@@ -47,7 +47,7 @@ defmodule Liquid.Variable do
       %Variable{literal: nil, parts: parts} ->
         resolve(parts, context, context)
     end
-    ret = Filters.filter(filters, ret)
+    ret = Filters.filter(filters, ret, context)
     { ret, context }
   end
 

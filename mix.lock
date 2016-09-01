@@ -1,5 +1,5 @@
 %{"benchfella": {:hex, :benchfella, "0.3.2", "b9648e77fa8d8b8b9fe8f54293bee63f7de03909b3af6ab22a0e546716a396fb", [:mix], []},
   "bunt": {:hex, :bunt, "0.1.6", "5d95a6882f73f3b9969fdfd1953798046664e6f77ec4e486e6fafc7caad97c6f", [:mix], []},
-  "credo": {:hex, :credo, "0.3.13", "90d2d2deb9d376bb2a63f81126a320c3920ce65acb1294982ab49a8aacc7d89f", [:mix], [{:bunt, "~> 0.1.4", [hex: :bunt, optional: false]}]},
+  "credo": {:hex, :credo, "0.4.5", "5c5daaf50a2a96068c0f21b6fbd382d206702efa8836a946eeab0b8ac25f5f22", [:mix], [{:bunt, "~> 0.1.6", [hex: :bunt, optional: false]}]},
   "exprintf": {:hex, :exprintf, "0.1.6", "b5b0a38bf78a357dbc61cdf7364fea004af6fdf5214be44021eb2ea7edf61f6e", [:mix], []},
   "exprof": {:hex, :exprof, "0.2.0", "b03f50d0d33e2f18c8e047d9188ba765dc32daba0b553ed717a98a78561d5eaf", [:mix], [{:exprintf, "~> 0.1", [hex: :exprintf, optional: false]}]}}
