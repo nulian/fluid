@@ -6,7 +6,12 @@ defmodule Liquid.Render do
   alias Liquid.Block
   alias Liquid.Tag
 
-  def render(%Template{root: root}, %Context{}=context) do
+  def render(%Template{root: root}, %Context{version: 2} = context) do
+    { output, context } = render([], root, context)
+    { :ok, output |> to_text(2), context }
+  end
+
+  def render(%Template{root: root}, %Context{version: 1}=context) do
     { output, context } = render([], root, context)
     { :ok, output |> to_text, context }
   end
@@ -23,8 +28,17 @@ defmodule Liquid.Render do
     end
   end
 
+  def render(output, {:string, char_list}, %Context{} = context) do
+    { [char_list|output] , context }
+  end
+
   def render(output, text, %Context{}=context) when is_binary(text) do
     { [text|output] , context }
+  end
+
+  def render(output, %Variable{}=v, %Context{version: 2}=context) do
+    rendered = Variable.lookup(v, context)
+    { [rendered|output], context }
   end
 
   def render(output, %Variable{}=v, %Context{}=context) do
@@ -33,17 +47,19 @@ defmodule Liquid.Render do
   end
 
   def render(output, %Tag{name: name}=tag, %Context{}=context) do
-    { mod, Tag } = Registers.lookup(name)
+    { mod, Tag } = Registers.lookup(name, context)
     mod.render(output, tag, context)
   end
 
   def render(output, %Block{name: name}=block, %Context{}=context) do
-    case Registers.lookup(name) do
+    case Registers.lookup(name, context) do
       { mod, Block } -> mod.render(output, block, context)
-      nil -> render(output, block.nodelist, context)
+      nil ->
+        render(output, block.nodelist, context)
     end
   end
 
+  def to_text(list, 2), do: list |> Enum.reverse |> List.flatten |> Enum.join
   def to_text(list), do: list |> List.flatten |> Enum.reverse |> Enum.join
 
   defp join_list(input) when is_list(input),

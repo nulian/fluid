@@ -1,5 +1,5 @@
 defmodule Liquid.Block do
-  defstruct name: nil, markup: nil, condition: nil, parts: [], iterator: [], nodelist: [], elselist: [], blank: false
+  defstruct name: nil, markup: nil, condition: nil, parts: [], iterator: [], nodelist: [], elselist: [], blank: false, end_marker: false
 
   alias Liquid.Tag, as: Tag
   alias Liquid.Block, as: Block
@@ -7,6 +7,11 @@ defmodule Liquid.Block do
   def create(markup) do
     destructure [name, rest], String.split(markup, " ", parts: 2)
     %Block{name: name |> String.to_atom, markup: rest}
+  end
+
+  def create(name, arguments, options) do
+    end_marker = Keyword.get(options, :end_marker, false)
+    %Block{name: name, markup: arguments |> to_string(), end_marker: end_marker}
   end
 
   def split(nodes), do: split(nodes, [:else])

@@ -4,11 +4,11 @@ defmodule Liquid.Expression do
 
   @literal_list [nil, "nil", "null", "", "true", "false", "blank", "empty"]
   @literals %{
-    :nil=> nil, "nil": nil, "null": nil, "": nil,
-    "true": true,
-    "false": false,
-    "blank": :blank?,
-    "empty": :empty?
+    :nil => nil, "nil" => nil, "null" => nil, "" => nil,
+    "true" => true,
+    "false" => false,
+    "blank" => :blank?,
+    "empty" => :empty?
   }
 
   def parse(markup) when markup in @literal_list, do: @literals[markup]

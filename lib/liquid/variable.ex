@@ -10,12 +10,22 @@ defmodule Liquid.Variable do
     resolves data from `Liquid.Variable.parse/1` and creates a variable struct
   """
   def create(markup) when is_binary(markup) do
-    [name|filters] = markup |> parse
-    name = name |> String.trim
+    [name|filters] =  parse(markup)
+    name = String.trim(name)
     variable = %Liquid.Variable{name: name, filters: filters}
     parsed = Liquid.Appointer.parse_name(name)
     Map.merge(variable, parsed)
   end
+
+  def create({name, filters}) do
+    name = to_string(name)
+    filters = filters |> parse()
+    variable = %Liquid.Variable{name: name, filters: filters}
+    parsed = Liquid.Appointer.parse_name(name)
+    Map.merge(variable, parsed)
+  end
+
+  def create(nil), do: ""
 
   @doc """
   Assigns context to variable and than applies all filters
@@ -32,10 +42,7 @@ defmodule Liquid.Variable do
   end
 
   defp apply_global_filter(input, %Context{global_filter: nil}) do
-    case Application.get_env(:liquid, :global_filter) do
-      nil -> input
-      filter -> input |> filter.()
-    end
+    input
   end
 
   defp apply_global_filter(input, %Context{}=context),
@@ -62,9 +69,27 @@ defmodule Liquid.Variable do
         |> List.flatten
         |> Liquid.List.even_elements
 
-      [String.to_atom(filter), args]
+      [String.to_existing_atom(filter), args]
     end
     [name|filters]
+  end
+
+  def parse({filter, args}) do
+    filter = :erlang.list_to_binary(filter)
+    filter = try do
+      String.to_existing_atom(filter)
+    rescue
+      ArgumentError -> filter
+    end
+    [filter, args]
+  end
+
+  def parse([]) do
+    []
+  end
+
+  def parse([head|tail]) do
+    [parse(head)|parse(tail)]
   end
 
 end

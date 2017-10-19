@@ -26,9 +26,10 @@ defmodule Liquid.Template do
     raise Liquid.SyntaxError, message: "You can use only maps/structs to hold context data"
   end
 
-  def render(%Template{} = t, %Context{} = context, options) do
+  def render(%Template{} = t, %Context{global_filter: _global_filter} = context, options) do
     registers = Keyword.get(options, :registers, %{})
-    context = %{context | registers: registers}
+    version = Keyword.get(options, :version, 1)
+    context = %{context | registers: registers, version: version}
     render(t, context)
   end
 
@@ -37,7 +38,7 @@ defmodule Liquid.Template do
     context = case {Map.has_key?(assigns,"global_filter"), Map.has_key?(assigns,:global_filter)} do
       {true,_} -> %{context|global_filter: Map.fetch!(assigns, "global_filter")}
       {_,true} -> %{context|global_filter: Map.fetch!(assigns, :global_filter)}
-      _ -> context
+      _ -> %{context| global_filter: Application.get_env(:liquid, :global_filter), extra_tags: Application.get_env(:liquid, :extra_tags, %{})}
     end
     render(t, context, options)
   end
@@ -47,13 +48,25 @@ defmodule Liquid.Template do
   """
   @spec parse(String.t, map) :: Liquid.Template
   def parse(value, presets \\ %{})
-  def parse(<<markup::binary>>, presets) do
-    Liquid.Parse.parse(markup, %Template{presets: presets})
+#  def parse(<<markup::binary>>, presets) do
+#    Liquid.Parse.parse(markup, %Template{presets: presets})
+#  end
+  def parse(value, presets) when is_binary(value) do
+    {:ok, lex, _} = :liquid_lexer.string(value |> String.to_charlist())
+    {:ok, ast} = :liquid_parser.parse(lex)
+    ast
+    |> Enum.reverse()
+    |> List.flatten()
+    |> Liquid.Parse.parse_new(%Template{presets: presets})
   end
 
   @spec parse(nil, map) :: Liquid.Template
   def parse(nil, presets) do
+
     Liquid.Parse.parse("", %Template{presets: presets})
   end
+
+
+
 
 end

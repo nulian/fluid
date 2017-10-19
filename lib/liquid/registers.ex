@@ -1,8 +1,6 @@
 defmodule Liquid.Registers do
 
-  defp default_tags do
-    %{
-      # defaultcontent: { Liquid.Default,  Liquid.Tag },
+  @default_tags %{
      continue:       { Liquid.Continue, Liquid.Tag },
      comment:        { Liquid.Comment,  Liquid.Block },
      include:        { Liquid.Include,  Liquid.Tag },
@@ -22,11 +20,11 @@ defmodule Liquid.Registers do
      increment:      { Liquid.Increment, Liquid.Tag},
      decrement:      { Liquid.Decrement, Liquid.Tag},
      cycle:          { Liquid.Cycle,     Liquid.Tag},
-     capture:        { Liquid.Capture, Liquid.Block}}
-  end
+     capture:        { Liquid.Capture, Liquid.Block}
+  }
 
   def clear do
-    Application.put_env(:liquid, :extra_tags, default_tags())
+    Application.put_env(:liquid, :extra_tags, %{})
   end
 
   def lookup(name) when is_binary(name) do
@@ -34,8 +32,12 @@ defmodule Liquid.Registers do
   end
 
   def lookup(name) when is_atom(name) do
-    custom_tags = Application.get_env(:liquid, :extra_tags)
-    case {name, default_tags()[name], custom_tags[name]} do
+    custom_tag = case Application.get_env(:liquid, :extra_tags) do
+      %{^name => value} -> value
+      _ -> nil
+    end
+
+    case {name, Map.get(@default_tags, name), custom_tag} do
       {nil, _, _} -> nil
       {_, nil, nil} -> nil
       {_, nil, custom_tag} -> custom_tag
@@ -44,6 +46,23 @@ defmodule Liquid.Registers do
   end
 
   def lookup(_), do: nil
+
+  def lookup(name, context) when is_binary(name) do
+    name |> String.to_atom |> lookup(context)
+  end
+
+  def lookup(name, %{extra_tags: extra_tags}) do
+    custom_tag = Map.get(extra_tags, name)
+
+    case {name, Map.get(@default_tags, name), custom_tag} do
+      {nil, _, _} -> nil
+      {_, nil, nil} -> nil
+      {_, nil, custom_tag} -> custom_tag
+      {_, tag, _} -> tag
+    end
+  end
+
+  def lookup(_, _), do: nil
 
   def register(name, module, type) do
     custom_tags = Application.get_env(:liquid, :extra_tags) || %{}

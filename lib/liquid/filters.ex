@@ -470,7 +470,7 @@ defmodule Liquid.Filters do
     end
 
     defp get_int_and_counter(input) do
-      input |> to_number |> get_int_and_counter
+      input |> to_number() |> get_int_and_counter()
     end
 
   end
@@ -479,8 +479,7 @@ defmodule Liquid.Filters do
   Recursively pass through all of the input filters applying them
   """
   def filter([], value), do: value
-  def filter([filter|rest], value) do
-    [name, args] = filter
+  def filter([[name, args]|rest], value) when is_atom(name) do
     args = for arg <- args do
       Liquid.quote_matcher |> Regex.replace(arg, "")
     end
@@ -494,10 +493,13 @@ defmodule Liquid.Filters do
       # pass non-existend filter
       {_, nil, nil} -> value
       # Fallback to custom if no standard
-      {_, nil, _} -> apply_function custom_filters[name], name, [value|args]
-      _ -> apply_function Functions, name, [value|args]
+      {_, nil, _} -> apply_function(custom_filters[name], name, [value|args])
+      _ -> apply_function(Functions, name, [value|args])
     end
     filter(rest, ret)
+  end
+  def filter([_|rest], value) do
+    filter(rest, value)
   end
 
 
@@ -506,7 +508,7 @@ defmodule Liquid.Filters do
   """
   def add_filter_modules do
     for filter_module <- Application.get_env(:liquid, :extra_filter_modules) || [] do
-      filter_module |> add_filters
+      filter_module |> add_filters()
     end
   end
 
@@ -526,7 +528,7 @@ defmodule Liquid.Filters do
 
   defp apply_function(module, name, args) do
     try do
-      apply module, name, args
+      apply(module, name, args)
     rescue
       e in UndefinedFunctionError ->
         functions = module.__info__(:functions)

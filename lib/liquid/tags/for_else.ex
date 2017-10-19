@@ -94,7 +94,7 @@ defmodule Liquid.ForElse do
   def render(output, %Block{iterator: it}=block, %Context{}=context) do
     list = parse_collection(it.collection, context)
     list = if is_binary(list) and list != "", do: [list], else: list
-    if is_list(list) and Enum.count(list) > 0 do
+    if is_list(list) and !is_empty_list(list) do
       list = if it.reversed, do: Enum.reverse(list), else: list
       limit  = lookup_limit(it, context)
       offset = lookup_offset(it, context)
@@ -103,6 +103,10 @@ defmodule Liquid.ForElse do
       Render.render(output, block.elselist, context)
     end
   end
+
+  defp is_empty_list([]), do: true
+  defp is_empty_list(value) when is_list(value), do: false
+  defp is_empty_list(_value), do: false
 
   defp parse_collection(list, _context) when is_list(list), do: list
   defp parse_collection(%Variable{} = variable, context) do
@@ -127,22 +131,22 @@ defmodule Liquid.ForElse do
     each(output, [h, limit, offset], t, block, %{context | assigns: block_context.assigns, registers: block_context.registers})
   end
 
-  defp render_content(output, %Block{iterator: it}=block, context, [limit, offset]) do
-    case {should_render?(limit, offset, it.forloop["index"]), block.blank} do
+  defp render_content(output, %Block{iterator: %{forloop: %{"index" => index}}, nodelist: nodelist, blank: blank}, context, [limit, offset]) do
+    case {should_render?(limit, offset, index), blank} do
       {true, true} ->
-        { _, new_context } = Render.render([], block.nodelist, context)
+        { _, new_context } = Render.render([], nodelist, context)
         { output, new_context }
       {true, _ } ->
-        Render.render(output, block.nodelist, context)
+        Render.render(output, nodelist, context)
       _ ->
         { output, context }
     end
   end
 
-  defp remember_limit(%Block{iterator: it}, context) do
+  defp remember_limit(%Block{iterator: %{name: name} = it}, %{offsets: offsets} = context) do
     limit = lookup_limit(it, context) || 0
-    remembered = context.offsets[it.name] || 0
-    %{ context | offsets: context.offsets |> Map.put(it.name, remembered + limit) }
+    remembered = Map.get(offsets, name, 0)
+    %{ context | offsets: offsets |> Map.put(name, remembered + limit) }
   end
 
   defp should_render?(_limit, offset, index) when index <= offset, do: false
@@ -153,15 +157,16 @@ defmodule Liquid.ForElse do
   defp lookup_limit(%Iterator{limit: limit}, %Context{}=context),
    do: Variable.lookup(limit, context)
 
-  defp lookup_offset(%Iterator{offset: %Variable{name: "continue"}}=it, %Context{}=context),
-   do: context.offsets[it.name] || 0
+  defp lookup_offset(%Iterator{offset: %Variable{name: "continue"}, name: name}, %Context{offsets: offsets}) do
+    Map.get(offsets, name, 0)
+  end
 
   defp lookup_offset(%Iterator{offset: offset}, %Context{}=context),
    do: Variable.lookup(offset, context)
 
-  defp next_forloop(%Iterator{forloop: loop}=it, count) when map_size(loop) < 1 do
-    count = count |> Enum.count
-    %{"name" => it.item <> "-" <> it.name,
+  defp next_forloop(%Iterator{forloop: loop, item: item, name: name}, count) when map_size(loop) < 1 do
+    count = Enum.count(count)
+    %{"name" => item <> "-" <> name,
     "index" => 1,
      "index0" => 0,
      "rindex" => count,
@@ -171,15 +176,15 @@ defmodule Liquid.ForElse do
      "last"   => count == 1}
   end
 
-  defp next_forloop(%Iterator{forloop: loop}=it, _count) do
-    %{"name" => it.item <> "-" <> it.name,
-    "index" => loop["index"]  + 1,
-     "index0" => loop["index0"] + 1,
-     "rindex" => loop["rindex"]  - 1,
-     "rindex0"=> loop["rindex0"] - 1,
-     "length" => loop["length"],
+  defp next_forloop(%Iterator{forloop: %{"name" => name, "index" => index, "index0" => index0, "rindex" => rindex, "rindex0" => rindex0, "length" => length}}, _count) do
+    %{"name" => name,
+    "index" => index  + 1,
+     "index0" => index0 + 1,
+     "rindex" => rindex  - 1,
+     "rindex0"=> rindex0 - 1,
+     "length" => length,
      "first"  => false,
-     "last"   => loop["rindex0"] == 1}
+     "last"   => rindex0 == 1}
   end
 
 end

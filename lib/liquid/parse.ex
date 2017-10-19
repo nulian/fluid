@@ -11,6 +11,78 @@ defmodule Liquid.Parse do
       |> Enum.filter(&(&1 != ""))
   end
 
+  def parse_new(ast, template) do
+    { root, template } = parse_new(%Liquid.Block{name: :document}, ast, [], template)
+    %{template | root: root}
+  end
+
+  def parse_new(%Block{name: :document} = block, [], accum, %Template{} = template) do
+    { %{ block | nodelist: Enum.reverse(accum) }, template }
+  end
+
+  def parse_new(%Block{name: :comment}=block, [h|t], accum, %Template{}=template) do
+    case h do
+      %Block{name: :comment, end_marker: true} ->
+        { %{ block | nodelist: Enum.reverse(accum) }, t, template }
+      %Block{end_marker: true} ->
+        raise "Unmatched block close: #{h}"
+      h ->
+        { result, rest, template } = try do
+          parse_node(h, t, template)
+        rescue
+          # Ignore undefined tags inside comments
+          RuntimeError -> { h, t, template }
+        end
+        parse_new(block, rest, [result] ++ accum, template)
+    end
+  end
+
+  def parse_new(%Block{name: name, end_marker: false}, [], _, _) do
+    raise "No matching end for block {% #{to_string(name)} %}"
+  end
+
+  def parse_new(%Block{} = block, [h|t], accum, %Template{}=template) do
+    case h do
+      %Block{end_marker: true} ->
+        { %{ block | nodelist: Enum.reverse(accum) }, t, template }
+      _ ->
+        { result, rest, template } = parse_node_new(h, t, template)
+        parse_new(block, rest, [result] ++ accum, template)
+    end
+  end
+
+  defp parse_node_new(head, tail, %Template{}=template) do
+    case head do
+      %Variable{} ->
+        { head, tail, template }
+      %type{} when type in [Tag, Block] ->
+        parse_struct_node_new(head, tail, template)
+      _ -> { head, tail, template }
+    end
+  end
+
+  defp parse_struct_node_new(%{name: name} = head, tail, %Template{} = template) do
+    case Registers.lookup(name) do
+      { mod, Liquid.Block } ->
+        parse_block_new(mod, head, tail, template)
+      { mod, Liquid.Tag } ->
+        tag = Liquid.Tag.create(head)
+        { tag, template } = mod.parse(tag, template)
+        { tag, tail, template }
+      nil -> raise "unregistered tag: #{name}"
+    end
+  end
+
+  defp parse_block_new(mod, head, rest, template) do
+    { head, rest, template } = try do
+      mod.parse(head, rest, [], template)
+    rescue
+      UndefinedFunctionError -> parse_new(head, rest, [], template)
+    end
+    { head, template } = mod.parse(head, template)
+    { head, rest, template }
+  end
+
   def parse("", %Template{}=template) do
     %{template | root: %Liquid.Block{name: :document}}
   end

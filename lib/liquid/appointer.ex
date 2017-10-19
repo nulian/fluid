@@ -17,9 +17,24 @@ defmodule Liquid.Appointer do
     { literal, filters |> assign_context(context.assigns) }
   end
 
-  def assign(%Variable{literal: nil, parts: parts, filters: filters}, context) do
-    {Liquid.Matcher.match(context, parts), filters |> assign_context(context.assigns)}
+  def assign(%Variable{literal: nil, parts: parts, filters: filters}, %{assigns: assigns} = context) do
+    {match(context, parts), filters |> assign_context(assigns)}
   end
+
+  def match(%{assigns: assigns} = context, [key|_]=parts) when is_binary(key) do
+    case assigns do
+      %{^key => _value} -> match(assigns, parts)
+      _ -> Liquid.Matcher.match(context, parts)
+    end
+  end
+
+  def match(current, []), do: current
+
+  def match(current, [name|parts]) when is_binary(name) do
+    current |> match(name) |> Liquid.Matcher.match(parts)
+  end
+
+  def match(current, key) when is_binary(key), do: Map.get(current, key)
 
   @doc """
   Makes `Variable.parts` or literals from the given markup
