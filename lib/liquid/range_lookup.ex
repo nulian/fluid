@@ -1,13 +1,13 @@
 defmodule Liquid.RangeLookup do
   @moduledoc """
-  looks for ranges and parse it for the uses of the liquid syntax
+  Looks for ranges and parse it for the uses of the liquid syntax
   """
   defstruct range_start: 0, range_end: 0
   alias Liquid.{Context, RangeLookup, Expression, Variable}
 
 
   @doc """
-  Used to parse de ranges to our structure to render correctly
+  Parses ranges
   """
   @spec parse(%RangeLookup{}, %Context{}) :: list()
   def parse(
