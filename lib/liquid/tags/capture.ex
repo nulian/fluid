@@ -10,9 +10,7 @@ defmodule Liquid.Capture do
   ```
   Capture is useful for saving content for use later in your template, such as in a sidebar or footer.
   """
-  alias Liquid.Block
-  alias Liquid.Context
-  alias Liquid.Template
+  alias Liquid.{Block, Template, Context}
 
   @doc """
   Implementation of Capture parse operations
@@ -25,7 +23,8 @@ defmodule Liquid.Capture do
   @doc """
   Implementation of Capture render operations
   """
-  @spec render(%{}, %Block{}, %Context{}) :: {%{}, %Context{}}
+  @spec render(list(), %Block{}, %Context{}) ::
+          {list(), %Context{}} | {list(), %Block{}, %Context{}}
   def render(output, %Block{markup: markup, nodelist: content}, %Context{} = context) do
     variable_name = Liquid.variable_parser() |> Regex.run(markup) |> hd
     {block_output, context} = Liquid.Render.render([], content, context)

@@ -13,13 +13,14 @@ defmodule Liquid.Raw do
   In Handlebars, {{ this }} will be HTML-escaped, but {{{ that }}} will not.
   ```
   """
-  alias Liquid.{Block, Render, Template}
+  alias Liquid.{Block, Render, Template, Context}
 
   @full_token_possibly_invalid ~r/\A(.*)#{Liquid.tag_start()}\s*(\w+)\s*(.*)?#{Liquid.tag_end()}\z/m
 
   @doc """
   Implementation of 'Raw' parse operations
   """
+  @spec parse(%Block{}, list(), any(), %Template{}) :: {%Block{}, %Template{}}
   def parse(%Block{name: name}, [], _, _),
     do: raise("No matching end for block {% #{to_string(name)} %}")
 
@@ -50,7 +51,7 @@ defmodule Liquid.Raw do
   @doc """
   Implementation of 'Raw' render operations
   """
-  @spec render(List, block :: %Block{}, List) :: %{}
+  @spec render(list(), %Block{}, %Context{}) :: {list(), %Context{}}
   def render(output, %Block{} = block, context) do
     Render.render(output, block.nodelist, context)
   end

@@ -19,6 +19,7 @@ defmodule Liquid.Comment do
   @doc """
   Implementation of Comment parse operations
   """
+
   @spec parse(%Block{}, %Template{}) :: {%Block{}, %Template{}}
   def parse(%Block{} = block, %Template{} = template),
     do: {%{block | blank: true, strict: false}, template}

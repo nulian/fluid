@@ -1,7 +1,9 @@
 defmodule Liquid.Decrement do
   @moduledoc """
-  Creates a new number variable, and decreases its value by one every time it is called. The initial value is -1.
-  Decrement is used in a place where one needs to insert a counter into a template, and needs the counter to survive across
+  Creates a new number variable, and decreases its value by one every time it is called. 
+  The initial value is -1.
+  Decrement is used in a place where one needs to insert a counter into a template, 
+  and needs the counter to survive across
   multiple instantiations of the template.
        NOTE: decrement is a pre-decrement, -i, while increment is post: i+.
       (To achieve the survival, the application must keep the context)
@@ -18,15 +20,12 @@ defmodule Liquid.Decrement do
     Hello: -3
   ```
   """
-  alias Liquid.Tag
-  alias Liquid.Template
-  alias Liquid.Context
-  alias Liquid.Variable
+  alias Liquid.{Tag, Template, Context, Variable}
 
   @doc """
   Identity function. Implementation of Decrement parse operations
   """
-  @spec parse(tag :: %Tag{}, template :: %Template{}) :: {%Tag{}, %Template{}}
+  @spec parse(%Tag{}, %Template{}) :: {%Tag{}, %Template{}}
   def parse(%Tag{} = tag, %Template{} = template) do
     {tag, template}
   end

@@ -20,8 +20,10 @@ defmodule Liquid.ElseIf do
   @doc """
   Implementation of 'ElseIf' parse operations
   """
-  @spec parse(tag :: %Liquid.Tag{}, t :: %Liquid.Template{}) :: {%Liquid.Tag{}, %Liquid.Template{}}
-  def parse(%Liquid.Tag{} = tag, %Liquid.Template{} = t), do: {tag, t}
+  alias Liquid.{Context, Tag, Template}
+
+  @spec parse(%Tag{}, %Template{}) :: {%Tag{}, %Template{}}
+  def parse(%Tag{} = tag, %Template{} = t), do: {tag, t}
 
   @doc """
   Implementation of 'ElseIf' render operations
@@ -49,8 +51,10 @@ defmodule Liquid.Else do
   @doc """
   Identity function. Implementation of 'Else' parse operations
   """
-  @spec parse(tag :: %Liquid.Tag{}, t :: %Liquid.Template{}) :: {%Liquid.Tag{}, %Liquid.Template{}}
-  def parse(%Liquid.Tag{} = tag, %Liquid.Template{} = t), do: {tag, t}
+  alias Liquid.{Context, Tag, Template}
+
+  @spec parse(%Tag{}, %Template{}) :: {%Tag{}, %Template{}}
+  def parse(%Tag{} = tag, %Template{} = t), do: {tag, t}
 
   @doc """
   Implementation of 'ElseIf' render operations
@@ -90,7 +94,7 @@ defmodule Liquid.IfElse do
   @doc """
   Implementation of 'If/Else' parse operations
   """
-  @spec parse(block :: %Block{}, t :: %Template{}) :: {%Block{}, %Template{}}
+  @spec parse(%Block{}, %Template{}) :: {%Block{}, %Template{}}
   def parse(%Block{} = block, %Template{} = t) do
     block = parse_conditions(block)
 

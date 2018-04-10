@@ -70,7 +70,7 @@ defmodule Liquid.ForElse do
   @doc """
   Implmements 'For' parse operations
   """
-  @spec parse(nodelist :: %Block{}, t :: %Template{}) :: {%Block{}, %Template{}}
+  @spec parse(%Block{}, %Template{}) :: {%Block{}, %Template{}}
   def parse(%Block{nodelist: nodelist} = block, %Template{} = t) do
     block = %{block | iterator: parse_iterator(block)}
 
@@ -116,6 +116,7 @@ defmodule Liquid.ForElse do
   @doc """
   Implements 'For' render operations
   """
+  @spec render(list(), %Block{}, %Context{}) :: {list(), %Block{}, %Context{}}
   def render(output, %Block{iterator: it} = block, %Context{} = context) do
     {list, context} = parse_collection(it.collection, context)
     list = if is_binary(list) and list != "", do: [list], else: list
@@ -207,9 +208,12 @@ defmodule Liquid.ForElse do
   defp lookup_limit(%Iterator{limit: limit}, %Context{} = context),
     do: Variable.lookup(limit, context)
 
-  defp lookup_offset(%Iterator{offset: %Variable{name: "continue"}, name: name}, %Context{
-         offsets: offsets
-       } = context) do
+  defp lookup_offset(
+         %Iterator{offset: %Variable{name: "continue"}, name: name},
+         %Context{
+           offsets: offsets
+         } = context
+       ) do
     {Map.get(offsets, name, 0), context}
   end
 
@@ -277,20 +281,18 @@ defmodule Liquid.Break do
     1 2 3
   ```
   """
-  alias Liquid.Tag
-  alias Liquid.Context
-  alias Liquid.Template
+  alias Liquid.{Context, Tag, Template}
 
   @doc """
   Implementation of 'Break' parse operations
   """
-  @spec parse(tag :: %Tag{}, template :: %Template{}) :: {%Tag{}, %Template{}}
+  @spec parse(%Tag{}, %Template{}) :: {%Tag{}, %Template{}}
   def parse(%Tag{} = tag, %Template{} = template), do: {tag, template}
 
   @doc """
   Implementation of 'Break' render operations
   """
-  @spec render(List, %Tag{}, context :: %{}) :: {List, %{}}
+  @spec render(list(), %Tag{}, %Context{}) :: {list(), %Context{}}
   def render(output, %Tag{}, %Context{} = context) do
     {output, %{context | break: true}}
   end
@@ -319,13 +321,13 @@ defmodule Liquid.Continue do
   @doc """
   Implementation of 'Continue' parse operations
   """
-  @spec parse(tag :: %Tag{}, template :: %Template{}) :: {%Tag{}, %Template{}}
+  @spec parse(%Tag{}, %Template{}) :: {%Tag{}, %Template{}}
   def parse(%Tag{} = tag, template), do: {tag, template}
 
   @doc """
   Implementation of 'Continue' render operations
   """
-  @spec render(output :: [], %Tag{}, context :: %Context{}) :: {[], %Context{}}
+  @spec render(list(), %Tag{}, %Context{}) :: {list(), %Context{}}
   def render(output, %Tag{}, %Context{} = context) do
     {output, %{context | continue: true}}
   end
@@ -335,18 +337,19 @@ defmodule Liquid.IfChanged do
   @moduledoc """
   Helper module to verifies whether Context.registers has changed before render or parse operations
   """
-  alias Liquid.{Template, Block}
+  alias Liquid.{Template, Block, Context}
 
   @doc """
   Implementation of parse to 'IfChanged' tag
   """
-  @spec parse(block :: %Block{}, template :: %Template{}) :: {%Block{}, %Template{}}
+  @spec parse(%Block{}, %Template{}) :: {%Block{}, %Template{}}
   def parse(%Block{} = block, %Template{} = t), do: {block, t}
 
   @doc """
   Implementation of 'IFChanged' render operations. Updates registers before render If Changed
   """
-  @spec render(List, %Block{}, List) :: {List, List}
+  @spec render(list(), %Block{}, %Context{}) ::
+          {list(), %Context{}} | {list(), %Block{}, %Context{}}
   def render(output, %Block{nodelist: nodelist}, context) do
     case context.registers["changed"] do
       {l, r} when l != r -> Liquid.Render.render(output, nodelist, context)

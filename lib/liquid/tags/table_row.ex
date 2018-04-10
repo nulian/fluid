@@ -60,7 +60,7 @@ defmodule Liquid.TableRow do
   @doc """
   Implementation of 'TableRaw' parse operations. Parses and organises markup to set up iterator
   """
-  @spec parse(block :: %Block{}, t :: %Template{}) :: {%Block{}, %Template{}}
+  @spec parse(%Block{}, %Template{}) :: {%Block{}, %Template{}}
   def parse(%Block{nodelist: nodelist} = block, %Liquid.Template{} = t) do
     block = %{block | iterator: parse_iterator(block)}
 
@@ -105,7 +105,7 @@ defmodule Liquid.TableRow do
   end
 
   @doc """
-  Implementation of 'Raw' render operations. Iterates through pre-set data and appends it to rendered output list
+  Implementation of 'TableRaw' render operations. Iterates through pre-set data and appends it to rendered output list
   Adds the HTML table rows and cols depending on the initial `cols` parameter
   """
   @spec render(list(), %Block{}, %Context{}) :: {list(), %Context{}}
@@ -131,7 +131,8 @@ defmodule Liquid.TableRow do
 
   defp parse_collection(%Variable{} = variable, context), do: Variable.lookup(variable, context)
 
-  defp parse_collection(%RangeLookup{} = range, context), do: {RangeLookup.parse(range, context), context}
+  defp parse_collection(%RangeLookup{} = range, context),
+    do: {RangeLookup.parse(range, context), context}
 
   defp each(output, _, [], %Block{} = block, %Context{} = context),
     do: {output, remember_limit(block, context)}

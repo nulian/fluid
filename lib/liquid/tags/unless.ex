@@ -15,7 +15,7 @@ defmodule Liquid.Unless do
   @doc """
   Implementation of 'Unless' parse operations
   """
-  @spec parse(block :: %Block{}, t :: %Template{}) :: {%Block{}, %Template{}}
+  @spec parse(%Block{}, %Template{}) :: {%Block{}, %Template{}}
   def parse(%Block{} = block, %Template{} = t) do
     IfElse.parse(block, t)
   end
@@ -28,6 +28,7 @@ defmodule Liquid.Unless do
     {output, context}
   end
 
+  @spec render(list(), %Block{}, %Context{}) :: {list(), %Block{}, %Context{}}
   def render(
         output,
         %Block{condition: condition, nodelist: nodelist, elselist: elselist},

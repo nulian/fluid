@@ -40,7 +40,7 @@ defmodule Liquid.Cycle do
   @doc """
     Implementation of Cycle parse operations. Sets up the cycle name and variables to cycle through
   """
-  @spec parse(tag :: %Tag{}, template :: %Template{}) :: {%Tag{}, %Template{}}
+  @spec parse(%Tag{}, %Template{}) :: {%Tag{}, %Template{}}
   def parse(%Tag{markup: markup} = tag, %Template{} = template) do
     {name, values} = markup |> get_name_and_values
     tag = %{tag | parts: [name | values]}
