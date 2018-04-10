@@ -5,7 +5,7 @@ defmodule Liquid.Parse do
   alias Liquid.{Block, Registers, Template, Variable}
 
   @doc """
-  This function takes a template ("string") cleans it and divides in valid tags ,valid variables and other expressions 
+  Takes a template ("string") cleans it and divides in valid tags, valid variables and other expressions 
   """
   @spec tokenize(String.t) ::  list()
   def tokenize(<<string::binary>>) do
@@ -16,8 +16,8 @@ defmodule Liquid.Parse do
   end
 
   @doc """
-  This is a recursive function that parses the string verify it is the sintaxis for liquid is correct and create a
-  structure that it's composed of blocks,variables, template and documents to prepare to render
+  Parses the string, verify if has the correct syntax for liquid and creates a struct 
+  which is composed of blocks, variables, template and documents to be rendered
   """
   def parse("", %Template{} = template) do
     %{template | root: %Block{name: :document}}
