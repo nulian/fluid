@@ -1,6 +1,7 @@
 defmodule Liquid.Case do
   @moduledoc """
-   Creates a switch statement to compare a variable with different values. Case initializes the switch statement, and When compares its values.
+   Creates a switch statement to compare a variable with different values.
+   Case initializes the switch statement, and When compares its values.
   Input:
     ```
       {% assign handle = 'cake' %}
