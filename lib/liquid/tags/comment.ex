@@ -19,7 +19,6 @@ defmodule Liquid.Comment do
   @doc """
   Implementation of Comment parse operations
   """
-  alias Liquid.{Block, Template, Contex}
 
   @spec parse(%Block{}, %Template{}) :: {%Block{}, %Template{}}
   def parse(%Block{} = block, %Template{} = template),
@@ -28,6 +27,6 @@ defmodule Liquid.Comment do
   @doc """
   Implementation of Comment render operations
   """
-  @spec render(list(), %Block{}, %Contex{}) :: {list(), %Contex{}}
+  @spec render(list(), %Block{}, %Context{}) :: {list(), %Context{}}
   def render(output, %Block{}, context), do: {output, context}
 end

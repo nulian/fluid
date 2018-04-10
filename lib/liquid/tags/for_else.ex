@@ -281,9 +281,7 @@ defmodule Liquid.Break do
     1 2 3
   ```
   """
-  alias Liquid.Tag
-  alias Liquid.Context
-  alias Liquid.Template
+  alias Liquid.{Context, Tag, Template}
 
   @doc """
   Implementation of 'Break' parse operations
@@ -339,7 +337,7 @@ defmodule Liquid.IfChanged do
   @moduledoc """
   Helper module to verifies whether Context.registers has changed before render or parse operations
   """
-  alias Liquid.{Template, Block}
+  alias Liquid.{Template, Block, Context}
 
   @doc """
   Implementation of parse to 'IfChanged' tag
