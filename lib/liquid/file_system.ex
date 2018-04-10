@@ -25,8 +25,8 @@ defmodule Liquid.LocalFileSystem do
   end
 
   @doc """
-  Creates a full path, joining the root and the template path, also creates a error if you use a wrong template name or
-  path
+  Creates a full path, joining the root and the template path, 
+  also creates a error if you use a wrong template name or path
   """
   @spec full_path(String.t(), String.t()) :: {:ok | :error, String.t()}
   def full_path(root, template_path) do
