@@ -15,6 +15,7 @@ defmodule Liquid.Block do
   alias Liquid.Block, as: Block
 
   @doc "Creates a standard Block structure from a markup. Blocks are standard data structures resulting from a markup processing"
+  @spec create(any()) :: %Block{}
   def create(markup) do
     destructure [name, rest], String.split(markup, " ", parts: 2)
     %Block{name: name |> String.to_atom(), markup: rest}

@@ -16,13 +16,13 @@ defmodule Liquid.Assign do
   @doc """
   Implementation of `assign` parse operations
   """
-  @spec parse(%Liquid.Tag{}, %Liquid.Template{}) :: {%Liquid.Tag{}, %Liquid.Template{}}
-  def parse(%Tag{} = tag, %Liquid.Template{} = template), do: {%{tag | blank: true}, template}
+  @spec parse(%Tag{}, %Template{}) :: {%Tag{}, %Template{}}
+  def parse(%Tag{} = tag, %Template{} = template), do: {%{tag | blank: true}, template}
 
   @doc """
   Implementation of `assign` render operations
   """
-  @spec render(%{}, %Liquid.Tag{}, %Liquid.Context{}) :: {%{}, %Liquid.Context{}}
+  @spec render(list(), %Tag{}, %Context{}) :: {list(), %Context{}}
   def render(output, %Tag{markup: markup}, %Context{} = context) do
     [[_, to, from]] = syntax() |> Regex.scan(markup)
 

@@ -16,15 +16,12 @@ defmodule Liquid.Increment do
       Hello: 2
   ```
   """
-  alias Liquid.Tag
-  alias Liquid.Template
-  alias Liquid.Context
-  alias Liquid.Variable
+  alias Liquid.{Context, Variable, Tag, Template}
 
   @doc """
   Implementation of 'Increment' parse operations
   """
-  @spec parse(tag :: %Tag{}, template :: %Template{}) :: {%Tag{}, %Template{}}
+  @spec parse(%Tag{}, %Template{}) :: {%Tag{}, %Template{}}
   def parse(%Tag{} = tag, %Template{} = template) do
     {tag, template}
   end
@@ -32,7 +29,7 @@ defmodule Liquid.Increment do
   @doc """
   Implementation of 'Increment' render operations
   """
-  @spec render(list(), %Tag{}, context :: %Context{}) :: {list(), %Context{}}
+  @spec render(list(), %Tag{}, %Context{}) :: {list(), %Context{}}
   def render(output, %Tag{markup: markup}, %Context{} = context) do
     variable = Variable.create(markup)
     {rendered, context} = Variable.lookup(variable, context)

@@ -16,13 +16,15 @@ defmodule Liquid.Comment do
   @doc """
   Implementation of Comment parse operations
   """
-  @spec parse(block :: %Liquid.Block{}, template :: %Liquid.Template{}) :: {%Liquid.Block{}, %Liquid.Template{}}
-  def parse(%Liquid.Block{} = block, %Liquid.Template{} = template),
+  alias Liquid.{Block, Template, Contex}
+
+  @spec parse(%Block{}, %Template{}) :: {%Block{}, %Template{}}
+  def parse(%Block{} = block, %Template{} = template),
     do: {%{block | blank: true, strict: false}, template}
 
   @doc """
   Implementation of Comment render operations
   """
-  @spec render(List, %Liquid.Block{}, List) :: {List, List}
-  def render(output, %Liquid.Block{}, context), do: {output, context}
+  @spec render(list(), %Block{}, %Contex{}) :: {list(), %Contex{}}
+  def render(output, %Block{}, context), do: {output, context}
 end

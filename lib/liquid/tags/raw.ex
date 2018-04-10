@@ -20,9 +20,11 @@ defmodule Liquid.Raw do
   @doc """
   Implementation of 'Raw' parse operations
   """
+
   def parse(%Block{name: name}, [], _, _),
     do: raise("No matching end for block {% #{to_string(name)} %}")
 
+  @spec parse(%Block{}, any(), %Template{}) :: {%Block{}, %Template{}}
   def parse(%Block{name: name} = block, [h | t], accum, %Template{} = template) do
     if Regex.match?(@full_token_possibly_invalid, h) do
       block_delimiter = "end" <> to_string(name)
@@ -50,7 +52,7 @@ defmodule Liquid.Raw do
   @doc """
   Implementation of 'Raw' render operations
   """
-  @spec render(List, block :: %Block{}, List) :: %{}
+  @spec render(list(), %Block{}, %Contex{}) :: {list(), %Contex{}}
   def render(output, %Block{} = block, context) do
     Render.render(output, block.nodelist, context)
   end

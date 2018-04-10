@@ -1,5 +1,5 @@
 defmodule Liquid.Condition do
-  @moduledoc "A module to handle liquid conditional operators and its variables (left and right side of conditionals)"
+  @moduledoc "Handle liquid conditional operators and its variables (left and right side of conditionals)"
 
   defstruct left: nil, operator: nil, right: nil, child_operator: nil, child_condition: nil
 
