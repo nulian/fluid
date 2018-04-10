@@ -1,11 +1,13 @@
 defmodule Liquid.Condition do
-  @moduledoc "Handle liquid conditional operators and its variables (left and right side of conditionals)"
+  @moduledoc """
+  Handles liquid conditional operators and its variables (left and right side of conditionals)
+  """
 
   defstruct left: nil, operator: nil, right: nil, child_operator: nil, child_condition: nil
 
   alias Liquid.{Condition, Context, Variable}
 
-  @doc "Create a list of conditional and vars including positioning of each element"
+  @doc "Creates a list of conditional and vars including positioning of each element"
   def create([h | t]) do
     head = create(h)
     create(head, t)
