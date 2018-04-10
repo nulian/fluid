@@ -1,0 +1,40 @@
+<div class="article" {{ hello }>
+  <h2 class="article-title">{{ article.title }}</h2>
+  <p class="article-details">posted <span class="article-time">{{ article.created_at | date: "%Y %h" }}</span> by <span class="article-author">{{ article.author }}</span></p>
+
+  <div class="article-body textile">
+    {{ article.content | capitalize }}
+  </div>
+</div>
+
+{% comment %}
+  This is a comment in a liquid template
+  {% joderse }
+{% endcomment %}
+
+{% raw %}
+  {{ atrocidad }
+{% endraw %}
+
+<!-- Blog Comments -->
+{% if blog.comments_enabled? %}
+<div id="comments">
+  <h3>Comments</h3>
+
+  <!-- List all comments -->
+  <ul id="comment-list">
+  {% for comment in article.comments %}
+    <li>
+      <div class="comment-details">
+        <span class="comment-author">{{ comment.author }</span> said on <span class="comment-date">{{ comment.created_at | date: "%B %d, %Y" }}</span>:
+      </div>
+
+      <div class="comment">
+        {{ comment.content }}
+      </div>
+    </li>
+  {% endfor %}
+  </ul>
+</div>
+{% endif %}
+<!-- END Blog Comments -->
