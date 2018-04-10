@@ -15,9 +15,9 @@ defmodule Liquid.Decrement do
   ```
    Output:
   ```
-      Hello: -1
-      Hello: -2
-      Hello: -3
+    Hello: -1
+    Hello: -2
+    Hello: -3
   ```
   """
   alias Liquid.{Tag, Template, Context, Variable}

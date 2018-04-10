@@ -12,7 +12,7 @@ defimpl Blank, for: List do
   def blank?(list) do
     list
     |> Enum.all?(fn
-      x when is_binary(x) -> !!Regex.match?(~r/\A\s*\z/, x)
+      x when is_binary(x) -> Regex.match?(~r/\A\s*\z/, x)
       %Block{blank: true} -> true
       %Tag{blank: true} -> true
       _ -> false

@@ -9,7 +9,7 @@ defmodule Liquid.Assign do
     {{ foo }}
   ```
   """
-  alias Liquid.{Context, Tag, Variable}
+  alias Liquid.{Context, Tag, Template, Variable}
 
   defp syntax, do: ~r/([\w\-]+)\s*=\s*(.*)\s*/
 

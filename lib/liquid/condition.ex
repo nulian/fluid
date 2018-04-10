@@ -52,7 +52,7 @@ defmodule Liquid.Condition do
 
   def evaluate(%Condition{left: left, right: nil} = condition, %Context{} = context) do
     {current, context} = Variable.lookup(left, context)
-    eval_child(!!current, condition.child_operator, condition.child_condition, context)
+    eval_child(current, condition.child_operator, condition.child_condition, context)
   end
 
   def evaluate(
@@ -62,7 +62,7 @@ defmodule Liquid.Condition do
     {left, _} = Variable.lookup(left, context)
     {right, _} = Variable.lookup(right, context)
     current = eval_operator(left, operator, right)
-    eval_child(!!current, condition.child_operator, condition.child_condition, context)
+    eval_child(current, condition.child_operator, condition.child_condition, context)
   end
 
   defp eval_child(current, nil, nil, _), do: current
