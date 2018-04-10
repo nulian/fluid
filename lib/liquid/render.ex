@@ -8,7 +8,7 @@ defmodule Liquid.Render do
   @doc """
   Takes the template structure with all his parts that comes from the parser (context, variable, tags and blocks) and creates an output to render
   """
-  @spec render(template :: %Template{}, context :: %Context{}) :: {:ok, String.t(), %Context{}}
+  @spec render(%Template{}, %Context{}) :: {:ok, String.t(), %Context{}}
   def render(%Template{root: root}, %Context{} = context) do
     {output, context} = render([], root, context)
     {:ok, to_text(output), context}

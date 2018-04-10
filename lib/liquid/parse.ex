@@ -7,6 +7,7 @@ defmodule Liquid.Parse do
   @doc """
   This function takes a template ("string") cleans it and divides in valid tags ,valid variables and other expressions 
   """
+  @spec tokenize(String.t) ::  list()
   def tokenize(<<string::binary>>) do
     Liquid.template_parser()
     |> Regex.split(string, on: :all_but_first, trim: true)
@@ -15,7 +16,8 @@ defmodule Liquid.Parse do
   end
 
   @doc """
-  This is a recursive function that parses the string verify it is the sintaxis for liquid is correct and create a structure that it's composed of blocks,variables, template and documents to prepare to render
+  This is a recursive function that parses the string verify it is the sintaxis for liquid is correct and create a
+  structure that it's composed of blocks,variables, template and documents to prepare to render
   """
   def parse("", %Template{} = template) do
     %{template | root: %Block{name: :document}}

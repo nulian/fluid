@@ -9,7 +9,7 @@ defmodule Liquid.Template do
   @doc """
   Function that renders passed template and context to string
   """
-  @spec render(t :: %Liquid.Template{}, c :: %Liquid.Context{}) :: {atom, String.t(), %Context{}}
+  @spec render(%Template{}, %Context{}) :: {atom, String.t(), %Context{}}
   def render(t, c \\ %{})
 
   def render(%Template{} = t, %Context{} = c) do
@@ -54,7 +54,7 @@ defmodule Liquid.Template do
   @doc """
   Function to parse markup with given presets (if any)
   """
-  @spec parse(String.t(), map) :: %Liquid.Template{}
+  @spec parse(String.t(), %{}) :: %Template{}
   def parse(value, presets \\ %{})
 
   def parse(<<markup::binary>>, presets) do

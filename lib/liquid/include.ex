@@ -2,11 +2,8 @@ defmodule Liquid.Include do
   @moduledoc """
   Include allows templates to relate with other templates
   """
-  alias Liquid.Tag, as: Tag
-  alias Liquid.Context, as: Context
-  alias Liquid.Template, as: Template
-  alias Liquid.Variable, as: Variable
-  alias Liquid.FileSystem, as: FileSystem
+  alias Liquid.{Context, FileSystem, Tag, Template, Variable}
+
 
   @doc """
   Creates a regular expression pattern to match the syntax of the tag include.
@@ -17,8 +14,7 @@ defmodule Liquid.Include do
   @doc """
   This function is used to parse the include tag.
   """
-  @spec parse(tag :: %Liquid.Tag{}, template :: %Liquid.Template{}) ::
-          {%Liquid.Tag{}, %Liquid.Template{}}
+  @spec parse(%Tag{}, %Template{}) :: {%Tag{}, %Template{}}
   def parse(%Tag{markup: markup} = tag, %Template{} = template) do
     [parts | _] = syntax() |> Regex.scan(markup)
     tag = parse_tag(tag, parts)
@@ -50,8 +46,7 @@ defmodule Liquid.Include do
   @doc """
   Renders the results of the include tag.
   """
-  @spec render(output :: String.t(), tag :: %Liquid.Tag{}, contex :: %Liquid.Context{}) ::
-          {String.t(), %Liquid.Context{}}
+  @spec render(String.t(), %Tag{}, %Context{}) ::  {String.t(), %Context{}}
   def render(output, %Tag{parts: parts} = tag, %Context{} = context) do
     {file_system, root} = context |> Context.registers(:file_system) || FileSystem.lookup()
     {name, context} = parts[:name] |> Variable.lookup(context)
