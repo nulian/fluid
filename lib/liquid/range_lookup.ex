@@ -1,25 +1,45 @@
 defmodule Liquid.RangeLookup do
+  @moduledoc """
+  This module looks for ranges and parse it for the uses of the liquid syntax 
+  """
   defstruct range_start: 0, range_end: 0
   alias Liquid.Expression
   alias Liquid.RangeLookup
   alias Liquid.Variable
   alias Liquid.Context
 
-  def parse(%RangeLookup{range_start: %Variable{} = range_start, range_end: %Variable{} = range_end}, %Context{} = context) do
-    left = range_start |> Variable.lookup(context) |> valid_range_value
-    right = range_end |> Variable.lookup(context) |> valid_range_value(left)
+  @doc """
+  This is used to parse de ranges to our structure to render correctly 
+  """
+  @spec parse(%Liquid.RangeLookup{}, context :: %Liquid.Context{}) :: []
+  def parse(
+        %RangeLookup{range_start: %Variable{} = range_start, range_end: %Variable{} = range_end},
+        %Context{} = context
+      ) do
+    {rendered_left, _} = Variable.lookup(range_start, context)
+    {rendered_right, _} = Variable.lookup(range_end, context)
+    left = valid_range_value(rendered_left)
+    right = valid_range_value(rendered_right, left)
 
     Enum.to_list(left..right)
   end
 
-  def parse(%RangeLookup{range_start: range_start, range_end: %Variable{} = range_end}, %Context{} = context) do
-    right = range_end |> Variable.lookup(context) |> valid_range_value(range_start)
+  def parse(
+        %RangeLookup{range_start: range_start, range_end: %Variable{} = range_end},
+        %Context{} = context
+      ) do
+    {rendered_right, _} = Variable.lookup(range_end, context)
+    right = valid_range_value(rendered_right, range_start)
 
     Enum.to_list(range_start..right)
   end
 
-  def parse(%RangeLookup{range_start: %Variable{} = range_start, range_end: range_end}, %Context{} = context) do
-    left = range_start |> Variable.lookup(context) |> valid_range_value
+  def parse(
+        %RangeLookup{range_start: %Variable{} = range_start, range_end: range_end},
+        %Context{} = context
+      ) do
+    {rendered_left, _} = Variable.lookup(range_start, context)
+    left = valid_range_value(rendered_left)
 
     Enum.to_list(left..range_end)
   end
@@ -34,11 +54,9 @@ defmodule Liquid.RangeLookup do
   defp valid_range_value(value, fallback \\ 0)
 
   defp valid_range_value(value, fallback) when is_binary(value) do
-    if is_binary(value) do
-      case Integer.parse(value) do
-        :error -> fallback
-        {value, _} -> value
-      end
+    case Integer.parse(value) do
+      :error -> fallback
+      {value, _} -> value
     end
   end
 
@@ -53,8 +71,8 @@ defmodule Liquid.RangeLookup do
   end
 
   defp build_range(left, right) do
-    left = left |> to_string |> String.to_integer
-    right = right |> to_string |> String.to_integer
+    left = left |> to_string |> String.to_integer()
+    right = right |> to_string |> String.to_integer()
 
     Enum.to_list(left..right)
   end

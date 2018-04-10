@@ -1,0 +1,33 @@
+{
+  "blog": {
+    "comments_enabled": true
+  },
+  "article": {
+    "title": "New Article",
+    "created_at": "2011-01-01 00:00:00",
+    "author": "Jordan B. Peterson",
+    "content": "Aliquam posuere. Aliquam erat volutpat. Integer placerat tristique nisl. Nullam libero mauris, consequat quis, varius et, dictum id, arcu.",
+    "comments": [
+      {
+        "author": "John Doe",
+        "created_at": "2011-01-01 00:00:00",
+        "content": "Etiam vel tortor sodales tellus ultricies commodo."
+      },
+      {
+        "author": "Jane Doe",
+        "created_at": "2011-01-01 00:00:00",
+        "content": "Nam euismod tellus id erat."
+      },
+      {
+        "author": "Little People",
+        "created_at": "2011-01-01 00:00:00",
+        "content": "Proin quam nisl, tincidunt et, mattis eget, convallis nec, purus."
+      },
+      {
+        "author": "Big People",
+        "created_at": "2011-01-01 00:00:00",
+        "content": "Cras placerat accumsan nulla."
+      }
+    ]
+  }
+}

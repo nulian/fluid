@@ -1,6 +1,3 @@
-list = Enum.to_list(1..10_000)
-map_fun = fn(i) -> [i, i * i] end
-
 Liquid.start()
 
 markup = File.read!("./bench/simple.liquid")

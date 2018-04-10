@@ -1,18 +1,38 @@
 defmodule Liquid.Assign do
-  alias Liquid.Variable
-  alias Liquid.Tag
-  alias Liquid.Context
+  @moduledoc """
+  Sets variables in a template
+  ```
+    {% assign foo = 'monkey' %}
+  ```
+  User can then use the variables later in the page
+  ```
+    {{ foo }}
+  ```
+  """
+  alias Liquid.{Context, Tag, Template, Variable}
 
-  def syntax, do: ~r/([\w\-]+)\s*=\s*(.*)\s*/
+  defp syntax, do: ~r/([\w\-]+)\s*=\s*(.*)\s*/
 
-  def parse(%Tag{}=tag, %Liquid.Template{}=template), do: { %{tag | blank: true }, template }
+  @doc """
+  Implementation of `assign` parse operations
+  """
+  @spec parse(%Tag{}, %Template{}) :: {%Tag{}, %Template{}}
+  def parse(%Tag{} = tag, %Template{} = template), do: {%{tag | blank: true}, template}
 
-  def render(output, %Tag{markup: markup}, %Context{}=context) do
+  @doc """
+  Implementation of `assign` render operations
+  """
+  @spec render(list(), %Tag{}, %Context{}) :: {list(), %Context{}}
+  def render(output, %Tag{markup: markup}, %Context{} = context) do
     [[_, to, from]] = syntax() |> Regex.scan(markup)
-    from_value = from |> Variable.create
-                      |> Variable.lookup(context)
+
+    {from_value, context} =
+      from
+      |> Variable.create()
+      |> Variable.lookup(context)
+
     result_assign = context.assigns |> Map.put(to, from_value)
     context = %{context | assigns: result_assign}
-    { output, context }
+    {output, context}
   end
 end
