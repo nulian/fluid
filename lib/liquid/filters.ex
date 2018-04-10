@@ -8,7 +8,7 @@ defmodule Liquid.Filters do
 
   defmodule Functions do
     @moduledoc """
-    Structure that holds all the basic filter functions used in Liquid 3
+    Holds all the basic filter functions used in Liquid 3
     """
     use Timex
 
@@ -291,7 +291,8 @@ defmodule Liquid.Filters do
     end
 
     @doc """
-    Rounds a number down to the nearest whole number. tries to convert the input to a number before the filter is applied. Can use strings and you have the option to put a precision number
+    Rounds a number down to the nearest whole number. tries to convert the input to a number before the 
+    filter is applied. Can use strings and you have the option to put a precision number
 
     ## Examples
 
@@ -431,7 +432,9 @@ defmodule Liquid.Filters do
     end
 
     @doc """
-    Shortens a string down to the number of characters passed as a parameter. If the number of characters specified is less than the length of the string, an ellipsis (…) is appended to the string and is included in the character count.
+    Shortens a string down to the number of characters passed as a parameter. If the number of characters 
+    specified is less than the length of the string, an ellipsis (…) is appended to the string and is 
+    included in the character count
 
     ## Examples
 
@@ -456,7 +459,9 @@ defmodule Liquid.Filters do
     def truncate(input, l, truncate_string), do: truncate(input, to_number(l), truncate_string)
 
     @doc """
-    Shortens a string down to the number of words passed as the argument. If the specified number of words is less than the number of words in the string, an ellipsis (…) is appended to the string.
+    Shortens a string down to the number of words passed as the argument. 
+    If the specified number of words is less than the number of words in the string, 
+    an ellipsis (…) is appended to the string
 
     ## Examples
 
@@ -595,7 +600,8 @@ defmodule Liquid.Filters do
     end
 
     @doc """
-    Removes all whitespace (tabs, spaces, and newlines) from both the left and right side of a string. It does not affect spaces between words.
+    Removes all whitespace (tabs, spaces, and newlines) from both the left and right side of a string. 
+    It does not affect spaces between words.
 
     ## Examples
 
@@ -608,7 +614,8 @@ defmodule Liquid.Filters do
     end
 
     @doc """
-    Removes all whitespaces (tabs, spaces, and newlines) from the beginning of a string. The filter does not affect spaces between words.
+    Removes all whitespaces (tabs, spaces, and newlines) from the beginning of a string. 
+    The filter does not affect spaces between words.
 
     ## Examples
 
@@ -650,7 +657,8 @@ defmodule Liquid.Filters do
     end
 
     @doc """
-    Divides an input string into an array using the argument as a separator. split is commonly used to convert comma-separated items from a string to an array.
+    Divides an input string into an array using the argument as a separator. split is commonly used to 
+    convert comma-separated items from a string to an array.
 
     ## Examples
 
@@ -665,7 +673,8 @@ defmodule Liquid.Filters do
     def split(nil, _), do: []
 
     @doc """
-    Returns a substring of 1 character beginning at the index specified by the argument passed in. An optional second argument specifies the length of the substring to be returned.
+    Returns a substring of 1 character beginning at the index specified by the argument passed in. 
+    An optional second argument specifies the length of the substring to be returned.
     String indices are numbered starting from 0.
 
     ## Examples
@@ -707,7 +716,8 @@ defmodule Liquid.Filters do
     def slice(nil, _), do: ""
 
     @doc """
-    Escapes a string by replacing characters with escape sequences (so that the string can be used in a URL, for example). It doesn’t change strings that don’t have anything to escape.
+    Escapes a string by replacing characters with escape sequences (so that the string can be used in a URL, 
+    for example). It doesn’t change strings that don’t have anything to escape.
 
     ## Examples
 
@@ -722,7 +732,8 @@ defmodule Liquid.Filters do
     defdelegate h(input), to: __MODULE__, as: :escape
 
     @doc """
-    Escapes a string without changing existing escaped entities. It doesn’t change strings that don’t have anything to escape.
+    Escapes a string without changing existing escaped entities. It doesn’t change strings that don’t 
+    have anything to escape.
 
     ## Examples
 
