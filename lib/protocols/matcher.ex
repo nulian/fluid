@@ -8,7 +8,7 @@ defimpl Liquid.Matcher, for: Liquid.Context do
   @doc """
   `Liquid.Matcher` protocol implementation for `Liquid.Context`
   """
-  @spec match(current :: %{}, parts :: []) :: %{}
+  @spec match(%{}, list()) :: %{}
   def match(current, []), do: current
 
   def match(%{assigns: assigns, presets: presets}, [key | _] = parts) when is_binary(key) do

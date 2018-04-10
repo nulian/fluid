@@ -25,9 +25,10 @@ defmodule Liquid.LocalFileSystem do
   end
 
   @doc """
-  Creates a full path, joining the root and the template path, also creates a error if you use a wrong template name or path
+  Creates a full path, joining the root and the template path, 
+  also creates a error if you use a wrong template name or path
   """
-  @spec full_path(root :: String.t(), template_path :: String.t()) :: {:ok | :error, String.t()}
+  @spec full_path(String.t(), String.t()) :: {:ok | :error, String.t()}
   def full_path(root, template_path) do
     full_path =
       if Regex.match?(~r/\//, template_path) do
@@ -60,7 +61,7 @@ defmodule Liquid.FileSystem do
   Looks in the `env` for a file system and creates a full path according to the file system module,
   if  `env` returns nill, response with an error map: no file system defined
   """
-  @spec full_path(path :: String.t()) :: {Atom.t(), String.t()} | nil
+  @spec full_path(String.t()) :: {Atom.t(), String.t()} | nil
   def full_path(path) do
     case lookup() do
       nil -> {:error, "No file system defined"}
@@ -72,7 +73,7 @@ defmodule Liquid.FileSystem do
   Looks in the `env` for a  file system and reads the template according to the file system module,
   if the `env` returns nill, response with an error map: no file system defined
   """
-  @spec read_template_file(path :: String.t(), options :: []) :: {Atom.t(), String.t()} | nil
+  @spec read_template_file(String.t(), list()) :: {Atom.t(), String.t()} | nil
   def read_template_file(path, options \\ []) do
     case lookup() do
       nil -> {:error, "No file system defined"}
@@ -83,7 +84,7 @@ defmodule Liquid.FileSystem do
   @doc """
   Registers in the `env` , the module (file system module)  and the root path for the lookup
   """
-  @spec register(module :: String.t(), path :: String.t()) :: %{}
+  @spec register(String.t(), String.t()) :: %{}
   def register(module, path \\ "") do
     Application.put_env(:liquid, :file_system, {module, path})
   end

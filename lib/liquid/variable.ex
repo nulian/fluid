@@ -9,11 +9,11 @@ defmodule Liquid.Variable do
   @doc """
   Resolves data from `Liquid.Variable.parse/1` and creates a variable struct
   """
-  @spec create(markup :: String.t()) :: %{}
+  @spec create(String.t()) :: %Variable{}
   def create(markup) when is_binary(markup) do
     [name | filters] = markup |> parse()
     name = String.trim(name)
-    variable = %Liquid.Variable{name: name, filters: filters}
+    variable = %Variable{name: name, filters: filters}
     parsed = Appointer.parse_name(name)
     Map.merge(variable, parsed)
   end
@@ -21,8 +21,7 @@ defmodule Liquid.Variable do
   @doc """
   Assigns context to variable and than applies all filters
   """
-  @spec lookup(v :: %Liquid.Variable{}, context :: %Liquid.Context{}) ::
-          {String.t(), %Liquid.Context{}}
+  @spec lookup(%Variable{}, %Context{}) :: {String.t(), %Context{}}
   def lookup(%Variable{} = v, %Context{} = context) do
     {ret, filters} = Appointer.assign(v, context)
 
@@ -62,7 +61,7 @@ defmodule Liquid.Variable do
   @doc """
   Parses the markup to a list of filters
   """
-  @spec parse(markup :: String.t()) :: []
+  @spec parse(String.t()) :: list()
   def parse(markup) when is_binary(markup) do
     parsed_variable =
       if markup != "" do

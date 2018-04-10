@@ -4,9 +4,9 @@ defprotocol Blank do
 end
 
 defimpl Blank, for: List do
-  alias Liquid.Block
-  alias Liquid.Tag
+  alias Liquid.{Block, Tag}
 
+  @spec blank?(list()) :: boolean()
   def blank?([]), do: true
 
   def blank?(list) do

@@ -8,7 +8,7 @@ defmodule Liquid.Filters do
 
   defmodule Functions do
     @moduledoc """
-    Structure that holds all the basic filter functions used in Liquid 3.
+    Holds all the basic filter functions used in Liquid 3
     """
     use Timex
 
@@ -84,7 +84,7 @@ defmodule Liquid.Filters do
         iex> Liquid.Filters.Functions.first(["testy", "the", "test"])
         "testy"
     """
-    @spec first(list :: list()) :: any()
+    @spec first(list()) :: any()
     def first(list) when is_list(list), do: list |> List.first()
 
     @doc """
@@ -95,7 +95,7 @@ defmodule Liquid.Filters do
         iex> Liquid.Filters.Functions.last(["testy", "the", "test"])
         "test"
     """
-    @spec last(list :: list()) :: any()
+    @spec last(list()) :: any()
     def last(list) when is_list(list), do: list |> List.last()
 
     @doc """
@@ -106,7 +106,7 @@ defmodule Liquid.Filters do
         iex> Liquid.Filters.Functions.reverse(["testy", "the", "test"])
         ["test", "the", "testy"]
     """
-    @spec reverse(array :: []) :: []
+    @spec reverse(list()) :: list()
     def reverse(array), do: array |> to_iterable |> Enum.reverse()
 
     @doc """
@@ -117,7 +117,7 @@ defmodule Liquid.Filters do
         iex> Liquid.Filters.Functions.sort(["do", "a", "sort", "by","clown"])
         ["a", "by", "clown", "do", "sort"]
     """
-    @spec sort(array :: []) :: []
+    @spec sort(list()) :: list()
     def sort(array), do: array |> Enum.sort()
 
     def sort(array, key) when is_list(array) and is_map(hd(array)) do
@@ -136,7 +136,7 @@ defmodule Liquid.Filters do
         iex> Liquid.Filters.Functions.uniq(["pls", "pls", "remove", "remove","duplicates"])
         ["pls", "remove", "duplicates"]
     """
-    @spec uniq(array :: [], key :: String.t()) :: [] | String.t()
+    @spec uniq(list(), String.t()) :: list() | String.t()
     def uniq(array) when is_list(array), do: array |> Enum.uniq()
 
     def uniq(_), do: raise("Called `uniq` with non-list parameter.")
@@ -159,7 +159,7 @@ defmodule Liquid.Filters do
         iex> Liquid.Filters.Functions.join(["1","2","3"], " and ")
         "1 and 2 and 3"
     """
-    @spec join(array :: [], separator :: String.t()) :: String.t()
+    @spec join(list(), String.t()) :: String.t()
     def join(array, separator \\ " ") do
       array |> to_iterable |> Enum.join(separator)
     end
@@ -172,7 +172,7 @@ defmodule Liquid.Filters do
         iex> Liquid.Filters.Functions.map([%{:hallo=>"1", :hola=>"2"}], :hallo)
         "1"
     """
-    @spec map(array :: [], key :: String.t()) :: [] | String.t()
+    @spec map(list(), String.t()) :: list() | String.t()
     def map(array, key) when is_list(array) do
       with mapped <- array |> Enum.map(fn arg -> arg[key] end) do
         case Enum.all?(mapped, &is_binary/1) do
@@ -195,7 +195,7 @@ defmodule Liquid.Filters do
         iex> Liquid.Filters.Functions.plus("100","200")
         300
     """
-    @spec plus(value :: number | String.t(), operand :: number | String.t()) :: integer
+    @spec plus(number() | String.t(), number() | String.t()) :: integer()
     def plus(value, operand) when is_number(value) and is_number(operand) do
       value + operand
     end
@@ -219,7 +219,7 @@ defmodule Liquid.Filters do
         iex> Liquid.Filters.Functions.minus("200", "200")
         0
     """
-    @spec minus(value :: number | String.t(), operand :: number | String.t()) :: number
+    @spec minus(number() | String.t(), number() | String.t()) :: number()
     def minus(value, operand) when is_number(value) and is_number(operand) do
       value - operand
     end
@@ -243,7 +243,7 @@ defmodule Liquid.Filters do
         iex> Liquid.Filters.Functions.times("2","4")
         8
     """
-    @spec times(value :: number | String.t(), operand :: number | String.t()) :: number
+    @spec times(number() | String.t(), number() | String.t()) :: number()
     def times(value, operand) when is_integer(value) and is_integer(operand) do
       value * operand
     end
@@ -272,7 +272,7 @@ defmodule Liquid.Filters do
         iex> Liquid.Filters.Functions.divided_by("2","0")
         ** (ArithmeticError) divided by 0
     """
-    @spec divided_by(input :: number | String.t(), operand :: number | String.t()) :: number
+    @spec divided_by(number() | String.t(), number() | String.t()) :: number()
     def divided_by(input, operand) when is_number(input) do
       case {input, operand |> to_number} do
         {_, 0} ->
@@ -291,7 +291,8 @@ defmodule Liquid.Filters do
     end
 
     @doc """
-    Rounds a number down to the nearest whole number. tries to convert the input to a number before the filter is applied. Can use strings and you have the option to put a precision number
+    Rounds a number down to the nearest whole number. tries to convert the input to a number before the 
+    filter is applied. Can use strings and you have the option to put a precision number
 
     ## Examples
 
@@ -301,7 +302,7 @@ defmodule Liquid.Filters do
         iex> Liquid.Filters.Functions.floor(11.22222222222,4)
         11.2222
     """
-    @spec floor(input :: integer | number | String.t()) :: integer | number
+    @spec floor(integer() | number() | String.t()) :: integer() | number()
     def floor(input) when is_integer(input), do: input
 
     def floor(input) when is_number(input), do: input |> trunc
@@ -353,7 +354,7 @@ defmodule Liquid.Filters do
         iex> Liquid.Filters.Functions.round(11.6)
         12
     """
-    @spec round(input :: integer | number | String.t()) :: integer | number
+    @spec round(integer() | number() | String.t()) :: integer() | number()
     def round(input) when is_integer(input), do: input
 
     def round(input) when is_number(input) do
@@ -374,7 +375,7 @@ defmodule Liquid.Filters do
     Allows you to specify a fallback in case a value doesn’t exist.
     `default` will show its value if the left side is nil, false, or empty
     """
-    @spec default(any, any) :: any
+    @spec default(any(), any()) :: any()
     def default(input, default_val \\ "")
 
     def default(input, default_val) when input in [nil, false, '', "", [], {}, %{}],
@@ -385,11 +386,7 @@ defmodule Liquid.Filters do
     @doc """
     Returns a single or plural word depending on input number
     """
-    @spec pluralize(
-            input :: integer | number | String.t(),
-            single :: String.t(),
-            plural :: String.t()
-          ) :: String.t()
+    @spec pluralize(integer() | number() | String.t(), String.t(), String.t()) :: String.t()
     def pluralize(1, single, _), do: single
 
     def pluralize(input, _, plural) when is_number(input), do: plural
@@ -406,7 +403,7 @@ defmodule Liquid.Filters do
         iex> Liquid.Filters.Functions.abs(-17)
         17
     """
-    @spec abs(input :: integer | number | String.t()) :: integer | number | String.t()
+    @spec abs(integer() | number() | String.t()) :: integer() | number() | String.t()
     def abs(input) when is_binary(input), do: input |> to_number |> abs
 
     def abs(input) when input < 0, do: -input
@@ -414,7 +411,6 @@ defmodule Liquid.Filters do
     def abs(input), do: input
 
     @doc """
-
     Returns the remainder of a division operation.
 
     ## Examples
@@ -422,8 +418,7 @@ defmodule Liquid.Filters do
         iex> Liquid.Filters.Functions.modulo(31,4)
         3
     """
-    @spec floor(input :: integer | number | String.t(), operand :: integer | number | String.t()) ::
-            integer | number
+    @spec floor(integer() | number() | String.t(), integer() | number() | String.t()) :: integer() | number()
     def modulo(0, _), do: 0
 
     def modulo(input, operand) when is_number(input) and is_number(operand) and input > 0,
@@ -437,14 +432,16 @@ defmodule Liquid.Filters do
     end
 
     @doc """
-    Shortens a string down to the number of characters passed as a parameter. If the number of characters specified is less than the length of the string, an ellipsis (…) is appended to the string and is included in the character count.
+    Shortens a string down to the number of characters passed as a parameter. If the number of characters 
+    specified is less than the length of the string, an ellipsis (…) is appended to the string and is 
+    included in the character count
 
     ## Examples
 
         iex> Liquid.Filters.Functions.truncate("cut this please i need it",18)
         "cut this please..."
     """
-    @spec truncate(input :: String.t(), integer, String.t()) :: String.t()
+    @spec truncate(String.t(), integer(), String.t()) :: String.t()
     def truncate(input, l \\ 50, truncate_string \\ "...")
 
     def truncate(nil, _, _), do: nil
@@ -462,14 +459,16 @@ defmodule Liquid.Filters do
     def truncate(input, l, truncate_string), do: truncate(input, to_number(l), truncate_string)
 
     @doc """
-    Shortens a string down to the number of words passed as the argument. If the specified number of words is less than the number of words in the string, an ellipsis (…) is appended to the string.
+    Shortens a string down to the number of words passed as the argument. 
+    If the specified number of words is less than the number of words in the string, 
+    an ellipsis (…) is appended to the string
 
     ## Examples
 
         iex> Liquid.Filters.Functions.truncatewords("cut this please i need it",3)
         "cut this please..."
     """
-    @spec truncatewords(input :: String.t(), words :: integer) :: String.t()
+    @spec truncatewords(String.t(), integer()) :: String.t()
     def truncatewords(input, words \\ 15)
 
     def truncatewords(nil, _), do: nil
@@ -502,7 +501,7 @@ defmodule Liquid.Filters do
         iex> Liquid.Filters.Functions.replace("cut this please i need it","cut", "replace")
         "replace this please i need it"
     """
-    @spec replace(string :: String.t(), from :: String.t(), to :: String.t()) :: String.t()
+    @spec replace(String.t(), String.t(), String.t()) :: String.t()
     def replace(string, from, to \\ "")
 
     def replace(<<string::binary>>, <<from::binary>>, <<to::binary>>) do
@@ -528,7 +527,7 @@ defmodule Liquid.Filters do
         iex> Liquid.Filters.Functions.replace_first("cut this please i need it cut it pls","cut", "replace")
         "replace this please i need it cut it pls"
     """
-    @spec replace_first(string :: String.t(), from :: String.t(), to :: String.t()) :: String.t()
+    @spec replace_first(String.t(), String.t(), String.t()) :: String.t()
     def replace_first(string, from, to \\ "")
 
     def replace_first(<<string::binary>>, <<from::binary>>, to) do
@@ -548,12 +547,12 @@ defmodule Liquid.Filters do
         iex> Liquid.Filters.Functions.remove("cut this please i need it cut it pls","cut")
         " this please i need it  it pls"
     """
-    @spec remove(string :: String.t(), remove :: String.t()) :: String.t()
+    @spec remove(String.t(), String.t()) :: String.t()
     def remove(<<string::binary>>, <<remove::binary>>) do
       string |> String.replace(remove, "")
     end
 
-    @spec remove_first(string :: String.t(), remove :: String.t()) :: String.t()
+    @spec remove_first(String.t(), String.t()) :: String.t()
     def remove_first(<<string::binary>>, <<remove::binary>>) do
       string |> String.replace(remove, "", global: false)
     end
@@ -570,7 +569,7 @@ defmodule Liquid.Filters do
         iex> Liquid.Filters.Functions.append("this with"," this")
         "this with this"
     """
-    @spec append(string :: String.t(), operand :: String.t()) :: String.t()
+    @spec append(String.t(), String.t()) :: String.t()
     def append(<<string::binary>>, <<operand::binary>>) do
       string <> operand
     end
@@ -589,7 +588,7 @@ defmodule Liquid.Filters do
         iex> Liquid.Filters.Functions.prepend("this with","what is ")
         "what is this with"
     """
-    @spec prepend(string :: String.t(), addition :: String.t()) :: String.t()
+    @spec prepend(String.t(), String.t()) :: String.t()
     def prepend(<<string::binary>>, <<addition::binary>>) do
       addition <> string
     end
@@ -601,27 +600,29 @@ defmodule Liquid.Filters do
     end
 
     @doc """
-    Removes all whitespace (tabs, spaces, and newlines) from both the left and right side of a string. It does not affect spaces between words.
+    Removes all whitespace (tabs, spaces, and newlines) from both the left and right side of a string. 
+    It does not affect spaces between words.
 
     ## Examples
 
         iex> Liquid.Filters.Functions.strip("         this test is just for the strip        ")
         "this test is just for the strip"
     """
-    @spec strip(string :: String.t()) :: String.t()
+    @spec strip(String.t()) :: String.t()
     def strip(<<string::binary>>) do
       String.trim(string)
     end
 
     @doc """
-    Removes all whitespaces (tabs, spaces, and newlines) from the beginning of a string. The filter does not affect spaces between words.
+    Removes all whitespaces (tabs, spaces, and newlines) from the beginning of a string. 
+    The filter does not affect spaces between words.
 
     ## Examples
 
         iex> Liquid.Filters.Functions.lstrip("         this test is just for the strip     ")
         "this test is just for the strip     "
     """
-    @spec lstrip(string :: String.t()) :: String.t()
+    @spec lstrip(String.t()) :: String.t()
     def lstrip(<<string::binary>>) do
       String.trim_leading(string)
     end
@@ -634,7 +635,7 @@ defmodule Liquid.Filters do
         iex> Liquid.Filters.Functions.rstrip("         this test is just for the strip     ")
         "         this test is just for the strip"
     """
-    @spec rstrip(string :: String.t()) :: String.t()
+    @spec rstrip(String.t()) :: String.t()
     def rstrip(<<string::binary>>) do
       String.trim_trailing(string)
     end
@@ -642,7 +643,7 @@ defmodule Liquid.Filters do
     @doc """
     Removes any newline characters (line breaks) from a string.
     """
-    @spec strip_newlines(string :: String.t()) :: String.t()
+    @spec strip_newlines(String.t()) :: String.t()
     def strip_newlines(<<string::binary>>) do
       String.replace(string, ~r/\r?\n/, "")
     end
@@ -650,20 +651,21 @@ defmodule Liquid.Filters do
     @doc """
     Replaces every newline (\n) with an HTML line break (<br>).
     """
-    @spec newline_to_br(string :: String.t()) :: String.t()
+    @spec newline_to_br(String.t()) :: String.t()
     def newline_to_br(<<string::binary>>) do
       String.replace(string, "\n", "<br />\n")
     end
 
     @doc """
-    Divides an input string into an array using the argument as a separator. split is commonly used to convert comma-separated items from a string to an array.
+    Divides an input string into an array using the argument as a separator. split is commonly used to 
+    convert comma-separated items from a string to an array.
 
     ## Examples
 
         iex> Liquid.Filters.Functions.split("this test is cool", " ")
         ["this", "test", "is", "cool"]
     """
-    @spec split(string :: String.t(), separator :: String.t()) :: []
+    @spec split(String.t(), String.t()) :: list()
     def split(<<string::binary>>, <<separator::binary>>) do
       String.split(string, separator)
     end
@@ -671,7 +673,8 @@ defmodule Liquid.Filters do
     def split(nil, _), do: []
 
     @doc """
-    Returns a substring of 1 character beginning at the index specified by the argument passed in. An optional second argument specifies the length of the substring to be returned.
+    Returns a substring of 1 character beginning at the index specified by the argument passed in. 
+    An optional second argument specifies the length of the substring to be returned.
     String indices are numbered starting from 0.
 
     ## Examples
@@ -679,7 +682,7 @@ defmodule Liquid.Filters do
         iex> Liquid.Filters.Functions.slice("this test is cool", 5)
         "test is cool"
     """
-    @spec slice(string :: String.t() | [], range :: integer) :: String.t() | []
+    @spec slice(String.t() | list(), integer()) :: String.t() | list()
     def slice(list, from, to) when is_list(list) do
       list |> Enum.slice(from, to)
     end
@@ -713,14 +716,15 @@ defmodule Liquid.Filters do
     def slice(nil, _), do: ""
 
     @doc """
-    Escapes a string by replacing characters with escape sequences (so that the string can be used in a URL, for example). It doesn’t change strings that don’t have anything to escape.
+    Escapes a string by replacing characters with escape sequences (so that the string can be used in a URL, 
+    for example). It doesn’t change strings that don’t have anything to escape.
 
     ## Examples
 
         iex> Liquid.Filters.Functions.escape("Have you read 'James & the Giant Peach'?")
         "Have you read &#39;James &amp; the Giant Peach&#39;?"
     """
-    @spec escape(string :: String.t()) :: String.t()
+    @spec escape(String.t()) :: String.t()
     def escape(input) when is_binary(input) do
       input |> HTML.html_escape()
     end
@@ -728,14 +732,15 @@ defmodule Liquid.Filters do
     defdelegate h(input), to: __MODULE__, as: :escape
 
     @doc """
-    Escapes a string without changing existing escaped entities. It doesn’t change strings that don’t have anything to escape.
+    Escapes a string without changing existing escaped entities. It doesn’t change strings that don’t 
+    have anything to escape.
 
     ## Examples
 
         iex> Liquid.Filters.Functions.escape_once("1 < 2 & 3")
         "1 &lt; 2 &amp; 3"
     """
-    @spec escape_once(string :: String.t()) :: String.t()
+    @spec escape_once(String.t()) :: String.t()
     def escape_once(input) when is_binary(input) do
       input |> HTML.html_escape_once()
     end
@@ -748,7 +753,7 @@ defmodule Liquid.Filters do
         iex> Liquid.Filters.Functions.strip_html("Have <em>you</em> read <strong>Ulysses</strong>?")
         "Have you read Ulysses?"
     """
-    @spec strip_html(string :: String.t()) :: String.t()
+    @spec strip_html(String.t()) :: String.t()
     def strip_html(nil), do: ""
 
     def strip_html(input) when is_binary(input) do
@@ -767,7 +772,7 @@ defmodule Liquid.Filters do
         iex> Liquid.Filters.Functions.url_encode("john@test.com")
         "john%40test.com"
     """
-    @spec url_encode(string :: String.t()) :: String.t()
+    @spec url_encode(String.t()) :: String.t()
     def url_encode(input) when is_binary(input) do
       input |> URI.encode_www_form()
     end
@@ -783,7 +788,7 @@ defmodule Liquid.Filters do
       "1990-11-19 09:45:00"
     """
 
-    @spec date(input :: String.t() | Date.t(), format :: Date.t() | String.t()) ::
+    @spec date(String.t() | Date.t(), Date.t() | String.t()) ::
             String.t() | Date.t()
     def date(input, format \\ "%F %T")
 
@@ -845,7 +850,7 @@ defmodule Liquid.Filters do
   @doc """
   Recursively pass through all of the input filters applying them
   """
-  @spec filter([], value :: String.t()) :: String.t() | []
+  @spec filter(list(), String.t()) :: String.t() | list()
   def filter([], value), do: value
 
   def filter([filter | rest], value) do
