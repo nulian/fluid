@@ -1,17 +1,19 @@
-Code.require_file "../../test_helper.exs", __ENV__.file
-
 defmodule Liquid.CaptureTest do
   use ExUnit.Case
   alias Liquid.Template
 
   setup_all do
-    Liquid.start
-    on_exit fn -> Liquid.stop end
+    Liquid.start()
+    on_exit(fn -> Liquid.stop() end)
     :ok
   end
 
   test :test_captures_block_content_in_variable do
-    assert_template_result("test string", "{% capture 'var' %}test string{% endcapture %}{{var}}", %{})
+    assert_template_result(
+      "test string",
+      "{% capture 'var' %}test string{% endcapture %}{{var}}",
+      %{}
+    )
   end
 
   test :test_capture_with_hyphen_in_variable_name do
@@ -19,9 +21,10 @@ defmodule Liquid.CaptureTest do
     {% capture this-thing %}Print this-thing{% endcapture %}
     {{ this-thing }}
     """
+
     template = Template.parse(template_source)
-    { :ok, result, _ } = Template.render(template)
-    assert "Print this-thing" == result |> String.trim
+    {:ok, result, _} = Template.render(template)
+    assert "Print this-thing" == result |> String.trim()
   end
 
   test :test_capture_to_variable_from_outer_scope_if_existing do
@@ -35,8 +38,9 @@ defmodule Liquid.CaptureTest do
     {% endif %}
     {{var}}
     """
+
     template = Template.parse(template_source)
-    { :ok, result, _ } = Template.render(template)
+    {:ok, result, _} = Template.render(template)
     assert "test-string" == Regex.replace(~r/\s/, result, "")
   end
 
@@ -50,18 +54,19 @@ defmodule Liquid.CaptureTest do
     {% endfor %}
     {{ first }}-{{ second }}
     """
+
     template = Template.parse(template_source)
-    { :ok, result, _ } = Template.render(template)
+    {:ok, result, _} = Template.render(template)
     assert "3-3" == Regex.replace(~r/\n/, result, "")
   end
 
   defp assert_template_result(expected, markup, assigns) do
-    assert_result(expected,markup,assigns)
+    assert_result(expected, markup, assigns)
   end
 
   defp assert_result(expected, markup, assigns) do
     template = Liquid.Template.parse(markup)
-    { :ok, result, _ } = Liquid.Template.render(template, assigns)
+    {:ok, result, _} = Liquid.Template.render(template, assigns)
     assert result == expected
   end
 end

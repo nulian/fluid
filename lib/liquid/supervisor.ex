@@ -3,6 +3,7 @@ defmodule Liquid.Supervisor do
   Supervisor for Liquid processes (currently empty)
   """
   use Supervisor
+
   @doc """
   Starts the liquid supervisor
   """
@@ -17,5 +18,4 @@ defmodule Liquid.Supervisor do
     children = []
     supervise(children, strategy: :one_for_one)
   end
-
 end

@@ -1,6 +1,6 @@
 defmodule BasicBench do
   use Benchfella
-  alias Liquid.{Template, Tag}
+  alias Liquid.{Registers, Tag, Template}
 
   @list Enum.to_list(1..1000)
 
@@ -18,7 +18,7 @@ defmodule BasicBench do
   end
 
   defmodule MinusOneTag do
-    def parse(%Tag{}=tag, %Template{}=context) do
+    def parse(%Tag{} = tag, %Template{} = context) do
       {tag, context}
     end
 
@@ -31,7 +31,7 @@ defmodule BasicBench do
   setup_all do
     Application.put_env(:liquid, :extra_filter_modules, [MyFilter, MyFilterTwo])
     Liquid.start
-    Liquid.Registers.register("minus_one", MinusOneTag, Tag)
+    Registers.register("minus_one", MinusOneTag, Tag)
     {:ok, nil}
   end
 
@@ -39,14 +39,14 @@ defmodule BasicBench do
     assigns = %{"array" => @list}
     markup = "{%for item in array %}{{item}}{%endfor%}"
     t = Template.parse(markup)
-    { :ok, _rendered, _ } = Template.render(t, assigns)
+    {:ok, _rendered, _} = Template.render(t, assigns)
   end
 
   bench "Loop custom filters and tags list" do
     assigns = %{"array" => @list}
     markup = "{%for item in array %}{%minus_one 3%}{{item | plus_one }}{%endfor%}"
     t = Template.parse(markup)
-    { :ok, _rendered, _ } = Template.render(t, assigns)
+    {:ok, _rendered, _} = Template.render(t, assigns)
   end
 
 end
