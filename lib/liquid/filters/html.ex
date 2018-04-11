@@ -5,7 +5,7 @@ defmodule Liquid.Filters.HTML do
   import Kernel, except: [round: 1, abs: 1]
   import Liquid.Utils, only: [to_number: 1]
 
-  alias Liquid.{HTML, Filters}
+  alias Liquid.HTML
 
   use Timex
 
