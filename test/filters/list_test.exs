@@ -3,8 +3,8 @@ defmodule Liquid.Filters.ListTest do
   use Timex
   doctest Liquid.Filters.List
 
-  alias Liquid.{Filters, Template, Variable}
-  alias Liquid.Filters.{Additionals, HTML, List, Math, String}
+  alias Liquid.Template
+  alias Liquid.Filters.List
 
   setup_all do
     Liquid.start()
@@ -13,8 +13,8 @@ defmodule Liquid.Filters.ListTest do
   end
 
   test :join do
-    assert "1 2 3 4" == Functions.join([1, 2, 3, 4])
-    assert "1 - 2 - 3 - 4" == Functions.join([1, 2, 3, 4], " - ")
+    assert "1 2 3 4" == List.join([1, 2, 3, 4])
+    assert "1 - 2 - 3 - 4" == List.join([1, 2, 3, 4], " - ")
 
     assert_template_result(
       "1, 1, 2, 4, 5",
@@ -23,19 +23,19 @@ defmodule Liquid.Filters.ListTest do
   end
 
   test :sort do
-    assert [1, 2, 3, 4] == Functions.sort([4, 3, 2, 1])
+    assert [1, 2, 3, 4] == List.sort([4, 3, 2, 1])
 
     assert [%{"a" => 1}, %{"a" => 2}, %{"a" => 3}, %{"a" => 4}] ==
-             Functions.sort([%{"a" => 4}, %{"a" => 3}, %{"a" => 1}, %{"a" => 2}], "a")
+             List.sort([%{"a" => 4}, %{"a" => 3}, %{"a" => 1}, %{"a" => 2}], "a")
 
     assert [%{"a" => 1, "b" => 1}, %{"a" => 3, "b" => 2}, %{"a" => 2, "b" => 3}] ==
-             Functions.sort(
+             List.sort(
                [%{"a" => 3, "b" => 2}, %{"a" => 1, "b" => 1}, %{"a" => 2, "b" => 3}],
                "b"
              )
 
     # Elixir keyword list support
-    assert [a: 1, a: 2, a: 3, a: 4] == Functions.sort([{:a, 4}, {:a, 3}, {:a, 1}, {:a, 2}], "a")
+    assert [a: 1, a: 2, a: 3, a: 4] == List.sort([{:a, 4}, {:a, 3}, {:a, 1}, {:a, 2}], "a")
   end
 
   test :sort_integrity do
@@ -43,37 +43,37 @@ defmodule Liquid.Filters.ListTest do
   end
 
   test :legacy_sort_hash do
-    assert Map.to_list(%{a: 1, b: 2}) == Functions.sort(a: 1, b: 2)
+    assert Map.to_list(%{a: 1, b: 2}) == List.sort(a: 1, b: 2)
   end
 
   test :numerical_vs_lexicographical_sort do
-    assert [2, 10] == Functions.sort([10, 2])
-    assert [{"a", 2}, {"a", 10}] == Functions.sort([{"a", 10}, {"a", 2}], "a")
-    assert ["10", "2"] == Functions.sort(["10", "2"])
-    assert [{"a", "10"}, {"a", "2"}] == Functions.sort([{"a", "10"}, {"a", "2"}], "a")
+    assert [2, 10] == List.sort([10, 2])
+    assert [{"a", 2}, {"a", 10}] == List.sort([{"a", 10}, {"a", 2}], "a")
+    assert ["10", "2"] == List.sort(["10", "2"])
+    assert [{"a", "10"}, {"a", "2"}] == List.sort([{"a", "10"}, {"a", "2"}], "a")
   end
 
   test :uniq do
-    assert [1, 3, 2, 4] == Functions.uniq([1, 1, 3, 2, 3, 1, 4, 3, 2, 1])
+    assert [1, 3, 2, 4] == List.uniq([1, 1, 3, 2, 3, 1, 4, 3, 2, 1])
 
     assert [{"a", 1}, {"a", 3}, {"a", 2}] ==
-             Functions.uniq([{"a", 1}, {"a", 3}, {"a", 1}, {"a", 2}], "a")
+             List.uniq([{"a", 1}, {"a", 3}, {"a", 1}, {"a", 2}], "a")
 
     # testdrop = TestDrop.new
-    # assert [testdrop] == Functions.uniq([testdrop, TestDrop.new], "test")
+    # assert [testdrop] == List.uniq([testdrop, TestDrop.new], "test")
   end
 
   test :reverse do
-    assert [4, 3, 2, 1] == Functions.reverse([1, 2, 3, 4])
+    assert [4, 3, 2, 1] == List.reverse([1, 2, 3, 4])
   end
 
   test :legacy_reverse_hash do
-    assert [Map.to_list(%{a: 1, b: 2})] == Functions.reverse(a: 1, b: 2)
+    assert [Map.to_list(%{a: 1, b: 2})] == List.reverse(a: 1, b: 2)
   end
 
   test :map do
     assert [1, 2, 3, 4] ==
-             Functions.map([%{"a" => 1}, %{"a" => 2}, %{"a" => 3}, %{"a" => 4}], "a")
+             List.map([%{"a" => 1}, %{"a" => 2}, %{"a" => 3}, %{"a" => 4}], "a")
 
     assert_template_result("abc", "{{ ary | map:'foo' | map:'bar' }}", %{
       "ary" => [
@@ -90,30 +90,23 @@ defmodule Liquid.Filters.ListTest do
   end
 
   test :first_last do
-    assert 1 == Functions.first([1, 2, 3])
-    assert 3 == Functions.last([1, 2, 3])
-    assert nil == Functions.first([])
-    assert nil == Functions.last([])
+    assert 1 == List.first([1, 2, 3])
+    assert 3 == List.last([1, 2, 3])
+    assert nil == List.first([])
+    assert nil == List.last([])
   end
 
   test :size do
-    assert 3 == Functions.size([1, 2, 3])
-    assert 0 == Functions.size([])
-    assert 0 == Functions.size(nil)
+    assert 3 == List.size([1, 2, 3])
+    assert 0 == List.size([])
+    assert 0 == List.size(nil)
 
     # for strings
-    assert 3 == Functions.size("foo")
-    assert 0 == Functions.size("")
+    assert 3 == List.size("foo")
+    assert 0 == List.size("")
   end
 
-  #Helper Test Builder Functions
-  defp assert_template_result(expected, markup, assigns \\ %{})
-
-  defp assert_template_result(expected, markup, assigns) do
-    assert_result(expected, markup, assigns)
-  end
-
-  defp assert_result(expected, markup, assigns) do
+  defp assert_template_result(expected, markup, assigns \\ %{}) do
     template = Template.parse(markup)
 
     with {:ok, result, _} <- Template.render(template, assigns) do
