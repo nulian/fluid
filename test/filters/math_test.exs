@@ -1,10 +1,8 @@
 defmodule Liquid.Filters.MathTest do
   use ExUnit.Case
-  use Timex
   doctest Liquid.Filters.Math
 
-  alias Liquid.{Filters, Template, Variable}
-  alias Liquid.Filters.{Additionals, HTML, List, Math, String}
+  alias Liquid.Template
 
   setup_all do
     Liquid.start()
@@ -69,14 +67,7 @@ defmodule Liquid.Filters.MathTest do
     assert_template_result("4", "{{ input | floor }}", %{"input" => 4.6})
   end
 
-  #Helper Test Builder Functions
-  defp assert_template_result(expected, markup, assigns \\ %{})
-
-  defp assert_template_result(expected, markup, assigns) do
-    assert_result(expected, markup, assigns)
-  end
-
-  defp assert_result(expected, markup, assigns) do
+  defp assert_template_result(expected, markup, assigns \\ %{}) do
     template = Template.parse(markup)
 
     with {:ok, result, _} <- Template.render(template, assigns) do
