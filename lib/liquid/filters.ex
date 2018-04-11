@@ -418,7 +418,8 @@ defmodule Liquid.Filters do
         iex> Liquid.Filters.Functions.modulo(31,4)
         3
     """
-    @spec floor(integer() | number() | String.t(), integer() | number() | String.t()) :: integer() | number()
+    @spec floor(integer() | number() | String.t(), integer() | number() | String.t()) ::
+            integer() | number()
     def modulo(0, _), do: 0
 
     def modulo(input, operand) when is_number(input) and is_number(operand) and input > 0,
@@ -788,8 +789,7 @@ defmodule Liquid.Filters do
       "1990-11-19 09:45:00"
     """
 
-    @spec date(String.t() | Date.t(), Date.t() | String.t()) ::
-            String.t() | Date.t()
+    @spec date(String.t() | Date.t(), Date.t() | String.t()) :: String.t() | Date.t()
     def date(input, format \\ "%F %T")
 
     def date(nil, _), do: nil

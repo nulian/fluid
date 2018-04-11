@@ -61,7 +61,7 @@ defmodule Liquid.Registers do
   @doc """
   Add tag to Registers
   """
-  @spec register(String.t(),String.t(), String.t()) :: %{}
+  @spec register(String.t(), String.t(), String.t()) :: %{}
   def register(name, module, type) do
     custom_tags =
       Map.merge(Application.get_env(:liquid, :extra_tags, %{}), %{

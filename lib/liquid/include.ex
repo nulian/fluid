@@ -4,7 +4,6 @@ defmodule Liquid.Include do
   """
   alias Liquid.{Context, FileSystem, Tag, Template, Variable}
 
-
   @doc """
   Creates a regular expression pattern to match the syntax of the tag include.
   """
@@ -46,7 +45,7 @@ defmodule Liquid.Include do
   @doc """
   Renders the results of the include tag.
   """
-  @spec render(String.t(), %Tag{}, %Context{}) ::  {String.t(), %Context{}}
+  @spec render(String.t(), %Tag{}, %Context{}) :: {String.t(), %Context{}}
   def render(output, %Tag{parts: parts} = tag, %Context{} = context) do
     {file_system, root} = context |> Context.registers(:file_system) || FileSystem.lookup()
     {name, context} = parts[:name] |> Variable.lookup(context)
