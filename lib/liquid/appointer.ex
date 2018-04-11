@@ -1,37 +1,20 @@
 defmodule Liquid.Appointer do
   @moduledoc "A module to assign context for `Liquid.Variable`"
-  alias Liquid.Variable
+  alias Liquid.{Matcher, Variable}
 
-  defp literals,
-    do: %{
-      "nil" => nil,
-      "null" => nil,
-      "" => nil,
-      "true" => true,
-      "false" => false,
-      "blank" => :blank?,
-      "empty" => :empty?
-    }
+  @literals %{
+    "nil" => nil,
+    "null" => nil,
+    "" => nil,
+    "true" => true,
+    "false" => false,
+    "blank" => :blank?,
+    "empty" => :empty?
+  }
 
-  @doc """
-  Returns a regex for integer special match
-  """
-  def integer, do: ~r/^(-?\d+)$/
-
-  @doc """
-  Returns a regex for float special match
-  """
-  def float, do: ~r/^(-?\d[\d\.]+)$/
-
-  @doc """
-  Returns a regex for quoted string special match
-  """
-  def quoted_string, do: ~r/#{Liquid.quoted_string()}/
-
-  @doc """
-  Returns a regex for start characters for quoted string special match
-  """
-  def start_quoted_string, do: ~r/^#{Liquid.quoted_string()}/
+  @integer ~r/^(-?\d+)$/
+  @float ~r/^(-?\d[\d\.]+)$/
+  @start_quoted_string ~r/^#{Liquid.quoted_string()}/
 
   @doc "Assigns context for Variable and filters"
   def assign(%Variable{literal: literal, parts: [], filters: filters}, context) do
@@ -49,14 +32,14 @@ defmodule Liquid.Appointer do
   def match(%{assigns: assigns} = context, [key | _] = parts) when is_binary(key) do
     case assigns do
       %{^key => _value} -> match(assigns, parts)
-      _ -> Liquid.Matcher.match(context, parts)
+      _ -> Matcher.match(context, parts)
     end
   end
 
   def match(current, []), do: current
 
   def match(current, [name | parts]) when is_binary(name) do
-    current |> match(name) |> Liquid.Matcher.match(parts)
+    current |> match(name) |> Matcher.match(parts)
   end
 
   def match(current, key) when is_binary(key), do: Map.get(current, key)
@@ -68,16 +51,16 @@ defmodule Liquid.Appointer do
   def parse_name(name) do
     value =
       cond do
-        Map.has_key?(literals(), name) ->
-          Map.get(literals(), name)
+        Map.has_key?(@literals, name) ->
+          Map.get(@literals, name)
 
-        Regex.match?(integer(), name) ->
+        Regex.match?(@integer, name) ->
           String.to_integer(name)
 
-        Regex.match?(float(), name) ->
+        Regex.match?(@float, name) ->
           String.to_float(name)
 
-        Regex.match?(start_quoted_string(), name) ->
+        Regex.match?(@start_quoted_string, name) ->
           Regex.replace(Liquid.quote_matcher(), name, "")
 
         true ->
@@ -95,17 +78,18 @@ defmodule Liquid.Appointer do
 
     args =
       for arg <- args do
-        parsed = arg |> parse_name
+        parsed = parse_name(arg)
 
-        if parsed |> Map.has_key?(:parts) do
-          assigns |> Liquid.Matcher.match(parsed.parts) |> to_string
-        else
-          if Map.has_key?(assigns, :__struct__) do
-            key = arg |> String.to_atom()
-            if assigns |> Map.has_key?(key), do: assigns |> Map.get(key) |> to_string(), else: arg
-          else
-            if assigns |> Map.has_key?(arg), do: assigns[arg] |> to_string(), else: arg
-          end
+        cond do
+          Map.has_key?(parsed, :parts) ->
+            assigns |> Matcher.match(parsed.parts) |> to_string()
+
+          Map.has_key?(assigns, :__struct__) ->
+            key = String.to_atom(arg)
+            if Map.has_key?(assigns, key), do: to_string(assigns[key]), else: arg
+
+          true ->
+            if Map.has_key?(assigns, arg), do: to_string(assigns[arg]), else: arg
         end
       end
 
