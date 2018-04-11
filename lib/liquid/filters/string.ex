@@ -2,12 +2,9 @@ defmodule Liquid.Filters.String do
   @moduledoc """
   Applies a chain of 'String' filters passed from Liquid.Variable
   """
+
   import Kernel, except: [round: 1, abs: 1]
   import Liquid.Utils, only: [to_number: 1]
-
-  alias Liquid.{HTML, Filters}
-
-  use Timex
 
   @doc """
   Makes each character in a string lowercase.
@@ -15,7 +12,7 @@ defmodule Liquid.Filters.String do
 
   ## Examples
 
-    iex> Liquid.Filters.Functions.downcase("Testy the Test")
+    iex> Liquid.Filters.String.downcase("Testy the Test")
     "testy the test"
   """
   @spec downcase(any()) :: String.t()
@@ -29,7 +26,7 @@ defmodule Liquid.Filters.String do
 
   ## Examples
 
-    iex> Liquid.Filters.Functions.upcase("Testy the Test")
+    iex> Liquid.Filters.String.upcase("Testy the Test")
     "TESTY THE TEST"
   """
   @spec upcase(any()) :: String.t()
@@ -42,7 +39,7 @@ defmodule Liquid.Filters.String do
 
   ## Examples
 
-    iex> Liquid.Filters.Functions.capitalize("testy the test")
+    iex> Liquid.Filters.String.capitalize("testy the test")
     "Testy the test"
   """
   @spec capitalize(any()) :: String.t()
@@ -51,13 +48,14 @@ defmodule Liquid.Filters.String do
   end
 
   @doc """
-  Shortens a string down to the number of characters passed as a parameter. If the number of characters
-  specified is less than the length of the string, an ellipsis (…) is appended to the string and is
-  included in the character count
+  Shortens a string down to the number of characters passed as a parameter.
+  If the number of characters
+  specified is less than the length of the string, an ellipsis (…) is appended to the
+  string and is included in the character count
 
   ## Examples
 
-    iex> Liquid.Filters.Functions.truncate("cut this please i need it",18)
+    iex> Liquid.Filters.String.truncate("cut this please i need it",18)
     "cut this please..."
   """
   @spec truncate(String.t(), integer(), String.t()) :: String.t()
@@ -84,7 +82,7 @@ defmodule Liquid.Filters.String do
 
   ## Examples
 
-    iex> Liquid.Filters.Functions.truncatewords("cut this please i need it",3)
+    iex> Liquid.Filters.String.truncatewords("cut this please i need it",3)
     "cut this please..."
   """
   @spec truncatewords(String.t(), integer()) :: String.t()
@@ -117,7 +115,7 @@ defmodule Liquid.Filters.String do
 
   ## Examples
 
-    iex> Liquid.Filters.Functions.replace("cut this please i need it","cut", "replace")
+    iex> Liquid.Filters.String.replace("cut this please i need it","cut", "replace")
     "replace this please i need it"
   """
   @spec replace(String.t(), String.t(), String.t()) :: String.t()
@@ -143,7 +141,7 @@ defmodule Liquid.Filters.String do
   Replaces only the first occurrence of the first argument in a string with the second argument.
 
   ## Examples
-    iex> Liquid.Filters.Functions.replace_first("cut this please i need it cut it pls","cut", "replace")
+    iex> Liquid.Filters.String.replace_first("cut this please i need it cut it pls","cut", "replace")
     "replace this please i need it cut it pls"
   """
   @spec replace_first(String.t(), String.t(), String.t()) :: String.t()
@@ -163,7 +161,7 @@ defmodule Liquid.Filters.String do
 
   ## Examples
 
-    iex> Liquid.Filters.Functions.remove("cut this please i need it cut it pls","cut")
+    iex> Liquid.Filters.String.remove("cut this please i need it cut it pls","cut")
     " this please i need it  it pls"
   """
   @spec remove(String.t(), String.t()) :: String.t()
@@ -185,7 +183,7 @@ defmodule Liquid.Filters.String do
 
   ## Examples
 
-    iex> Liquid.Filters.Functions.append("this with"," this")
+    iex> Liquid.Filters.String.append("this with"," this")
     "this with this"
   """
   @spec append(String.t(), String.t()) :: String.t()
@@ -204,7 +202,7 @@ defmodule Liquid.Filters.String do
 
   ## Examples
 
-    iex> Liquid.Filters.Functions.prepend("this with","what is ")
+    iex> Liquid.Filters.String.prepend("this with","what is ")
     "what is this with"
   """
   @spec prepend(String.t(), String.t()) :: String.t()
@@ -224,7 +222,7 @@ defmodule Liquid.Filters.String do
 
   ## Examples
 
-    iex> Liquid.Filters.Functions.split("this test is cool", " ")
+    iex> Liquid.Filters.String.split("this test is cool", " ")
     ["this", "test", "is", "cool"]
   """
   @spec split(String.t(), String.t()) :: list()
@@ -240,7 +238,7 @@ defmodule Liquid.Filters.String do
 
   ## Examples
 
-    iex> Liquid.Filters.Functions.strip("         this test is just for the strip        ")
+    iex> Liquid.Filters.String.strip("         this test is just for the strip        ")
     "this test is just for the strip"
   """
   @spec strip(String.t()) :: String.t()
@@ -254,7 +252,7 @@ defmodule Liquid.Filters.String do
 
   ## Examples
 
-    iex> Liquid.Filters.Functions.lstrip("         this test is just for the strip     ")
+    iex> Liquid.Filters.String.lstrip("         this test is just for the strip     ")
     "this test is just for the strip     "
   """
   @spec lstrip(String.t()) :: String.t()
@@ -267,7 +265,7 @@ defmodule Liquid.Filters.String do
 
   ## Examples
 
-    iex> Liquid.Filters.Functions.rstrip("         this test is just for the strip     ")
+    iex> Liquid.Filters.String.rstrip("         this test is just for the strip     ")
     "         this test is just for the strip"
   """
   @spec rstrip(String.t()) :: String.t()
@@ -282,7 +280,7 @@ defmodule Liquid.Filters.String do
 
   ## Examples
 
-    iex> Liquid.Filters.Functions.slice("this test is cool", 5)
+    iex> Liquid.Filters.String.slice("this test is cool", 5)
     "test is cool"
   """
   @spec slice(String.t() | list(), integer()) :: String.t() | list()
@@ -317,7 +315,6 @@ defmodule Liquid.Filters.String do
   end
 
   def slice(nil, _), do: ""
-
 
   @doc """
   Returns a single or plural word depending on input number

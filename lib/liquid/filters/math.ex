@@ -5,19 +5,15 @@ defmodule Liquid.Filters.Math do
   import Kernel, except: [round: 1, abs: 1]
   import Liquid.Utils, only: [to_number: 1]
 
-  alias Liquid.{HTML, Filters}
-
-  use Timex
-
   @doc """
   Adds a number to another number. Can use strings
 
   ## Examples
 
-    iex> Liquid.Filters.Functions.plus(100,200)
+    iex> Liquid.Filters.Math.plus(100, 200)
     300
 
-    iex> Liquid.Filters.Functions.plus("100","200")
+    iex> Liquid.Filters.Math.plus("100", "200")
     300
   """
   @spec plus(number() | String.t(), number() | String.t()) :: integer()
@@ -38,10 +34,10 @@ defmodule Liquid.Filters.Math do
 
   ## Examples
 
-    iex> Liquid.Filters.Functions.minus(200, 200)
+    iex> Liquid.Filters.Math.minus(200, 200)
     0
 
-    iex> Liquid.Filters.Functions.minus("200", "200")
+    iex> Liquid.Filters.Math.minus("200", "200")
     0
   """
   @spec minus(number() | String.t(), number() | String.t()) :: number()
@@ -62,10 +58,10 @@ defmodule Liquid.Filters.Math do
 
   ## Examples
 
-    iex> Liquid.Filters.Functions.times(2, 4)
+    iex> Liquid.Filters.Math.times(2, 4)
     8
 
-    iex> Liquid.Filters.Functions.times("2","4")
+    iex> Liquid.Filters.Math.times("2","4")
     8
   """
   @spec times(number() | String.t(), number() | String.t()) :: number()
@@ -104,10 +100,10 @@ defmodule Liquid.Filters.Math do
 
   ## Examples
 
-    iex> Liquid.Filters.Functions.divided_by(12, 2)
+    iex> Liquid.Filters.Math.divided_by(12, 2)
     6
 
-    iex> Liquid.Filters.Functions.divided_by("2","0")
+    iex> Liquid.Filters.Math.divided_by("2","0")
     ** (ArithmeticError) divided by 0
   """
   @spec divided_by(number() | String.t(), number() | String.t()) :: number()
@@ -134,10 +130,10 @@ defmodule Liquid.Filters.Math do
 
   ## Examples
 
-    iex> Liquid.Filters.Functions.floor(11.2)
+    iex> Liquid.Filters.Math.floor(11.2)
     11
 
-    iex> Liquid.Filters.Functions.floor(11.22222222222,4)
+    iex> Liquid.Filters.Math.floor(11.22222222222,4)
     11.2222
   """
   @spec floor(integer() | number() | String.t()) :: integer() | number()
@@ -160,7 +156,7 @@ defmodule Liquid.Filters.Math do
 
   ## Examples
 
-    iex> Liquid.Filters.Functions.ceil(11.2)
+    iex> Liquid.Filters.Math.ceil(11.2)
     12
   """
   @spec ceil(input :: integer | number | String.t()) :: integer | number
@@ -186,10 +182,10 @@ defmodule Liquid.Filters.Math do
 
   ## Examples
 
-    iex> Liquid.Filters.Functions.round(11.2)
+    iex> Liquid.Filters.Math.round(11.2)
     11
 
-    iex> Liquid.Filters.Functions.round(11.6)
+    iex> Liquid.Filters.Math.round(11.6)
     12
   """
   @spec round(integer() | number() | String.t()) :: integer() | number()
@@ -214,7 +210,7 @@ defmodule Liquid.Filters.Math do
 
   ## Examples
 
-    iex> Liquid.Filters.Functions.abs(-17)
+    iex> Liquid.Filters.Math.abs(-17)
     17
   """
   @spec abs(integer() | number() | String.t()) :: integer() | number() | String.t()
@@ -229,7 +225,7 @@ defmodule Liquid.Filters.Math do
 
   ## Examples
 
-    iex> Liquid.Filters.Functions.modulo(31,4)
+    iex> Liquid.Filters.Math.modulo(31,4)
     3
   """
   @spec modulo(integer() | number() | String.t(), integer() | number() | String.t()) ::

@@ -2,12 +2,8 @@ defmodule Liquid.Filters.HTML do
   @moduledoc """
   Applies a chain of 'HTML' filters passed from Liquid.Variable
   """
-  import Kernel, except: [round: 1, abs: 1]
-  import Liquid.Utils, only: [to_number: 1]
 
   alias Liquid.HTML
-
-  use Timex
 
   @doc """
   Removes any newline characters (line breaks) from a string.
@@ -31,7 +27,7 @@ defmodule Liquid.Filters.HTML do
 
   ## Examples
 
-    iex> Liquid.Filters.Functions.escape("Have you read 'James & the Giant Peach'?")
+    iex> Liquid.Filters.HTML.escape("Have you read 'James & the Giant Peach'?")
     "Have you read &#39;James &amp; the Giant Peach&#39;?"
   """
   @spec escape(String.t()) :: String.t()
@@ -47,7 +43,7 @@ defmodule Liquid.Filters.HTML do
 
   ## Examples
 
-    iex> Liquid.Filters.Functions.escape_once("1 < 2 & 3")
+    iex> Liquid.Filters.HTML.escape_once("1 < 2 & 3")
     "1 &lt; 2 &amp; 3"
   """
   @spec escape_once(String.t()) :: String.t()
@@ -60,7 +56,7 @@ defmodule Liquid.Filters.HTML do
 
   ## Examples
 
-    iex> Liquid.Filters.Functions.strip_html("Have <em>you</em> read <strong>Ulysses</strong>?")
+    iex> Liquid.Filters.HTML.strip_html("Have <em>you</em> read <strong>Ulysses</strong>?")
     "Have you read Ulysses?"
   """
   @spec strip_html(String.t()) :: String.t()
@@ -79,7 +75,7 @@ defmodule Liquid.Filters.HTML do
 
   ## Examples
 
-    iex> Liquid.Filters.Functions.url_encode("john@test.com")
+    iex> Liquid.Filters.HTML.url_encode("john@test.com")
     "john%40test.com"
   """
   @spec url_encode(String.t()) :: String.t()

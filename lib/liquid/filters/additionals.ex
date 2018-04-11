@@ -2,12 +2,6 @@ defmodule Liquid.Filters.Additionals do
   @moduledoc """
   Applies a chain of 'Additionals' filters passed from Liquid.Variable
   """
-  import Kernel, except: [round: 1, abs: 1]
-  import Liquid.Utils, only: [to_number: 1]
-
-  alias Liquid.{HTML, Filters}
-
-  use Timex
 
   @doc """
   Allows you to specify a fallback in case a value doesn’t exist.
@@ -26,7 +20,7 @@ defmodule Liquid.Filters.Additionals do
 
   ## Examples
 
-    iex>  Liquid.Filters.Functions.date("Mon Nov 19 9:45:0 1990")
+    iex>  Liquid.Filters.Additionals.date("Mon Nov 19 9:45:0 1990")
     "1990-11-19 09:45:00"
   """
   @spec date(String.t() | Date.t(), Date.t() | String.t()) :: String.t() | Date.t()

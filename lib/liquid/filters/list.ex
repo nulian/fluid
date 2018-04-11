@@ -2,18 +2,13 @@ defmodule Liquid.Filters.List do
   @moduledoc """
   Applies a chain of 'List' filters passed from Liquid.Variable
   """
-  import Kernel, except: [round: 1, abs: 1]
-  import Liquid.Utils, only: [to_number: 1]
 
-  alias Liquid.{HTML, Filters}
-
-  use Timex
   @doc """
   Returns the number of characters in a string or the number of items in an list or a tuple
 
   ## Examples
 
-    iex> Liquid.Filters.Functions.size("test")
+    iex> Liquid.Filters.List.size("test")
     4
   """
   @spec size(any()) :: integer()
@@ -36,7 +31,7 @@ defmodule Liquid.Filters.List do
 
   ## Examples
 
-    iex> Liquid.Filters.Functions.first(["testy", "the", "test"])
+    iex> Liquid.Filters.List.first(["testy", "the", "test"])
     "testy"
   """
   @spec first(list()) :: any()
@@ -47,7 +42,7 @@ defmodule Liquid.Filters.List do
 
   ## Examples
 
-    iex> Liquid.Filters.Functions.last(["testy", "the", "test"])
+    iex> Liquid.Filters.List.last(["testy", "the", "test"])
     "test"
   """
   @spec last(list()) :: any()
@@ -58,7 +53,7 @@ defmodule Liquid.Filters.List do
 
   ## Examples
 
-    iex> Liquid.Filters.Functions.reverse(["testy", "the", "test"])
+    iex> Liquid.Filters.List.reverse(["testy", "the", "test"])
     ["test", "the", "testy"]
   """
   @spec reverse(list()) :: list()
@@ -83,7 +78,7 @@ defmodule Liquid.Filters.List do
 
   ## Examples
 
-    iex> Liquid.Filters.Functions.sort(["do", "a", "sort", "by","clown"])
+    iex> Liquid.Filters.List.sort(["do", "a", "sort", "by","clown"])
     ["a", "by", "clown", "do", "sort"]
   """
   @spec sort(list()) :: list()
@@ -102,7 +97,7 @@ defmodule Liquid.Filters.List do
 
   ## Examples
 
-    iex> Liquid.Filters.Functions.uniq(["pls", "pls", "remove", "remove","duplicates"])
+    iex> Liquid.Filters.List.uniq(["pls", "pls", "remove", "remove","duplicates"])
     ["pls", "remove", "duplicates"]
   """
   @spec uniq(list(), String.t()) :: list() | String.t()
@@ -125,7 +120,7 @@ defmodule Liquid.Filters.List do
 
   ## Examples
 
-    iex> Liquid.Filters.Functions.join(["1","2","3"], " and ")
+    iex> Liquid.Filters.List.join(["1","2","3"], " and ")
     "1 and 2 and 3"
   """
   @spec join(list(), String.t()) :: String.t()
@@ -138,7 +133,7 @@ defmodule Liquid.Filters.List do
 
   ## Examples
 
-    iex> Liquid.Filters.Functions.map([%{:hallo=>"1", :hola=>"2"}], :hallo)
+    iex> Liquid.Filters.List.map([%{:hallo=>"1", :hola=>"2"}], :hallo)
     "1"
   """
   @spec map(list(), String.t()) :: list() | String.t()
