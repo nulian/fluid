@@ -4,8 +4,8 @@ defmodule Liquid do
   def start(_type, _args), do: start()
 
   def start do
-    Liquid.Filters.add_filter_modules
-    Liquid.Supervisor.start_link
+    Liquid.Filters.add_filter_modules()
+    Liquid.Supervisor.start_link()
   end
 
   def stop, do: {:ok, "stopped"}
@@ -24,12 +24,22 @@ defmodule Liquid do
 
   def any_starting_tag, do: "(){{()|(){%()"
 
-  def invalid_expression, do: ~r/^{%.*}}$|^{{.*%}$|^{%.*([^}%]}|[^}%])$|^{{.*([^}%]}|[^}%])$|(^{{|^{%)/ms
+  def invalid_expression,
+    do: ~r/^{%.*}}$|^{{.*%}$|^{%.*([^}%]}|[^}%])$|^{{.*([^}%]}|[^}%])$|(^{{|^{%)/ms
 
-  def tokenizer, do: ~r/()#{tag_start()}.*?#{tag_end()}()|()#{variable_start()}.*?#{variable_end()}()/
-  def parser, do: ~r/#{tag_start()}\s*(?<tag>.*?)\s*#{tag_end()}|#{variable_start()}\s*(?<variable>.*?)\s*#{variable_end()}/m
+  def tokenizer,
+    do: ~r/()#{tag_start()}.*?#{tag_end()}()|()#{variable_start()}.*?#{variable_end()}()/
+
+  def parser,
+    do:
+      ~r/#{tag_start()}\s*(?<tag>.*?)\s*#{tag_end()}|#{variable_start()}\s*(?<variable>.*?)\s*#{
+        variable_end()
+      }/m
+
   def template_parser, do: ~r/#{partial_template_parser()}|#{any_starting_tag()}/ms
-  def partial_template_parser, do: "()#{tag_start()}.*?#{tag_end()}()|()#{variable_start()}.*?#{variable_incomplete_end()}()"
+
+  def partial_template_parser,
+    do: "()#{tag_start()}.*?#{tag_end()}()|()#{variable_start()}.*?#{variable_incomplete_end()}()"
 
   def quoted_string, do: "\"[^\"]*\"|'[^']*'"
   def quoted_fragment, do: "#{quoted_string()}|(?:[^\s,\|'\"]|#{quoted_string()})+"
@@ -39,9 +49,10 @@ defmodule Liquid do
   def filter_parser, do: ~r/(?:\||(?:\s*(?!(?:\|))(?:#{quoted_fragment()}|\S+)\s*)+)/
 
   defmodule List do
-    def even_elements([_,h|t]) do
+    def even_elements([_, h | t]) do
       [h] ++ even_elements(t)
     end
+
     def even_elements([]), do: []
   end
 

@@ -3,6 +3,6 @@ defmodule Liquid.Tag do
 
   def create(markup) do
     destructure [name, rest], String.split(markup, " ", parts: 2)
-    %Liquid.Tag{name: name |> String.to_atom, markup: rest}
+    %Liquid.Tag{name: name |> String.to_atom(), markup: rest}
   end
 end

@@ -1,4 +1,4 @@
-Code.require_file "../../test_helper.exs", __ENV__.file
+Code.require_file("../../test_helper.exs", __ENV__.file)
 
 defmodule Liquid.BlankTest do
   use ExUnit.Case
@@ -6,18 +6,17 @@ defmodule Liquid.BlankTest do
   def n, do: "10"
 
   setup_all do
-    Liquid.start
+    Liquid.start()
     :ok
   end
 
   def wrap_in_for(body) do
-    "{% for i  in (1.."<> n() <> ") %}" <> body <> "{% endfor %}"
+    "{% for i  in (1.." <> n() <> ") %}" <> body <> "{% endfor %}"
   end
 
   def wrap_in_if(body) do
     "{% if true %}" <> body <> "{% endif %}"
   end
-
 
   def wrap(body) do
     wrap_in_for(body) <> wrap_in_if(body)
@@ -36,7 +35,10 @@ defmodule Liquid.BlankTest do
   end
 
   test :test_mark_as_blank_only_during_parsing do
-    assert_template_result(String.duplicate(" ",String.to_integer(n()) + 1), wrap(" {% if false %} this never happens, but still, this block is not blank {% endif %}"))
+    assert_template_result(
+      String.duplicate(" ", String.to_integer(n()) + 1),
+      wrap(" {% if false %} this never happens, but still, this block is not blank {% endif %}")
+    )
   end
 
   test :test_comments_are_blank do
@@ -49,8 +51,13 @@ defmodule Liquid.BlankTest do
 
   test :test_nested_blocks_are_blank_but_only_if_all_children_are do
     assert_template_result("", wrap(wrap(" ")))
-    assert_template_result(String.duplicate("\n       but this is not ", String.to_integer(n()) + 1),
-      wrap("{% if true %} {% comment %} this is blank {% endcomment %} {% endif %}\n      {% if true %} but this is not {% endif %}"))
+
+    assert_template_result(
+      String.duplicate("\n       but this is not ", String.to_integer(n()) + 1),
+      wrap(
+        "{% if true %} {% comment %} this is blank {% endcomment %} {% endif %}\n      {% if true %} but this is not {% endif %}"
+      )
+    )
   end
 
   test :test_assigns_are_blank do
@@ -67,7 +74,7 @@ defmodule Liquid.BlankTest do
 
   defp assert_result(expected, markup, assigns) do
     template = Liquid.Template.parse(markup)
-    { :ok, result, _ } = Liquid.Template.render(template, assigns)
+    {:ok, result, _} = Liquid.Template.render(template, assigns)
     assert result == expected
   end
 end

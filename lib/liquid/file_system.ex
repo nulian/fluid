@@ -1,27 +1,33 @@
 defmodule Liquid.BlankFileSystem do
   def read_template_file(_root, _name, _context) do
-    { :error, "This liquid context does not allow includes." }
+    {:error, "This liquid context does not allow includes."}
   end
 end
 
 defmodule Liquid.LocalFileSystem do
   def read_template_file(_root, _name, _context) do
-    { :ok, "" }
+    {:ok, ""}
   end
 
   def full_path(root, template_path) do
-    full_path = if Regex.match?(~r/\//, template_path) do
-      root |> Path.join(template_path |> Path.dirname)
-           |> Path.join("_#{template_path |> Path.basename}.liquid")
-    else
-      root |> Path.join("_#{template_path}.liquid")
-    end
+    full_path =
+      if Regex.match?(~r/\//, template_path) do
+        root
+        |> Path.join(template_path |> Path.dirname())
+        |> Path.join("_#{template_path |> Path.basename()}.liquid")
+      else
+        root |> Path.join("_#{template_path}.liquid")
+      end
+
     cond do
       !Regex.match?(~r/^[^.\/][a-zA-Z0-9_\/]+$/, template_path) ->
-        { :error, "Illegal template name '#{template_path}'" }
+        {:error, "Illegal template name '#{template_path}'"}
+
       !Regex.match?(~r/^#{Path.expand(root)}/, Path.expand(full_path)) ->
-        { :error, "Illegal template path '#{Path.expand(full_path)}'" }
-      true -> { :ok, full_path }
+        {:error, "Illegal template path '#{Path.expand(full_path)}'"}
+
+      true ->
+        {:ok, full_path}
     end
   end
 end
@@ -36,15 +42,15 @@ defmodule Liquid.FileSystem do
   """
   def full_path(path) do
     case lookup() do
-      nil -> { :error, "No file system defined" }
-      { mod, root } -> mod.full_path(root, path)
+      nil -> {:error, "No file system defined"}
+      {mod, root} -> mod.full_path(root, path)
     end
   end
 
   def read_template_file(path, options \\ []) do
     case lookup() do
-      nil -> { :error, "No file system defined" }
-      { mod, root } -> mod.read_template_file(root, path, options)
+      nil -> {:error, "No file system defined"}
+      {mod, root} -> mod.read_template_file(root, path, options)
     end
   end
 
@@ -55,5 +61,4 @@ defmodule Liquid.FileSystem do
   def lookup do
     Application.get_env(:liquid, :file_system)
   end
-
 end

@@ -1,4 +1,4 @@
-Code.require_file "../../test_helper.exs", __ENV__.file
+Code.require_file("../../test_helper.exs", __ENV__.file)
 
 defmodule Liquid.FilterTest do
   use ExUnit.Case
@@ -7,13 +7,13 @@ defmodule Liquid.FilterTest do
   alias Liquid.Filters.Functions
 
   setup_all do
-    Liquid.start
-    on_exit fn -> Liquid.stop end
+    Liquid.start()
+    on_exit(fn -> Liquid.stop() end)
     :ok
   end
 
   test :parse_input do
-    [name|filters] = "'foofoo' | replace:'foo','bar'" |> Variable.parse
+    [name | filters] = "'foofoo' | replace:'foo','bar'" |> Variable.parse()
 
     assert "'foofoo'" == name
     assert [[:replace, ["'foo'", "'bar'"]]] == filters
@@ -22,11 +22,11 @@ defmodule Liquid.FilterTest do
   test :filter_parsed do
     name = "'foofoo'"
     filters = [[:replace, ["'foo'", "'bar'"]]]
-    assert "'barbar'" == Filters.filter( filters, name)
+    assert "'barbar'" == Filters.filter(filters, name)
   end
 
   test :size do
-    assert 3 == Functions.size([1,2,3])
+    assert 3 == Functions.size([1, 2, 3])
     assert 0 == Functions.size([])
     assert 0 == Functions.size(nil)
 
@@ -95,16 +95,14 @@ defmodule Liquid.FilterTest do
     assert "1234567" == Functions.truncate("1234567890", 7, "")
   end
 
-
   test :split do
-    assert ["12","34"] == Functions.split("12~34", "~")
-    assert ["A? "," ,Z"] == Functions.split("A? ~ ~ ~ ,Z", "~ ~ ~")
+    assert ["12", "34"] == Functions.split("12~34", "~")
+    assert ["A? ", " ,Z"] == Functions.split("A? ~ ~ ~ ,Z", "~ ~ ~")
     assert ["A?Z"] == Functions.split("A?Z", "~")
     # Regexp works although Liquid does not support.
     # assert ["A","Z"] == Functions.split("AxZ", ~r/x/)
     assert [] == Functions.split(nil, " ")
   end
-
 
   test :escape do
     assert "&lt;strong&gt;" == Functions.escape("<strong>")
@@ -112,7 +110,8 @@ defmodule Liquid.FilterTest do
   end
 
   test :escape_once do
-    assert "&lt;strong&gt;Hulk&lt;/strong&gt;" == Functions.escape_once("&lt;strong&gt;Hulk</strong>")
+    assert "&lt;strong&gt;Hulk&lt;/strong&gt;" ==
+             Functions.escape_once("&lt;strong&gt;Hulk</strong>")
   end
 
   test :url_encode do
@@ -124,7 +123,13 @@ defmodule Liquid.FilterTest do
     assert "one two three" == Functions.truncatewords("one two three", 4)
     assert "one two..." == Functions.truncatewords("one two three", 2)
     assert "one two three" == Functions.truncatewords("one two three")
-    assert "Two small (13&#8221; x 5.5&#8221; x 10&#8221; high) baskets fit inside one large basket (13&#8221;..." == Functions.truncatewords("Two small (13&#8221; x 5.5&#8221; x 10&#8221; high) baskets fit inside one large basket (13&#8221; x 16&#8221; x 10.5&#8221; high) with cover.", 15)
+
+    assert "Two small (13&#8221; x 5.5&#8221; x 10&#8221; high) baskets fit inside one large basket (13&#8221;..." ==
+             Functions.truncatewords(
+               "Two small (13&#8221; x 5.5&#8221; x 10&#8221; high) baskets fit inside one large basket (13&#8221; x 16&#8221; x 10.5&#8221; high) with cover.",
+               15
+             )
+
     assert "测试测试测试测试" == Functions.truncatewords("测试测试测试测试", 5)
     assert "one two three" == Functions.truncatewords("one two three", "4")
   end
@@ -132,7 +137,12 @@ defmodule Liquid.FilterTest do
   test :strip_html do
     assert "test" == Functions.strip_html("<div>test</div>")
     assert "test" == Functions.strip_html(~s{<div id="test">test</div>})
-    assert "" == Functions.strip_html(~S{<script type="text/javascript">document.write("some stuff");</script>})
+
+    assert "" ==
+             Functions.strip_html(
+               ~S{<script type="text/javascript">document.write("some stuff");</script>}
+             )
+
     assert "" == Functions.strip_html(~S{<style type="text/css">foo bar</style>})
     assert "test" == Functions.strip_html(~S{<div\nclass="multiline">test</div>})
     assert "test" == Functions.strip_html(~S{<!-- foo bar \n test -->test})
@@ -142,19 +152,31 @@ defmodule Liquid.FilterTest do
   test :join do
     assert "1 2 3 4" == Functions.join([1, 2, 3, 4])
     assert "1 - 2 - 3 - 4" == Functions.join([1, 2, 3, 4], " - ")
-    assert_template_result "1, 1, 2, 4, 5", ~s({{"1: 2: 1: 4: 5" | split: ": " | sort | join: ", " }})
+
+    assert_template_result(
+      "1, 1, 2, 4, 5",
+      ~s({{"1: 2: 1: 4: 5" | split: ": " | sort | join: ", " }})
+    )
   end
 
   test :sort do
     assert [1, 2, 3, 4] == Functions.sort([4, 3, 2, 1])
-    assert [%{"a" => 1}, %{"a" => 2}, %{"a" => 3}, %{"a" => 4}] == Functions.sort([%{"a" => 4}, %{"a" => 3}, %{"a" => 1}, %{"a" => 2}], "a")
-    assert [%{"a" => 1, "b" => 1}, %{"a" => 3, "b" => 2}, %{"a" => 2, "b"=> 3}] == Functions.sort([%{"a" => 3, "b" => 2}, %{"a" => 1, "b" => 1}, %{"a" => 2, "b"=> 3}], "b")
+
+    assert [%{"a" => 1}, %{"a" => 2}, %{"a" => 3}, %{"a" => 4}] ==
+             Functions.sort([%{"a" => 4}, %{"a" => 3}, %{"a" => 1}, %{"a" => 2}], "a")
+
+    assert [%{"a" => 1, "b" => 1}, %{"a" => 3, "b" => 2}, %{"a" => 2, "b" => 3}] ==
+             Functions.sort(
+               [%{"a" => 3, "b" => 2}, %{"a" => 1, "b" => 1}, %{"a" => 2, "b" => 3}],
+               "b"
+             )
+
     # Elixir keyword list support
-    assert ["a": 1, "a": 2, "a": 3, "a": 4] == Functions.sort([{:a, 4}, {:a, 3}, {:a, 1}, {:a, 2}], "a")
+    assert [a: 1, a: 2, a: 3, a: 4] == Functions.sort([{:a, 4}, {:a, 3}, {:a, 1}, {:a, 2}], "a")
   end
 
   test :sort_integrity do
-    assert_template_result "11245", ~s({{"1: 2: 1: 4: 5" | split: ": " | sort }})
+    assert_template_result("11245", ~s({{"1: 2: 1: 4: 5" | split: ": " | sort }}))
   end
 
   test :legacy_sort_hash do
@@ -170,7 +192,10 @@ defmodule Liquid.FilterTest do
 
   test :uniq do
     assert [1, 3, 2, 4] == Functions.uniq([1, 1, 3, 2, 3, 1, 4, 3, 2, 1])
-    assert [{"a", 1}, {"a", 3}, {"a", 2}] == Functions.uniq([{"a", 1}, {"a", 3}, {"a", 1}, {"a", 2}], "a")
+
+    assert [{"a", 1}, {"a", 3}, {"a", 2}] ==
+             Functions.uniq([{"a", 1}, {"a", 3}, {"a", 1}, {"a", 2}], "a")
+
     # testdrop = TestDrop.new
     # assert [testdrop] == Functions.uniq([testdrop, TestDrop.new], "test")
   end
@@ -183,16 +208,22 @@ defmodule Liquid.FilterTest do
     assert [Map.to_list(%{a: 1, b: 2})] == Functions.reverse(a: 1, b: 2)
   end
 
-
   test :map do
-    assert [1,2,3,4] == Functions.map([%{"a" => 1}, %{"a" => 2}, %{"a" => 3}, %{"a" => 4}], "a")
-    assert_template_result "abc", "{{ ary | map:'foo' | map:'bar' }}",
-      %{"ary" => [%{"foo" => %{"bar" => "a"}}, %{"foo" => %{"bar" => "b"}}, %{"foo" => %{"bar" => "c"}}]}
+    assert [1, 2, 3, 4] ==
+             Functions.map([%{"a" => 1}, %{"a" => 2}, %{"a" => 3}, %{"a" => 4}], "a")
+
+    assert_template_result("abc", "{{ ary | map:'foo' | map:'bar' }}", %{
+      "ary" => [
+        %{"foo" => %{"bar" => "a"}},
+        %{"foo" => %{"bar" => "b"}},
+        %{"foo" => %{"bar" => "c"}}
+      ]
+    })
   end
 
   test :map_doesnt_call_arbitrary_stuff do
-    assert_template_result "", ~s[{{ "foo" | map: "__id__" }}]
-    assert_template_result "", ~s[{{ "foo" | map: "inspect" }}]
+    assert_template_result("", ~s[{{ "foo" | map: "__id__" }}])
+    assert_template_result("", ~s[{{ "foo" | map: "inspect" }}])
   end
 
   test :replace do
@@ -200,7 +231,7 @@ defmodule Liquid.FilterTest do
     assert "Tesing" == Functions.replace("Testing", "t", "")
     assert "2 2 2 2" == Functions.replace("1 1 1 1", "1", 2)
     assert "2 1 1 1" == Functions.replace_first("1 1 1 1", "1", 2)
-    assert_template_result "2 1 1 1", "{{ '1 1 1 1' | replace_first: '1', 2 }}"
+    assert_template_result("2 1 1 1", "{{ '1 1 1 1' | replace_first: '1', 2 }}")
   end
 
   test :date do
@@ -221,8 +252,8 @@ defmodule Liquid.FilterTest do
 
     assert "07/16/2004" == Functions.date("Fri Jul 16 01:00:00 2004", "%m/%d/%Y")
 
-    assert "#{Timex.today.year}" == Functions.date("now", "%Y")
-    assert "#{Timex.today.year}" == Functions.date("today", "%Y")
+    assert "#{Timex.today().year}" == Functions.date("now", "%Y")
+    assert "#{Timex.today().year}" == Functions.date("today", "%Y")
 
     assert nil == Functions.date(nil, "%B")
 
@@ -234,8 +265,8 @@ defmodule Liquid.FilterTest do
   end
 
   test :first_last do
-    assert 1 == Functions.first([1,2,3])
-    assert 3 == Functions.last([1,2,3])
+    assert 1 == Functions.first([1, 2, 3])
+    assert 3 == Functions.last([1, 2, 3])
     assert nil == Functions.first([])
     assert nil == Functions.last([])
   end
@@ -243,104 +274,106 @@ defmodule Liquid.FilterTest do
   test :remove do
     assert "   " == Functions.remove("a a a a", "a")
     assert "a a a" == Functions.remove_first("a a a a", "a ")
-    assert_template_result "a a a", "{{ 'a a a a' | remove_first: 'a ' }}"
+    assert_template_result("a a a", "{{ 'a a a a' | remove_first: 'a ' }}")
   end
 
   test :pipes_in_string_arguments do
-    assert_template_result "foobar", "{{ 'foo|bar' | remove: '|' }}"
+    assert_template_result("foobar", "{{ 'foo|bar' | remove: '|' }}")
   end
 
-
   test :strip do
-    assert_template_result "ab c", "{{ source | strip }}", %{"source" => " ab c  "}
-    assert_template_result "ab c", "{{ source | strip }}", %{"source" => " \tab c  \n \t"}
+    assert_template_result("ab c", "{{ source | strip }}", %{"source" => " ab c  "})
+    assert_template_result("ab c", "{{ source | strip }}", %{"source" => " \tab c  \n \t"})
   end
 
   test :lstrip do
-    assert_template_result "ab c  ", "{{ source | lstrip }}", %{"source" => " ab c  "}
-    assert_template_result "ab c  \n \t", "{{ source | lstrip }}", %{"source" => " \tab c  \n \t"}
+    assert_template_result("ab c  ", "{{ source | lstrip }}", %{"source" => " ab c  "})
+
+    assert_template_result("ab c  \n \t", "{{ source | lstrip }}", %{"source" => " \tab c  \n \t"})
   end
 
   test :rstrip do
-    assert_template_result " ab c", "{{ source | rstrip }}", %{"source" => " ab c  "}
-    assert_template_result " \tab c", "{{ source | rstrip }}", %{"source" => " \tab c  \n \t"}
+    assert_template_result(" ab c", "{{ source | rstrip }}", %{"source" => " ab c  "})
+    assert_template_result(" \tab c", "{{ source | rstrip }}", %{"source" => " \tab c  \n \t"})
   end
 
   test :strip_newlines do
-    assert_template_result "abc", "{{ source | strip_newlines }}", %{"source" => "a\nb\nc"}
-    assert_template_result "abc", "{{ source | strip_newlines }}", %{"source" => "a\r\nb\nc"}
-    assert_template_result "abc", "{{ source | strip_newlines }}", %{"source" => "a\r\nb\nc\r\n"}
+    assert_template_result("abc", "{{ source | strip_newlines }}", %{"source" => "a\nb\nc"})
+    assert_template_result("abc", "{{ source | strip_newlines }}", %{"source" => "a\r\nb\nc"})
+    assert_template_result("abc", "{{ source | strip_newlines }}", %{"source" => "a\r\nb\nc\r\n"})
   end
 
   test :newlines_to_br do
-    assert_template_result "a<br />\nb<br />\nc", "{{ source | newline_to_br }}", %{"source" => "a\nb\nc"}
+    assert_template_result("a<br />\nb<br />\nc", "{{ source | newline_to_br }}", %{
+      "source" => "a\nb\nc"
+    })
   end
 
   test :plus do
-    assert_template_result "2", "{{ 1 | plus:1 }}"
-    assert_template_result "2.0", "{{ '1' | plus:'1.0' }}"
+    assert_template_result("2", "{{ 1 | plus:1 }}")
+    assert_template_result("2.0", "{{ '1' | plus:'1.0' }}")
   end
 
   test :minus do
-    assert_template_result "4", "{{ input | minus:operand }}", %{"input" => 5, "operand" => 1}
-    assert_template_result "2.3", "{{ '4.3' | minus:'2' }}"
+    assert_template_result("4", "{{ input | minus:operand }}", %{"input" => 5, "operand" => 1})
+    assert_template_result("2.3", "{{ '4.3' | minus:'2' }}")
   end
 
   test :times do
-    assert_template_result "12", "{{ 3 | times:4 }}"
-    assert_template_result "0", "{{ 'foo' | times:4 }}"
+    assert_template_result("12", "{{ 3 | times:4 }}")
+    assert_template_result("0", "{{ 'foo' | times:4 }}")
 
-    assert_template_result "6", "{{ '2.1' | times:3 | replace: '.','-' | plus:0}}"
+    assert_template_result("6", "{{ '2.1' | times:3 | replace: '.','-' | plus:0}}")
 
-    assert_template_result "7.25", "{{ 0.0725 | times:100 }}"
+    assert_template_result("7.25", "{{ 0.0725 | times:100 }}")
   end
 
   test :divided_by do
-    assert_template_result "4", "{{ 12 | divided_by:3 }}"
-    assert_template_result "4", "{{ 14 | divided_by:3 }}"
-    assert_template_result "5", "{{ 15 | divided_by:3 }}"
+    assert_template_result("4", "{{ 12 | divided_by:3 }}")
+    assert_template_result("4", "{{ 14 | divided_by:3 }}")
+    assert_template_result("5", "{{ 15 | divided_by:3 }}")
 
-    assert_template_result "Liquid error: divided by 0", "{{ 5 | divided_by:0 }}"
+    assert_template_result("Liquid error: divided by 0", "{{ 5 | divided_by:0 }}")
 
-    assert_template_result "0.5", "{{ 2.0 | divided_by:4 }}"
+    assert_template_result("0.5", "{{ 2.0 | divided_by:4 }}")
   end
 
   test :abs do
-    assert_template_result "3", "{{ '3' | abs }}"
-    assert_template_result "3", "{{ -3 | abs }}"
-    assert_template_result "0", "{{ 0 | abs }}"
-    assert_template_result "0.1", "{{ -0.1 | abs }}"
+    assert_template_result("3", "{{ '3' | abs }}")
+    assert_template_result("3", "{{ -3 | abs }}")
+    assert_template_result("0", "{{ 0 | abs }}")
+    assert_template_result("0.1", "{{ -0.1 | abs }}")
   end
 
   test :modulo do
-    assert_template_result "1", "{{ 3 | modulo:2 }}"
-    assert_template_result "24", "{{ -1 | modulo:25 }}"
+    assert_template_result("1", "{{ 3 | modulo:2 }}")
+    assert_template_result("24", "{{ -1 | modulo:25 }}")
   end
 
   test :round do
-    assert_template_result "4", "{{ '4.3' | round }}"
-    assert_template_result "5", "{{ input | round }}", %{"input" => 4.6}
-    assert_template_result "4.56", "{{ input | round: 2 }}", %{"input" => 4.5612}
+    assert_template_result("4", "{{ '4.3' | round }}")
+    assert_template_result("5", "{{ input | round }}", %{"input" => 4.6})
+    assert_template_result("4.56", "{{ input | round: 2 }}", %{"input" => 4.5612})
   end
 
   test :ceil do
-    assert_template_result "5", "{{ '4.3' | ceil }}"
-    assert_template_result "5", "{{ input | ceil }}", %{"input" => 4.6}
+    assert_template_result("5", "{{ '4.3' | ceil }}")
+    assert_template_result("5", "{{ input | ceil }}", %{"input" => 4.6})
   end
 
   test :floor do
-    assert_template_result "4", "{{ '4.3' | floor }}"
-    assert_template_result "4", "{{ input | floor }}", %{"input" => 4.6}
+    assert_template_result("4", "{{ '4.3' | floor }}")
+    assert_template_result("4", "{{ input | floor }}", %{"input" => 4.6})
   end
 
   test :append do
-    assigns = %{"a" => "bc", "b" => "d" }
+    assigns = %{"a" => "bc", "b" => "d"}
     assert_template_result("bcd", "{{ a | append: 'd'}}", assigns)
     assert_template_result("bcd", "{{ a | append: b}}", assigns)
   end
 
   test :prepend_template do
-    assigns = %{"a" => "bc", "b" => "a" }
+    assigns = %{"a" => "bc", "b" => "a"}
     assert_template_result("abc", "{{ a | prepend: 'a'}}", assigns)
     assert_template_result("abc", "{{ a | prepend: b}}", assigns)
   end
@@ -355,27 +388,33 @@ defmodule Liquid.FilterTest do
   end
 
   test :pluralize do
-    assert_template_result "items", "{{ 3 | pluralize: 'item', 'items' }}"
-    assert_template_result "word", "{{ 1 | pluralize: 'word', 'words' }}"
+    assert_template_result("items", "{{ 3 | pluralize: 'item', 'items' }}")
+    assert_template_result("word", "{{ 1 | pluralize: 'word', 'words' }}")
   end
 
   test :filters_chain_with_assigments do
-    assert_template_result "abca\nb\nc", "{{ source | strip_newlines | append:source}}", %{"source" => "a\nb\nc"}
+    assert_template_result("abca\nb\nc", "{{ source | strip_newlines | append:source}}", %{
+      "source" => "a\nb\nc"
+    })
   end
 
   test :filters_error_wrong_in_chain do
-    assert_template_result "Liquid error: wrong number of arguments (2 for 1)", "{{ 'text' | upcase:1 | nonexisting | capitalize }}"
+    assert_template_result(
+      "Liquid error: wrong number of arguments (2 for 1)",
+      "{{ 'text' | upcase:1 | nonexisting | capitalize }}"
+    )
   end
 
   test :filters_nonexistent_in_chain do
-    assert_template_result "Text", "{{ 'text' | upcase | nonexistent | capitalize }}"
+    assert_template_result("Text", "{{ 'text' | upcase | nonexistent | capitalize }}")
   end
 
   test :filter_and_tag do
-    assert_template_result("V 1: 2: 1: 4: 5: 0 | 011245",
-                           "V {{ var2 }}{% capture var2 %}{{ '1: 2: 1: 4: 5' }}: 0{% endcapture %}{{ var2 }} | {{ var2 | split: ': ' | sort }}")
+    assert_template_result(
+      "V 1: 2: 1: 4: 5: 0 | 011245",
+      "V {{ var2 }}{% capture var2 %}{{ '1: 2: 1: 4: 5' }}: 0{% endcapture %}{{ var2 }} | {{ var2 | split: ': ' | sort }}"
+    )
   end
-
 
   defp assert_template_result(expected, markup, assigns \\ %{})
 
@@ -385,12 +424,12 @@ defmodule Liquid.FilterTest do
 
   defp assert_result(expected, markup, assigns) do
     template = Template.parse(markup)
-    with { :ok, result, _ } <- Template.render(template, assigns) do
+
+    with {:ok, result, _} <- Template.render(template, assigns) do
       assert result == expected
     else
-      { :error, message, _ } ->
+      {:error, message, _} ->
         assert message == expected
     end
   end
-
 end

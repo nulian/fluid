@@ -6,15 +6,19 @@ defmodule Liquid.Unless do
   alias Liquid.Tag
   alias Liquid.Render
 
-  def parse(%Block{}=block, %Template{}=t) do
+  def parse(%Block{} = block, %Template{} = t) do
     IfElse.parse(block, t)
   end
 
   def render(output, %Tag{}, context) do
-    { output, context }
+    {output, context}
   end
 
-  def render(output, %Block{condition: condition, nodelist: nodelist, elselist: elselist}, context) do
+  def render(
+        output,
+        %Block{condition: condition, nodelist: nodelist, elselist: elselist},
+        context
+      ) do
     condition = Condition.evaluate(condition, context)
     conditionlist = if condition, do: elselist, else: nodelist
     Render.render(output, conditionlist, context)

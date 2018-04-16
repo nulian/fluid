@@ -36,21 +36,23 @@ defmodule Liquid.StrictParseTest do
 
   test "syntax error" do
     template = "{{ 16  | divided_by: 0 }}"
+
     assert "Liquid error: divided by 0" ==
-      template |> Template.parse() |> Template.render() |> elem(1)
+             template |> Template.parse() |> Template.render() |> elem(1)
   end
 
   test "missing endtag parse time error" do
-    assert_raise RuntimeError, "No matching end for block {% for %}",
-      fn -> Template.parse("{% for a in b %} ...") end
+    assert_raise RuntimeError, "No matching end for block {% for %}", fn ->
+      Template.parse("{% for a in b %} ...")
+    end
   end
 
   test "unrecognized operator" do
-    assert_raise SyntaxError, "Unexpected character in '1 =! 2'",
-      fn -> Template.parse("{% if 1 =! 2 %}ok{% endif %}") end
+    assert_raise SyntaxError, "Unexpected character in '1 =! 2'", fn ->
+      Template.parse("{% if 1 =! 2 %}ok{% endif %}")
+    end
 
-    assert_raise SyntaxError, "Invalid variable name",
-      fn -> Template.parse("{{%%%}}") end
+    assert_raise SyntaxError, "Invalid variable name", fn -> Template.parse("{{%%%}}") end
   end
 
   defp assert_syntax_error(markup) do
