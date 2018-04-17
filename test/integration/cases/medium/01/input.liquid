@@ -1,5 +1,6 @@
 
 <ul id="product-collection">
+     {% for collection in collections%}
     {% for product in collection.products %}
     <li class="singleproduct clearfix">
       <div class="small">
@@ -11,6 +12,7 @@
       <p class="money">{% if product.price_varies %} - <p>Varies the price<\p>{% endif %}</p>
      </div>
     </li>
+    {% endfor %}
     {% endfor %}
 </ul>
 

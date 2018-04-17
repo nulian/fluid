@@ -1,8 +1,9 @@
+{% for page in pages %}
 <div id="page">
   <h2>{{page.title}}</h2>
 
-  {% paginate blog.articles by 20 %}
-
+{% endfor %}
+    {% for blog in blogs %}
     {% for article in blog.articles  %}
 
     <div class="article">
@@ -23,9 +24,13 @@
     </div>
 
     {% endfor %}
+    {% endfor %}
 
     <div id="pagination">
-      
+    What is this   
     </div>
+  
+
+
 
 </div>
