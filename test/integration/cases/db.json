@@ -2883,7 +2883,7 @@
       "url": "/pages/contact",
       "author": "Tobi",
       "content": "<p>You can contact us via phone under (555) 567-2222.</p> <p>Our retail store is located at <em>Rue d'Avignon 32, Avignon (Provence)</em>.</p> <p><strong>Opening Hours:</strong><br />Monday through Friday: 9am - 6pm<br />Saturday: 10am - 3pm<br />Sunday: closed</p>",
-      "created_at": "2005-04-04 12:00"
+      "created_at": "2005-04-04 12:00:00"
     },
     {
       "id": 2,
@@ -2892,7 +2892,7 @@
       "url": "/pages/about-us",
       "author": "Tobi",
       "content": "<p>Our company was founded in 1894 and we are since operating out of Avignon from the beautiful Provence.</p> <p>We offer the highest quality products and are proud to serve our customers to their heart's content.</p>",
-      "created_at": "2005-04-04 12:00"
+      "created_at": "2005-04-04 12:00:00"
     },
     {
       "id": 3,
@@ -2901,7 +2901,7 @@
       "url": "/pages/shopping-cart",
       "author": "Tobi",
       "content": "<ul><li>Your order is safe with us. Our checkout uses industry standard security to protect your information.</li><li>Your order will be billed immediately upon checkout.</li><li><b>ALL SALES ARE FINAL:</b> Defective or damaged product will be exchanged</li><li>All orders are processed expediently: usually in under 24 hours.</li></ul>",
-      "created_at": "2005-04-04 12:00"
+      "created_at": "2005-04-04 12:00:00"
     },
     {
       "id": 4,
@@ -2910,7 +2910,7 @@
       "url": "/pages/shipping",
       "author": "Tobi",
       "content": "<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>",
-      "created_at": "2005-04-04 12:00"
+      "created_at": "2005-04-04 12:00:00"
     },
     {
       "id": 5,
@@ -2919,7 +2919,7 @@
       "url": "/pages/frontpage",
       "author": "Tobi",
       "content": "<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>",
-      "created_at": "2005-04-04 12:00"
+      "created_at": "2005-04-04 12:00:00"
     }
   ],
   "blogs": [
@@ -2934,14 +2934,14 @@
           "title": "Welcome to the new Foo Shop",
           "author": "Daniel",
           "content": "<p><strong>Welcome to your Shopify store! The jaded Pixel crew is really glad you decided to take Shopify for a spin.</strong></p><p>To help you get you started with Shopify, here are a couple of tips regarding what you see on this page.</p><p>The text you see here is an article. To edit this article, create new articles or create new pages you can go to the <a href=\"/admin/pages\">Blogs &amp; Pages</a> tab of the administration menu.</p><p>The Shopify t-shirt above is a product and selling products is what Shopify is all about. To edit this product, or create new products you can go to the <a href=\"/admin/products\">Products Tab</a> in of the administration menu.</p><p>While you're looking around be sure to check out the <a href=\"/admin/collections\">Collections</a> and <a href=\"/admin/links\">Navigations</a> tabs and soon you will be well on your way to populating your site.</p><p>And of course don't forget to browse the <a href=\"admin/design/appearance/themes\">theme gallery</a> to pick a new look for your shop!</p><p><strong>Shopify is in beta</strong><br />If you would like to make comments or suggestions please visit us in the <a href=\"http://forums.shopify.com/community\">Shopify Forums</a> or drop us an <a href=\"mailto:feedback@shopify.com\">email</a>.</p>",
-          "created_at": "2005-04-04 16:00"
+          "created_at": "2005-04-04 16:00:00"
         },
         {
           "id": 4,
           "title": "Breaking News: Restock on all sales products",
           "author": "Tobi",
           "content": "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-          "created_at": "2005-04-04 12:00"
+          "created_at": "2005-04-04 12:00:00"
         }
       ],
       "articles_count": 2
@@ -2957,7 +2957,7 @@
           "title": "One thing you probably did not know yet...",
           "author": "Justin",
           "content": "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-          "created_at": "2005-04-04 16:00",
+          "created_at": "2005-04-04 16:00:00",
           "comments": [
             {
               "id": 1,
@@ -2965,8 +2965,8 @@
               "email": "john@smith.com",
               "content": "Wow...great article man.",
               "status": "published",
-              "created_at": "2009-01-01 12:00",
-              "updated_at": "2009-02-01 12:00",
+              "created_at": "2009-01-01 12:00:00",
+              "updated_at": "2009-02-01 12:00:00",
               "url": ""
             },
             {
@@ -2975,8 +2975,8 @@
               "email": "john@jones.com",
               "content": "I really enjoyed this article. And I love your shop! It's awesome. Shopify rocks!",
               "status": "published",
-              "created_at": "2009-03-01 12:00",
-              "updated_at": "2009-02-01 12:00",
+              "created_at": "2009-03-01 12:00:00",
+              "updated_at": "2009-02-01 12:00:00",
               "url": "http://somesite.com/"
             }
           ]
@@ -2986,7 +2986,7 @@
           "title": "Fascinating",
           "author": "Tobi",
           "content": "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-          "created_at": "2005-04-06 12:00",
+          "created_at": "2005-04-06 12:00:00",
           "comments": null
         }
       ],
@@ -3007,14 +3007,14 @@
           "title": "One thing you probably did not know yet...",
           "author": "Justin",
           "content": "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-          "created_at": "2005-04-04 16:00"
+          "created_at": "2005-04-04 16:00:00"
         },
         {
           "id": 7,
           "title": "Fascinating",
           "author": "Tobi",
           "content": "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-          "created_at": "2005-04-06 12:00"
+          "created_at": "2005-04-06 12:00:00"
         }
       ],
       "articles_count": 200
