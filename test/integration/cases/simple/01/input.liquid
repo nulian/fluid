@@ -1,0 +1,18 @@
+{% if collection.products.size == 0 %}
+  <strong>No products found in this collection.</strong>{% else %}
+  <h1>{{ collection.title }}</h1>
+  {{ collection.description }}
+  <table id="gallery">
+  {% tablerow product in collection.products cols: 3 %}
+    <div class="gallery-image">
+      <a href= title="{{ product.title | escape }} &mdash; {{ product.description | strip_html | truncate: 50 | escape }}"><img src="{{ product.images.first | product_img_url: 'small' }}" alt="{{ product.title | escape }}" /></a>
+    </div>
+    <div class="gallery-info">
+      <a href={{ product.title | truncate: 30 }}</a><br />
+      <small>{% if product.compare_at_price_max > product.price %} <del>Money filter</del>{% endif %}</small>
+    </div>
+  {% endtablerow %}
+  </table>{% if paginate.pages > 1 %}
+  <div id="paginate">
+  <p>Paginations filter here</p>
+  </div>{% endif %}{% endif %}
