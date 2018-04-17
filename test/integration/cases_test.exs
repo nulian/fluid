@@ -1,30 +1,22 @@
-defmodule Solid.Integration.CasesTest do
+defmodule Liquid.Test.Integration.CasesTest do
   use ExUnit.Case, async: true
-  import Solid.Helpers
+  import Liquid.Helpers
 
-  @cases_dir "test/cases"
+  @cases_dir "test/integration/cases"
   @types ["simple", "medium", "complex"]
+  @data "#{@cases_dir}/db.json"
+        |> File.read!()
+        |> Poison.decode!()
 
-  @test_cases File.ls! "test/cases"
-  for test_case <- @test_cases do
-    for file <- File.ls! "test/cases/#{type}/#{test_case}/" do
-      @external_resource "test/cases/#{type}/#{test_case}/#{file}"
+  for type <- @types do
+    test_cases = File.ls!("#{@cases_dir}/#{type}")
+    for test_case <- test_cases do
+      test "case #{test_case}" do
+        input_liquid = File.read!("#{@cases_dir}/#{type}/#{unquote(test_case)}/input.liquid")
+        # expected_output = File.read!("#{@cases_dir}/#{type}/#{unquote(test_case)}/output.html")
+        liquid_output = render(input_liquid, @data)
+        assert liquid_output == ""
+      end
     end
-  end
-
-  data    = "test/cases/db.json" |> File.read!() |> Poison.decode!()
-
-  for test_case <- @test_cases do
-    test "test case #{test_case}" do
-      input_liquid  = File.read!("test/cases/#{unquote(test_case)}/input.liquid")
-      expected_output = File.read!("test/cases/#{unquote(test_case)}/output.html")
-      liquid_output    = render(input_liquid, data)
-      {liquid_output, 0} = liquid_render(input_liquid, input_json)
-      assert liquid_output == solid_output
-    end
-  end
-
-  defp liquid_render(input_liquid, input_json) do
-    System.cmd("ruby", ["test/liquid.rb", input_liquid, input_json])
   end
 end
