@@ -2944,6 +2944,7 @@
           "created_at": "2005-04-04 12:00:00"
         }
       ],
+      "comments_enabled": true,
       "articles_count": 2
     },
     {
@@ -2991,7 +2992,7 @@
         }
       ],
       "articles_count": 2,
-      "comments_enabled?": true,
+      "comments_enabled": true,
       "comment_post_url": "",
       "comments_count": 2,
       "moderated?": true
@@ -3017,6 +3018,7 @@
           "created_at": "2005-04-06 12:00:00"
         }
       ],
+      "comments_enabled": true,
       "articles_count": 200
     }
   ]
