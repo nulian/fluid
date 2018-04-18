@@ -1,46 +1,49 @@
 {% for product in products %}
-<div id="productpage">
+  <div id="productpage">
+    <div id="productimages">
+      <div id="productimages-top">
+        <div id="productimages-bottom">
+          {% for image in product.images %}
+            {% if forloop.first %}
+              <a href="image filter" class="productimage" rel="lightbox">
+                <img src="image filter" alt="{{product.title | escape }}" />
+              </a>
+            {% else %}
+              <a href="image filter" class="productimage-small" rel="lightbox">
+                <img src="image filter" alt="{{product.title | escape }}" />
+              </a>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
 
-  <div id="productimages"><div id="productimages-top"><div id="productimages-bottom">
-    {% for image in product.images %}
-      {% if forloop.first %}
-	<a href="image filter" class="productimage" rel="lightbox">
-	  <img src="image filter" alt="{{product.title | escape }}" />
-	</a>
-      {% else %}
-	<a href="image filter" class="productimage-small" rel="lightbox">
-	  <img src="image filter" alt="{{product.title | escape }}" />
-	</a>
-      {% endif %}
-    {% endfor %}
-  </div></div></div>
+    <h2>{{ product.title }}</h2>
 
-  <h2>{{ product.title }}</h2>
+    <ul id="details" class="hlist">
+      <li>Vendor: html filter</li>
+      <li>Type: Type filter</li>
+    </ul>
 
-  <ul id="details" class="hlist">
-    <li>Vendor: html filter</li>
-    <li>Type: Type filter</li>
-  </ul>
+    <small>Money filter{% if product.price_varies %} - <p>Prices varies  money filter</p>{% endif %}</small>
 
-  <small>Money filter{% if product.price_varies %} - <p>Pricies varies  money filter</p>{% endif %}</small>
+    <div id="variant-add">
+      <form action="/cart/add" method="post">
 
-  <div id="variant-add">
-    <form action="/cart/add" method="post">
+        <select id="variant-select" name="id" class="product-info-options">
+          {% for variant in product.variants %}
+            <option value="{{ variant.id }}">{{ variant.title }} - money filter</option>
+          {% endfor %}
+        </select>
 
-      <select id="variant-select" name="id" class="product-info-options">
-	{% for variant in product.variants %}
-	  <option value="{{ variant.id }}">{{ variant.title }} - money filter</option>
-	{% endfor %}
-      </select>
+        <div id="price-field" class="price"></div>
 
-      <div id="price-field" class="price"></div>
+        <div style="text-align:center;"><input type="image" name="add" value="Add to Cart" id="add" src="url Filters" /></div>
+      </form>
+    </div>
 
-    <div style="text-align:center;"><input type="image" name="add" value="Add to Cart" id="add" src="url Filters" /></div>
-    </form>
+    <div class="description textile">
+      {{ product.description }}
+    </div>
   </div>
-
-  <div class="description textile">
-    {{ product.description }}
-  </div>
-</div>
 {% endfor %}

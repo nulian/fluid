@@ -1,21 +1,16 @@
-
 <ul id="product-collection">
-     {% for collection in collections%}
+  {% for collection in collections%}
     {% for product in collection.products %}
-    <li class="singleproduct clearfix">
-      <div class="small">
-        <div class="prodimage"><a href="{{product.url}}"><img src="oioioi" /></a></div>
+      <li class="singleproduct clearfix">
+        <div class="small">
+          <div class="prodimage"><a href="{{product.url}}"><img src="oioioi" /></a></div>
+        </div>
+        <div class="description">
+          <h3><a href="{{product.url}}">{{product.title}}</a></h3>
+          <p>{{ product.description | strip_html | truncatewords: 35 }}</p>
+        <p class="money">{% if product.price_varies %} - <p>Varies the price<\p>{% endif %}</p>
       </div>
-      <div class="description">
-        <h3><a href="{{product.url}}">{{product.title}}</a></h3>
-        <p>{{ product.description | strip_html | truncatewords: 35 }}</p>
-      <p class="money">{% if product.price_varies %} - <p>Varies the price<\p>{% endif %}</p>
-     </div>
-    </li>
+      </li>
     {% endfor %}
-    {% endfor %}
+  {% endfor %}
 </ul>
-
-<div id="pagination">
-</div>
-
