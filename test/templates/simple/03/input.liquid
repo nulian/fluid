@@ -1,0 +1,28 @@
+{% for page in pages %}
+  <div>
+    <h2>{{page.title}}</h2>
+      {% for blog in blogs %}
+        {% for article in blog.articles  %}
+          <div>
+            <div>
+            <h3>
+              <a href="{{article.url}}">{{ article.title }}</a>
+            </h3>
+            <h4>Posted on {{ article.created_at | date: "%B %d, %y" }} by {{ article.author }}.</h4>
+            </div>
+
+            <div>
+              {{ article.content | strip_html | truncate: 250 }}
+            </div>
+
+            {% if blog.comments_enabled %}
+              <h1>Comentarios</h1>
+            {% endif %}
+          </div>
+        {% endfor %}
+      {% endfor %}
+      <div>
+        What is this
+      </div>
+  </div>
+{% endfor %}
