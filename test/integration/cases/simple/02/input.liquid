@@ -1,15 +1,15 @@
 {% for product in products %}
-  <div id="productpage">
-    <div id="productimages">
-      <div id="productimages-top">
-        <div id="productimages-bottom">
+  <div>
+    <div>
+      <div>
+        <div>
           {% for image in product.images %}
             {% if forloop.first %}
-              <a href="image filter" class="productimage" rel="lightbox">
+              <a href="image filter" rel="lightbox">
                 <img src="image filter" alt="{{product.title | escape }}" />
               </a>
             {% else %}
-              <a href="image filter" class="productimage-small" rel="lightbox">
+              <a href="image filter" rel="lightbox">
                 <img src="image filter" alt="{{product.title | escape }}" />
               </a>
             {% endif %}
@@ -17,32 +17,24 @@
         </div>
       </div>
     </div>
-
     <h2>{{ product.title }}</h2>
-
-    <ul id="details" class="hlist">
+    <ul>
       <li>Vendor: html filter</li>
       <li>Type: Type filter</li>
     </ul>
-
     <small>Money filter{% if product.price_varies %} - <p>Prices varies  money filter</p>{% endif %}</small>
-
-    <div id="variant-add">
+    <div>
       <form action="/cart/add" method="post">
-
-        <select id="variant-select" name="id" class="product-info-options">
+        <select name="id">
           {% for variant in product.variants %}
             <option value="{{ variant.id }}">{{ variant.title }} - money filter</option>
           {% endfor %}
         </select>
-
-        <div id="price-field" class="price"></div>
-
-        <div style="text-align:center;"><input type="image" name="add" value="Add to Cart" id="add" src="url Filters" /></div>
+        <div></div>
+        <div><input type="image" name="add" value="Add to Cart" src="url Filters" /></div>
       </form>
     </div>
-
-    <div class="description textile">
+    <div>
       {{ product.description }}
     </div>
   </div>

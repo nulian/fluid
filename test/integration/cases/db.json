@@ -2945,6 +2945,7 @@
         }
       ],
       "comments_enabled": true,
+      "moderated": true,
       "articles_count": 2
     },
     {
@@ -2995,7 +2996,7 @@
       "comments_enabled": true,
       "comment_post_url": "",
       "comments_count": 2,
-      "moderated?": true
+      "moderated": true
     },
     {
       "id": 3,
@@ -3019,6 +3020,7 @@
         }
       ],
       "comments_enabled": true,
+      "moderated": true,
       "articles_count": 200
     }
   ]

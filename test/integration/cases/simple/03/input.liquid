@@ -1,17 +1,17 @@
 {% for page in pages %}
-  <div id="page">
+  <div>
     <h2>{{page.title}}</h2>
       {% for blog in blogs %}
         {% for article in blog.articles  %}
-          <div class="article">
-            <div class="headline">
-            <h3 class="title">
+          <div>
+            <div>
+            <h3>
               <a href="{{article.url}}">{{ article.title }}</a>
             </h3>
-            <h4 class="date">Posted on {{ article.created_at | date: "%B %d, %y" }} by {{ article.author }}.</h4>
+            <h4>Posted on {{ article.created_at | date: "%B %d, %y" }} by {{ article.author }}.</h4>
             </div>
 
-            <div class="article-body textile">
+            <div>
               {{ article.content | strip_html | truncate: 250 }}
             </div>
 
@@ -21,7 +21,7 @@
           </div>
         {% endfor %}
       {% endfor %}
-      <div id="pagination">
+      <div>
         What is this
       </div>
   </div>
