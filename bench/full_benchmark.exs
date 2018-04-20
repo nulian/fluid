@@ -8,16 +8,28 @@ data =
   |> File.read!()
   |> Poison.decode!()
 
-markup = File.read!("#{path}/simple/01/input.liquid")
+levels_map =
+  for level <- levels,
+    test_case <- File.ls!("#{path}/#{level}"),
+    into: %{} do
+      markup = File.read!("#{path}/#{level}/#{test_case}/input.liquid")
+      parsed = Liquid.Template.parse(markup)
+      {level, %{test_case => %{parse: markup, render: parsed}}}
+  end
 
-parsed = Liquid.Template.parse(markup)
+create_phase = fn cases, phase ->
+  fn ->
+    for {case_num, %{^phase => param}} <- cases do
+      args = if phase == :render, do: [param, data], else: [param]
+      apply(Liquid.Template, phase, args)
+    end
+  end
+end
 
-Benchee.run(%{"#{level} parse:" => fn ->
-               Liquid.Template.parse(markup)
-             end,
-              "#{level} render:" => fn ->
-                Liquid.Template.render(parsed, data)
-              end},
-  warmup: 2,
-  time: 5
-)
+for phase <- [:parse, :render] do
+  benchmark = for {level, cases} <- levels_map, into: %{} do
+    {"#{level} #{phase}", create_phase.(cases, phase)}
+  end
+
+  Benchee.run(benchmark, warmup: 5, time: 60)
+end
