@@ -13,7 +13,7 @@ defmodule Liquid.Block do
   alias Liquid.Block, as: Block
 
   def create(markup) do
-    destructure [name, rest], String.split(markup, " ", parts: 2)
+    destructure([name, rest], String.split(markup, " ", parts: 2))
     %Block{name: name |> String.to_atom(), markup: rest}
   end
 

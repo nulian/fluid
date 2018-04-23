@@ -4,31 +4,32 @@ defmodule Liquid.Parse do
   alias Liquid.Registers
   alias Liquid.Block
 
-  def tokenize(<<string::binary>>) do
+  def tokenize(<<markup::binary>>) do
     Liquid.template_parser()
-    |> Regex.split(string, on: :all_but_first, trim: true)
+    |> Regex.split(markup, on: :all_but_first, trim: true)
     |> List.flatten()
     |> Enum.filter(&(&1 != ""))
   end
 
+  @spec parse(markup :: binary(), %Template{}) :: %Template{}
   def parse("", %Template{} = template) do
     %{template | root: %Liquid.Block{name: :document}}
   end
 
-  def parse(<<string::binary>>, %Template{} = template) do
-    tokens = string |> tokenize
-    name = tokens |> hd
-    tag_name = parse_tag_name(name)
-    tokens = parse_tokens(string, tag_name) || tokens
-    {root, template} = parse(%Liquid.Block{name: :document}, tokens, [], template)
+  @spec parse(markup :: binary(), %Template{}) :: %Template{}
+  def parse(<<markup::binary>>, %Template{} = template) do
+    tokens = tokenize(markup)
+    tag_name = tokens |> hd() |> parse_tag_name()
+    tokens = parse_tokens(markup, tag_name) || tokens
+    {root, template} = do_parse(%Liquid.Block{name: :document}, tokens, [], template)
     %{template | root: root}
   end
 
-  def parse(%Block{name: :document} = block, [], accum, %Template{} = template) do
+  defp do_parse(%Block{name: :document} = block, [], accum, %Template{} = template) do
     unless nodelist_invalid?(block, accum), do: {%{block | nodelist: accum}, template}
   end
 
-  def parse(%Block{name: :comment} = block, [h | t], accum, %Template{} = template) do
+  defp do_parse(%Block{name: :comment} = block, [h | t], accum, %Template{} = template) do
     cond do
       Regex.match?(~r/{%\s*endcomment\s*%}/, h) ->
         {%{block | nodelist: accum}, t, template}
@@ -46,15 +47,15 @@ defmodule Liquid.Parse do
               {h, t, template}
           end
 
-        parse(block, rest, accum ++ [result], template)
+        do_parse(block, rest, accum ++ [result], template)
     end
   end
 
-  def parse(%Block{name: name}, [], _, _) do
+  defp do_parse(%Block{name: name}, [], _, _) do
     raise "No matching end for block {% #{to_string(name)} %}"
   end
 
-  def parse(%Block{name: name} = block, [h | t], accum, %Template{} = template) do
+  defp do_parse(%Block{name: name} = block, [h | t], accum, %Template{} = template) do
     endblock = "end" <> to_string(name)
 
     cond do
@@ -66,7 +67,19 @@ defmodule Liquid.Parse do
 
       true ->
         {result, rest, template} = parse_node(h, t, template)
-        parse(block, rest, accum ++ [result], template)
+        # Original implementation, without processes
+        # do_parse(block, rest, accum ++ [result], template)
+
+        # First stab, with Task
+        # Task.await(worker)
+        # worker = Task.async(fn -> do_parse(block, rest, accum ++ [result], template) end)
+
+        # Second try, with spawn
+        me = self()
+        pid = spawn_link fn ->
+          send(me, {self(), do_parse(block, rest, accum ++ [result], template)})
+        end
+        receive do {^pid, result} -> result end
     end
   end
 
@@ -147,7 +160,7 @@ defmodule Liquid.Parse do
       try do
         mod.parse(block, rest, [], template)
       rescue
-        UndefinedFunctionError -> parse(block, rest, [], template)
+        UndefinedFunctionError -> do_parse(block, rest, [], template)
       end
 
     {block, template} = mod.parse(block, template)
