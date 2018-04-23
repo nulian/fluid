@@ -19,7 +19,7 @@ levels_map =
 
 create_phase = fn cases, phase ->
   fn ->
-    for {case_num, %{^phase => param}} <- cases do
+    for {_, %{^phase => param}} <- cases do
       args = if phase == :render, do: [param, data], else: [param]
       apply(Liquid.Template, phase, args)
     end
@@ -27,9 +27,15 @@ create_phase = fn cases, phase ->
 end
 
 for phase <- [:parse, :render] do
+  time = DateTime.to_string(DateTime.utc_now())
   benchmark = for {level, cases} <- levels_map, into: %{} do
     {"#{level} #{phase}", create_phase.(cases, phase)}
   end
 
-  Benchee.run(benchmark, warmup: 5, time: 60)
+  Benchee.run(benchmark, warmup: 5, time: 60,
+    formatters: [
+      Benchee.Formatters.CSV,
+      Benchee.Formatters.Console
+    ],
+    formatter_options: [csv: [file: "bench/results/#{phase}-#{time}.csv"]])
 end
