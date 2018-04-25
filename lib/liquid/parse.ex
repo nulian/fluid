@@ -67,19 +67,7 @@ defmodule Liquid.Parse do
 
       true ->
         {result, rest, template} = parse_node(h, t, template)
-        # Original implementation, without processes
-        # do_parse(block, rest, accum ++ [result], template)
-
-        # First stab, with Task
-        # Task.await(worker)
-        # worker = Task.async(fn -> do_parse(block, rest, accum ++ [result], template) end)
-
-        # Second try, with spawn
-        me = self()
-        pid = spawn_link fn ->
-          send(me, {self(), do_parse(block, rest, accum ++ [result], template)})
-        end
-        receive do {^pid, result} -> result end
+        do_parse(block, rest, accum ++ [result], template)
     end
   end
 
