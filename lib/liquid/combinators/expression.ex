@@ -1,45 +1,45 @@
 defmodule Liquid.Combinators.Expression do
+  import NimbleParsec
+  alias Liquid.Combinators.General
 
-
-  defparsec(
-    :start_tag,
+  def start_tag do
     concat(
       string("{%"),
-      parsec(:ignore_whitespaces)
+      General.ignore_whitespaces()
     )
     |> ignore()
-  )
+  end
 
-  defparsec(
-    :end_tag,
-    concat(
-      parsec(:ignore_whitespaces),
-      string("%}")
-    )
-    |> ignore()
-  )
+  # defparsec(
+  #   :end_tag,
+  #   concat(
+  #     parsec(:ignore_whitespaces),
+  #     string("%}")
+  #   )
+  #   |> ignore()
+  # )
 
-  # Tag =========================================================================
+  # # Tag =========================================================================
 
-  # Variable ====================================================================
+  # # Variable ====================================================================
 
-  defparsec(
-    :start_variable,
-    concat(
-      string("{{"),
-      parsec(:ignore_whitespaces)
-    )
-    |> ignore()
-  )
+  # defparsec(
+  #   :start_variable,
+  #   concat(
+  #     string("{{"),
+  #     parsec(:ignore_whitespaces)
+  #   )
+  #   |> ignore()
+  # )
 
-  defparsec(
-    :end_variable,
-    concat(
-      parsec(:ignore_whitespaces),
-      string("}}")
-    )
-    |> ignore()
-  )
+  # defparsec(
+  #   :end_variable,
+  #   concat(
+  #     parsec(:ignore_whitespaces),
+  #     string("}}")
+  #   )
+  #   |> ignore()
+  # )
 
-  # Variable ====================================================================
+  # # Variable ====================================================================
 end
