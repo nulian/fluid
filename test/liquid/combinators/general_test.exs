@@ -15,11 +15,16 @@ defmodule Liquid.Combinators.GeneralTest do
     test_combiner(" ", &Parser.whitespace/1, ' ')
   end
 
-  test "literal: every utf8 valid character" do
+  test "literal: every utf8 valid character until open/close tag/variable" do
     test_combiner("Chinese: 你好, English: Whatever, Arabian: مرحبا",
       &Parser.literal/1,
       [literal: ["Chinese: 你好, English: Whatever, Arabian: مرحبا"]]
     )
+    test_combiner("stop in {{", &Parser.literal/1, [literal: ["stop in "]])
+    test_combiner("stop in {%", &Parser.literal/1, [literal: ["stop in "]])
+    test_combiner("stop in %}", &Parser.literal/1, [literal: ["stop in "]])
+    test_combiner("stop in }}", &Parser.literal/1, [literal: ["stop in "]])
+    test_combiner("{{ this is not processed", &Parser.literal/1, [literal: [""]])
   end
 
   test "extra_spaces ignore all :whitespaces" do

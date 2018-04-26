@@ -25,10 +25,16 @@ defmodule Liquid.Combinators.General do
   All utf8 valid characters or empty
   """
   def literal do
-    choice([
-      utf8_string([], min: 1),
-      empty()
-    ])
+    repeat_until(
+      utf8_char([]),
+      [
+        string("{{"),
+        string("}}"),
+        string("%}"),
+        string("{%")
+      ]
+    )
+    |> reduce({List, :to_string, []})
     |> tag(:literal)
   end
 
