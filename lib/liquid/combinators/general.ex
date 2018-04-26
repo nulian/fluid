@@ -27,12 +27,12 @@ defmodule Liquid.Combinators.General do
   def literal do
     repeat_until(
       utf8_char([]),
-      [
-        string("{{"),
-        string("}}"),
-        string("%}"),
-        string("{%")
-      ]
+        [
+          string("{{"),
+          string("}}"),
+          string("%}"),
+          string("{%")
+        ]
     )
     |> reduce({List, :to_string, []})
     |> tag(:literal)

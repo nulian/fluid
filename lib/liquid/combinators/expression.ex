@@ -2,6 +2,7 @@ defmodule Liquid.Combinators.Expression do
   import NimbleParsec
   alias Liquid.Combinators.General
 
+  # TODO: move start/end tag/var to module General
   def start_tag do
     concat(
       string("{%"),
@@ -10,36 +11,36 @@ defmodule Liquid.Combinators.Expression do
     |> ignore()
   end
 
-  # defparsec(
-  #   :end_tag,
-  #   concat(
-  #     parsec(:ignore_whitespaces),
-  #     string("%}")
-  #   )
-  #   |> ignore()
-  # )
+  def end_tag do
+    concat(
+      General.ignore_whitespaces(),
+      string("%}")
+    )
+    |> ignore()
+  end
 
-  # # Tag =========================================================================
+  def start_var do
+    concat(
+      string("{{"),
+      General.ignore_whitespaces()
+    )
+    |> ignore()
+  end
 
-  # # Variable ====================================================================
+  def end_var do
+    concat(
+      General.ignore_whitespaces(),
+      string("}}")
+    )
+    |> ignore()
+  end
 
-  # defparsec(
-  #   :start_variable,
-  #   concat(
-  #     string("{{"),
-  #     parsec(:ignore_whitespaces)
-  #   )
-  #   |> ignore()
-  # )
-
-  # defparsec(
-  #   :end_variable,
-  #   concat(
-  #     parsec(:ignore_whitespaces),
-  #     string("}}")
-  #   )
-  #   |> ignore()
-  # )
-
-  # # Variable ====================================================================
+  def var do
+    concat(
+      start_var(),
+      General.literal()
+    )
+    |> concat(end_var())
+    |> tag(:var)
+  end
 end
