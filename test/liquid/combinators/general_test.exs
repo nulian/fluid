@@ -1,5 +1,6 @@
 defmodule Liquid.Combinators.GeneralTest do
   use ExUnit.Case
+  import Liquid.Helpers
 
   defmodule Parser do
     import NimbleParsec
@@ -24,10 +25,6 @@ defmodule Liquid.Combinators.GeneralTest do
   test "extra_spaces ignore all :whitespaces" do
     test_combiner("      ", &Parser.ignore_whitespaces/1, [])
     test_combiner("    \t\t\t  ", &Parser.ignore_whitespaces/1, [])
-  end
-
-  defp test_combiner(markdown, combiner, expected) do
-    {:ok, response, _, _, _, _} = combiner.(markdown)
-    assert response == expected
+    test_combiner("", &Parser.ignore_whitespaces/1, [])
   end
 end

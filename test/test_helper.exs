@@ -1,7 +1,14 @@
 ExUnit.start(exclude: [:skip])
 
 defmodule Liquid.Helpers do
+  use ExUnit.Case
+
   def render(text, data \\ %{}) do
     text |> Liquid.Template.parse() |> Liquid.Template.render(data) |> elem(1)
+  end
+
+  def test_combiner(markdown, combiner, expected) do
+    {:ok, response, _, _, _, _} = combiner.(markdown)
+    assert response == expected
   end
 end
