@@ -9,6 +9,10 @@ defmodule Liquid.Combinators.GeneralTest do
     defparsec(:whitespace, General.whitespace())
     defparsec(:literal, General.literal())
     defparsec(:ignore_whitespaces, General.ignore_whitespaces())
+    defparsec(:start_tag, General.start_tag())
+    defparsec(:end_tag, General.end_tag())
+    defparsec(:start_var, General.start_var())
+    defparsec(:end_var, General.end_var())
   end
 
   test "whitespace must parse 0x0020 and 0x0009" do
@@ -32,4 +36,25 @@ defmodule Liquid.Combinators.GeneralTest do
     test_combiner("    \t\t\t  ", &Parser.ignore_whitespaces/1, [])
     test_combiner("", &Parser.ignore_whitespaces/1, [])
   end
+
+  test "start_tag" do
+    test_combiner("{%", &Parser.start_tag/1, [])
+    test_combiner("{%   \t   \t", &Parser.start_tag/1, [])
+  end
+
+  test "end_tag" do
+    test_combiner("%}", &Parser.end_tag/1, [])
+    test_combiner("   \t   \t%}", &Parser.end_tag/1, [])
+  end
+
+  test "start_var" do
+    test_combiner("{{", &Parser.start_var/1, [])
+    test_combiner("{{   \t   \t", &Parser.start_var/1, [])
+  end
+
+  test "end_var" do
+    test_combiner("}}", &Parser.end_var/1, [])
+    test_combiner("   \t   \t}}", &Parser.end_var/1, [])
+  end
+
 end

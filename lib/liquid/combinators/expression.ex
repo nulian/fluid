@@ -1,46 +1,26 @@
 defmodule Liquid.Combinators.Expression do
+  @moduledoc """
+  A expression in liquid can be either a variable or a tag and are
+  defined here
+  """
   import NimbleParsec
   alias Liquid.Combinators.General
 
-  # TODO: move start/end tag/var to module General
-  def start_tag do
-    concat(
-      string("{%"),
-      General.ignore_whitespaces()
-    )
-    |> ignore()
-  end
-
-  def end_tag do
-    concat(
-      General.ignore_whitespaces(),
-      string("%}")
-    )
-    |> ignore()
-  end
-
-  def start_var do
-    concat(
-      string("{{"),
-      General.ignore_whitespaces()
-    )
-    |> ignore()
-  end
-
-  def end_var do
-    concat(
-      General.ignore_whitespaces(),
-      string("}}")
-    )
-    |> ignore()
-  end
-
   def var do
     concat(
-      start_var(),
+      General.start_var(),
       General.literal()
     )
-    |> concat(end_var())
+    |> concat(General.end_var())
     |> tag(:var)
+  end
+
+  def tag do
+    concat(
+      General.start_tag(),
+      General.literal()
+    )
+    |> concat(General.end_tag())
+    |> tag(:tag)
   end
 end
