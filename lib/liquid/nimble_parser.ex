@@ -1,7 +1,22 @@
 defmodule Liquid.NimbleParser do
   import NimbleParsec
-  alias Liquid.Combinators.General
+  alias Liquid.Combinators.{
+    General,
+    Expression
+  }
 
-  defparsec(:literal, General.literal())
-  # defparsec(:parse, concat(parsec(:literal), parsec(:expression)))
+  defparsecp(:literal, General.literal())
+  defparsecp(:expression,
+    choice([
+        Expression.tag(),
+        Expression.var()
+      ]
+    )
+  )
+
+  defparsec(:parse,
+    parsec(:literal)
+    |> optional(parsec(:expression))
+    |> optional(parsec(:literal))
+  )
 end

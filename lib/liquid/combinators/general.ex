@@ -6,8 +6,6 @@ defmodule Liquid.Combinators.General do
 
   # Codepoints
   @horizontal_tab 0x0009
-  @newline 0x000A
-  @carriage_return 0x000D
   @space 0x0020
   @start_tag "{%"
   @end_tag "%}"

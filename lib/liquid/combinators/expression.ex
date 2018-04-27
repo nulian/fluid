@@ -1,7 +1,6 @@
 defmodule Liquid.Combinators.Expression do
   @moduledoc """
-  A expression in liquid can be either a variable or a tag and are
-  defined here
+  A expression in liquid can be either a variable or a tag and are defined here
   """
   import NimbleParsec
   alias Liquid.Combinators.General
