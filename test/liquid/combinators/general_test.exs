@@ -5,7 +5,6 @@ defmodule Liquid.Combinators.GeneralTest do
   defmodule Parser do
     import NimbleParsec
     alias Liquid.Combinators.General
-
     defparsec(:whitespace, General.whitespace())
     defparsec(:literal, General.literal())
     defparsec(:ignore_whitespaces, General.ignore_whitespaces())
@@ -13,10 +12,12 @@ defmodule Liquid.Combinators.GeneralTest do
     defparsec(:end_tag, General.end_tag())
     defparsec(:start_var, General.start_var())
     defparsec(:end_var, General.end_var())
+    defparsec(:repeat_tag, repeat(parsec(:literal)))
   end
 
   test "whitespace must parse 0x0020 and 0x0009" do
     test_combiner(" ", &Parser.whitespace/1, ' ')
+    test_combiner("\t", &Parser.whitespace/1, '\t')
   end
 
   test "literal: every utf8 valid character until open/close tag/variable" do
@@ -29,6 +30,7 @@ defmodule Liquid.Combinators.GeneralTest do
     test_combiner("stop in %}", &Parser.literal/1, [literal: ["stop in "]])
     test_combiner("stop in }}", &Parser.literal/1, [literal: ["stop in "]])
     test_combiner("{{ this is not processed", &Parser.literal/1, [literal: [""]])
+    test_combiner("", &Parser.literal/1, [literal: [""]])
   end
 
   test "extra_spaces ignore all :whitespaces" do

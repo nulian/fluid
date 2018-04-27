@@ -69,10 +69,8 @@ defmodule Liquid.Combinators.General do
   End of liquid Variable
   """
   def end_var do
-    concat(
-      ignore_whitespaces(),
-      string(@end_var)
-    )
+    ignore_whitespaces()
+    |> string(@end_var)
     |> ignore()
   end
 
@@ -80,15 +78,14 @@ defmodule Liquid.Combinators.General do
   All utf8 valid characters or empty limited by start/end of tag/variable
   """
   def literal do
-    repeat_until(
-      utf8_char([]),
-        [
-          string(@start_var),
-          string(@end_var),
-          string(@start_tag),
-          string(@end_tag)
-        ]
-    )
+    repeat_until(utf8_char([]),
+                    [
+                      string(@start_var),
+                      string(@end_var),
+                      string(@start_tag),
+                      string(@end_tag)
+                    ]
+                  )
     |> reduce({List, :to_string, []})
     |> tag(:literal)
   end

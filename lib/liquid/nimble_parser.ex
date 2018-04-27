@@ -5,7 +5,7 @@ defmodule Liquid.NimbleParser do
     Expression
   }
 
-  defparsecp(:literal, General.literal())
+  defparsec(:literal, General.literal())
   defparsecp(:expression,
     choice([
         Expression.tag(),
@@ -14,9 +14,14 @@ defmodule Liquid.NimbleParser do
     )
   )
 
+  def not_eof("", context, _, _), do: {:halt, context}
+  def not_eof(_, context, _, _), do: {:cont, context}
+
+  definition = choice([
+    parsec(:expression),
+    parsec(:literal),
+  ])
+
   defparsec(:parse,
-    parsec(:literal)
-    |> optional(parsec(:expression))
-    |> optional(parsec(:literal))
-  )
+    repeat_while(definition, {:not_eof, []}))
 end
