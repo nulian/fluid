@@ -18,8 +18,8 @@ defmodule Liquid.Parse do
 
   @spec parse(markup :: binary(), %Template{}) :: %Template{}
   def parse(<<markup::binary>>, %Template{} = template) do
-    tokens = tokenize(markup)
-    tag_name = tokens |> hd() |> parse_tag_name()
+    [raw_tag_name | _rest] = tokens = tokenize(markup)
+    tag_name = parse_tag_name(raw_tag_name)
     tokens = parse_tokens(markup, tag_name) || tokens
     {root, template} = do_parse(%Liquid.Block{name: :document}, tokens, [], template)
     %{template | root: root}
