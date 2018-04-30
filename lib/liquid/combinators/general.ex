@@ -7,14 +7,13 @@ defmodule Liquid.Combinators.General do
   # Codepoints
   @horizontal_tab 0x0009
   @space 0x0020
-  @point 0x0046
-  @question 0x0063
-  @under 0x0095
+  @point 0x002E
+  @question_mark 0x003F
+  @underscore 0x005F
   @start_tag "{%"
   @end_tag "%}"
   @start_var "{{"
   @end_var "}}"
-
 
   @doc """
   Horizontal Tab (U+0009) + Space (U+0020)
@@ -94,13 +93,14 @@ defmodule Liquid.Combinators.General do
   end
 
   @doc """
+  Valid variable name represented by:
   /[_A-Za-z][.][_0-9A-Za-z][?]*/
   """
   def name do
     empty()
     |> concat(ignore_whitespaces())
-    |> ascii_char([?_..?_, ?A..?Z, ?a..?z])
-    |> times(ascii_char([?0..?9, ?_..?_, ?A..?Z, ?a..?z]), min: 1)
+    |> ascii_char([@underscore, ?A..?Z, ?a..?z])
+    |> times(ascii_char([@point, @underscore, @question_mark, ?0..?9, ?A..?Z, ?a..?z]), min: 1)
     |> concat(ignore_whitespaces())
     |> reduce({List, :to_string, []})
     |> tag(:name)

@@ -35,6 +35,7 @@ defmodule Liquid.Combinators.GeneralTest do
 
   test "name: /[_A-Za-z][.][_0-9A-Za-z][?]*/" do
     test_combiner("  \t _variable   \t   ", &Parser.name/1, [{:name, ["_variable"]}])
+    test_combiner("cart.product.name?", &Parser.name/1, [{:name, ["cart.product.name?"]}])
   end
 
   test "extra_spaces ignore all :whitespaces" do
