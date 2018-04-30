@@ -12,7 +12,7 @@ defmodule Liquid.Combinators.GeneralTest do
     defparsec(:end_tag, General.end_tag())
     defparsec(:start_var, General.start_var())
     defparsec(:end_var, General.end_var())
-    defparsec(:repeat_tag, repeat(parsec(:literal)))
+    defparsec(:name, General.name())
   end
 
   test "whitespace must parse 0x0020 and 0x0009" do
@@ -31,6 +31,10 @@ defmodule Liquid.Combinators.GeneralTest do
     test_combiner("stop in }}", &Parser.literal/1, [literal: ["stop in "]])
     test_combiner("{{ this is not processed", &Parser.literal/1, [literal: [""]])
     test_combiner("", &Parser.literal/1, [literal: [""]])
+  end
+
+  test "name: /[_A-Za-z][.][_0-9A-Za-z][?]*/" do
+    test_combiner("  \t _variable   \t   ", &Parser.name/1, [{:name, ["_variable"]}])
   end
 
   test "extra_spaces ignore all :whitespaces" do
