@@ -4,6 +4,9 @@ defmodule Liquid.Combinators.Expression do
   """
   import NimbleParsec
   alias Liquid.Combinators.General
+  alias Liquid.Combinators.Tags.{
+    Assign
+  }
 
   def var do
     concat(
@@ -14,12 +17,18 @@ defmodule Liquid.Combinators.Expression do
     |> tag(:var)
   end
 
+  def decrement do
+    string("decrement")
+    |> concat(General.name())
+  end
+
   def tag do
-    concat(
-      General.start_tag(),
-      General.literal()
+    General.start_tag()
+    |> choice([
+        Assign.definition(),
+        decrement()
+      ]
     )
-    |> concat(General.end_tag())
-    |> tag(:tag)
+    |> concat(General.start_tag())
   end
 end
