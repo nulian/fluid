@@ -6,3 +6,4 @@
 erl_crash.dump
 /cover
 /bench/parser_benchmark.exs
+/bench/results/

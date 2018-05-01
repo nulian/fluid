@@ -11,7 +11,10 @@ defmodule Liquid.Combinator.Tags.AssignTest do
   end
 
   test "assign" do
-    test_combiner("assign cart = product", &Parser.assign/1,
-      [assign: [name: ["cart"], value: ["product"]]])
+    test_combiner(
+      "assign cart = product",
+      &Parser.assign/1,
+      assign: [name: ["cart"], value: ["product"]]
+    )
   end
 end

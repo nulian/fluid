@@ -11,6 +11,6 @@ defmodule Liquid.Combinators.ExpressionTest do
   end
 
   test "variable" do
-    test_combiner("{{ xyz }}", &Parser.var/1, [var: [literal: ["xyz "]]])
+    test_combiner("{{ xyz }}", &Parser.var/1, var: [literal: ["xyz "]])
   end
 end
