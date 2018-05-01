@@ -17,7 +17,7 @@ defmodule Liquid.Test.Integration.CasesTest do
       expected_output =
         File.read!("#{@cases_dir}/#{unquote(level)}/#{unquote(test_case)}/output.html")
 
-      liquid_output = render(input_liquid, @data)
+liquid_output = render(input_liquid, @data)
       assert liquid_output == expected_output
     end
   end
