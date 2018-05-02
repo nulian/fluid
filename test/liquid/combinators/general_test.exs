@@ -2,18 +2,7 @@ defmodule Liquid.Combinators.GeneralTest do
   use ExUnit.Case
   import Liquid.Helpers
 
-  defmodule Parser do
-    import NimbleParsec
-    alias Liquid.Combinators.General
-    defparsec(:whitespace, General.whitespace())
-    defparsec(:literal, General.literal())
-    defparsec(:ignore_whitespaces, General.ignore_whitespaces())
-    defparsec(:start_tag, General.start_tag())
-    defparsec(:end_tag, General.end_tag())
-    defparsec(:start_var, General.start_var())
-    defparsec(:end_var, General.end_var())
-    # defparsec(:name, General.name())
-  end
+  alias Liquid.NimbleParser, as: Parser
 
   test "whitespace must parse 0x0020 and 0x0009" do
     test_combiner(" ", &Parser.whitespace/1, ' ')

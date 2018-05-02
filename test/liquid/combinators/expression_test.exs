@@ -1,14 +1,7 @@
 defmodule Liquid.Combinators.ExpressionTest do
   use ExUnit.Case
   import Liquid.Helpers
-
-  defmodule Parser do
-    import NimbleParsec
-    alias Liquid.Combinators.Expression
-
-    defparsec(:var, Expression.var())
-    defparsec(:tag, Expression.tag())
-  end
+  alias Liquid.NimbleParser, as: Parser
 
   test "variable" do
     test_combiner("{{ xyz }}", &Parser.var/1, var: [literal: ["xyz "]])

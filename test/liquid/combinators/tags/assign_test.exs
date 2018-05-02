@@ -2,13 +2,7 @@ defmodule Liquid.Combinator.Tags.AssignTest do
   use ExUnit.Case
 
   import Liquid.Helpers
-
-  defmodule Parser do
-    import NimbleParsec
-    alias Liquid.Combinators.Tags.Assign
-
-    defparsec(:assign, Assign.definition())
-  end
+  alias Liquid.NimbleParser, as: Parser
 
   test "assign" do
     test_combiner(
