@@ -106,6 +106,8 @@ defmodule Liquid.NimbleParser do
     |> tag(:increment)
     |> optional(parsec(:__parse__))
 
+  ################################           raw          ###########################
+
   word_raw =
     string("raw")
     |> ignore()
@@ -148,6 +150,44 @@ defmodule Liquid.NimbleParser do
     |> optional(parsec(:__parse__))
 
   defparsec(:raw, raw)
+  ################################           raw          ###########################
+
+  ################################        comment          ###########################
+  not_end_comment =
+    empty()
+    |> ignore(utf8_char([]))
+    |> parsec(:comment_content)
+
+  defparsecp(:not_end_comment, not_end_comment)
+
+  end_comment =
+    empty()
+    |> parsec(:start_tag)
+    |> ignore(string("endcomment"))
+    |> concat(parsec(:end_tag))
+
+  defparsecp(:end_comment, end_comment)
+
+  comment_content =
+    empty()
+    |> repeat_until(utf8_char([]), [
+      string(@start_tag)
+    ])
+    |> choice([parsec(:end_comment), parsec(:not_end_comment)])
+
+  defparsecp(:comment_content, comment_content)
+
+  comment =
+    empty()
+    |> parsec(:start_tag)
+    |> ignore(string("comment"))
+    |> concat(parsec(:end_tag))
+    |> ignore(parsec(:comment_content))
+    |> optional(parsec(:__parse__))
+
+  defparsec(:comment, comment)
+
+  ################################        comment          ###########################
 
   defparsec(
     :liquid_tag,
@@ -155,7 +195,8 @@ defmodule Liquid.NimbleParser do
       assign,
       decrement,
       increment,
-      parsec(:raw)
+      parsec(:raw),
+      comment
     ])
   )
 
