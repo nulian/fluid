@@ -155,7 +155,7 @@ defmodule Liquid.NimbleParser do
       assign,
       decrement,
       increment,
-      parsec(raw)
+      parsec(:raw)
     ])
   )
 
