@@ -31,9 +31,7 @@ defmodule Liquid.NimbleParser do
     empty()
     |> concat(ignore_whitespaces)
     |> ascii_char([@underscore, ?A..?Z, ?a..?z])
-    |> optional(repeat(ascii_char([
-            @point, @underscore, @question_mark, ?0..?9, ?A..?Z, ?a..?z]
-          )))
+    |> optional(repeat(ascii_char([@point, @underscore, @question_mark, ?0..?9, ?A..?Z, ?a..?z])))
     |> concat(ignore_whitespaces)
     |> reduce({List, :to_string, []})
     |> tag(:variable_name)
@@ -78,6 +76,7 @@ defmodule Liquid.NimbleParser do
 
   ################################        Tags              ###########################
 
+  # |> concat(value)
   assign =
     empty()
     |> parsec(:start_tag)
@@ -85,7 +84,6 @@ defmodule Liquid.NimbleParser do
     |> ignore()
     |> concat(variable_name)
     |> concat(ignore(string("=")))
-    # |> concat(value)
     |> concat(parsec(:end_tag))
     |> tag(:assign)
     |> optional(parsec(:__parse__))
@@ -108,11 +106,56 @@ defmodule Liquid.NimbleParser do
     |> tag(:increment)
     |> optional(parsec(:__parse__))
 
-  defparsec(:liquid_tag,
+  word_raw =
+    string("raw")
+    |> ignore()
+
+  word_end_raw =
+    string("endraw")
+    |> ignore()
+
+  open_tag_raw = start_tag |> concat(word_raw) |> concat(end_tag)
+
+  close_tag_raw = start_tag |> concat(word_end_raw) |> concat(end_tag)
+
+  defparsec(:open_tag_raw, open_tag_raw)
+
+  defparsec(:close_tag_raw, close_tag_raw)
+
+  not_close_tag_raw =
+    empty()
+    |> ignore(utf8_char([]))
+    |> parsec(:raw_text)
+
+  defparsecp(:not_close_tag_raw, not_close_tag_raw)
+
+  # |> reduce({List, :to_string, []})
+  raw_text =
+    empty()
+    |> repeat_until(utf8_char([]), [
+      string("{%")
+    ])
+    |> choice([parsec(:close_tag_raw), parsec(:not_close_tag_raw)])
+    |> tag(:raw_text)
+
+  defparsec(:raw_text, raw_text)
+
+  raw =
+    empty()
+    |> parsec(:open_tag_raw)
+    |> concat(parsec(:raw_text))
+    |> tag(:raw)
+    |> optional(parsec(:__parse__))
+
+  defparsec(:raw, raw)
+
+  defparsec(
+    :liquid_tag,
     choice([
       assign,
       decrement,
-      increment
+      increment,
+      parsec(:raw)
     ])
   )
 
@@ -259,23 +302,26 @@ defmodule Liquid.NimbleParser do
   literal =
     empty()
     |> repeat_until(utf8_char([]), [
-        string(@start_variable),
-        string(@end_variable),
-        string(@start_tag),
-        string(@end_tag)
-      ])
+      string(@start_variable),
+      string(@end_variable),
+      string(@start_tag),
+      string(@end_tag)
+    ])
     |> reduce({List, :to_string, []})
     |> tag(:literal)
 
-  defparsec(:__parse__,
+  defparsec(
+    :__parse__,
     literal
-    |> optional(choice([parsec(:liquid_tag), parsec(:liquid_variable)])))
+    |> optional(choice([parsec(:liquid_tag), parsec(:liquid_variable)]))
+  )
 
   @doc """
   Valid and parse liquid markup.
   """
   @spec parse(String.t()) :: {:ok | :error, any()}
   def parse(""), do: {:ok, ""}
+
   def parse(markup) do
     case __parse__(markup) do
       {:ok, template, "", _, _, _} ->
