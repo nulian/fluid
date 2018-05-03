@@ -147,13 +147,15 @@ defmodule Liquid.NimbleParser do
     |> tag(:raw)
     |> optional(parsec(:__parse__))
 
+  defparsec(:raw, raw)
+
   defparsec(
     :liquid_tag,
     choice([
       assign,
       decrement,
       increment,
-      raw
+      parsec(raw)
     ])
   )
 
