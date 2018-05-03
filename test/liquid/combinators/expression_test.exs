@@ -4,6 +4,6 @@ defmodule Liquid.Combinators.ExpressionTest do
   alias Liquid.NimbleParser, as: Parser
 
   test "variable" do
-    test_combiner("{{ xyz }}", &Parser.var/1, var: [literal: ["xyz "]])
+    test_combinator("{{ xyz }}", &Parser.var/1, var: [literal: ["xyz "]])
   end
 end

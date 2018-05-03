@@ -5,7 +5,7 @@ defmodule Liquid.Combinator.Tags.AssignTest do
   alias Liquid.NimbleParser, as: Parser
 
   test "assign" do
-    test_combiner(
+    test_combinator(
       "assign cart = product",
       &Parser.assign/1,
       assign: [name: ["cart"], value: ["product"]]

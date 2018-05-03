@@ -197,19 +197,7 @@ defmodule Liquid.NimbleParser do
   int_value =
     empty()
     |> concat(integer_part)
-    |> traverse({:build_int_value, []})
-
-  defp build_int_value(rest, value, context, line, offset) do
-    do_build_int_value(rest, Enum.reverse(value), context, line, offset)
-  end
-
-  defp do_build_int_value(_rest, [?- | digits], context, _, _) do
-    {[List.to_integer(digits) * -1], context}
-  end
-
-  defp do_build_int_value(_rest, digits, context, _, _) do
-    {[List.to_integer(digits)], context}
-  end
+    |> reduce({List, :to_integer, []})
 
   # FractionalPart :: . Digit+
   fractional_part =
@@ -239,7 +227,7 @@ defmodule Liquid.NimbleParser do
       integer_part |> concat(fractional_part) |> concat(exponent_part),
       integer_part |> concat(fractional_part)
     ])
-    |> reduce({List, :to_string, []})
+    |> reduce({List, :to_float, []})
 
   # StringValue ::
   #   - `"` StringCharacter* `"`

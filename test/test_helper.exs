@@ -7,7 +7,7 @@ defmodule Liquid.Helpers do
     text |> Liquid.Template.parse() |> Liquid.Template.render(data) |> elem(1)
   end
 
-  def test_combiner(markdown, combiner, expected) do
+  def test_combinator(markdown, combiner, expected) do
     {:ok, response, _, _, _, _} = combiner.(markdown)
     assert response == expected
   end
