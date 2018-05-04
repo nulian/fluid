@@ -6,9 +6,9 @@ defmodule Liquid.Combinator.Tags.AssignTest do
 
   test "assign" do
     test_combinator(
-      "assign cart = product",
+      "{% assign cart = 5 %}",
       &Parser.assign/1,
-      assign: [name: ["cart"], value: ["product"]]
+      [assign: [variable_name: "cart", value: 5], literal: [""]]
     )
   end
 end
