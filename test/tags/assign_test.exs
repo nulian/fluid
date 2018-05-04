@@ -1,8 +1,5 @@
-Code.require_file("../../test_helper.exs", __ENV__.file)
-
 defmodule Liquid.AssignTest do
   use ExUnit.Case
-  use ExUnit.Callbacks
 
   setup_all do
     Liquid.start()
