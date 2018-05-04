@@ -12,8 +12,22 @@ defmodule Liquid.Combinators.General do
   @underscore 0x005F
   @start_tag "{%"
   @end_tag "%}"
-  @start_var "{{"
-  @end_var "}}"
+  @start_variable "{{"
+  @end_variable "}}"
+
+  def codepoints do
+    %{
+      horizontal_tab: @horizontal_tab,
+      space: @space,
+      point: @point,
+      question_mark: @question_mark,
+      underscore: @underscore,
+      start_tag: @start_tag,
+      end_tag: @end_tag,
+      start_variable: @start_variable,
+      end_variable: @end_variable
+    }
+  end
 
   @doc """
   Horizontal Tab (U+0009) + Space (U+0020)
@@ -49,19 +63,17 @@ defmodule Liquid.Combinators.General do
   End of liquid Tag
   """
   def end_tag do
-    concat(
-      ignore_whitespaces(),
-      string(@end_tag)
-    )
+    ignore_whitespaces()
+    |> concat(string(@end_tag))
     |> ignore()
   end
 
   @doc """
   Start of liquid Variable
   """
-  def start_var do
+  def start_variable do
     concat(
-      string(@start_var),
+      string(@start_variable),
       ignore_whitespaces()
     )
     |> ignore()
@@ -70,9 +82,9 @@ defmodule Liquid.Combinators.General do
   @doc """
   End of liquid Variable
   """
-  def end_var do
+  def end_variable do
     ignore_whitespaces()
-    |> string(@end_var)
+    |> string(@end_variable)
     |> ignore()
   end
 
@@ -80,14 +92,13 @@ defmodule Liquid.Combinators.General do
   All utf8 valid characters or empty limited by start/end of tag/variable
   """
   def literal do
-    repeat_until(utf8_char([]),
-                    [
-                      string(@start_var),
-                      string(@end_var),
-                      string(@start_tag),
-                      string(@end_tag)
-                    ]
-                  )
+    empty()
+    |> repeat_until(utf8_char([]), [
+      string(@start_variable),
+      string(@end_variable),
+      string(@start_tag),
+      string(@end_tag)
+    ])
     |> reduce({List, :to_string, []})
     |> tag(:literal)
   end
@@ -96,13 +107,13 @@ defmodule Liquid.Combinators.General do
   Valid variable name represented by:
   /[_A-Za-z][.][_0-9A-Za-z][?]*/
   """
-  def name do
+  def variable_name do
     empty()
     |> concat(ignore_whitespaces())
     |> ascii_char([@underscore, ?A..?Z, ?a..?z])
-    |> times(ascii_char([@point, @underscore, @question_mark, ?0..?9, ?A..?Z, ?a..?z]), min: 1)
+    |> optional(repeat(ascii_char([@point, @underscore, @question_mark, ?0..?9, ?A..?Z, ?a..?z])))
     |> concat(ignore_whitespaces())
     |> reduce({List, :to_string, []})
-    |> tag(:name)
+    |> unwrap_and_tag(:variable_name)
   end
 end

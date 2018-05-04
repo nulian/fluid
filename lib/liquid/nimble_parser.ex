@@ -5,74 +5,19 @@ defmodule Liquid.NimbleParser do
   # TODO: Find methods to split this module
   import NimbleParsec
 
-  # Codepoints
-  @horizontal_tab 0x0009
-  @space 0x0020
-  @start_tag "{%"
-  @end_tag "%}"
-  @start_variable "{{"
-  @end_variable "}}"
-  @point 0x002E
-  @question_mark 0x003F
-  @underscore 0x005F
-
-  ############################### General use combinators  ############################
-
-  # Horizontal Tab (U+0009) + Space (U+0020)
-  whitespace = ascii_char([@space, @horizontal_tab])
-
-  # Remove all :whitespace
-  ignore_whitespaces =
-    whitespace
-    |> repeat()
-    |> ignore()
-
-  variable_name =
-    empty()
-    |> concat(ignore_whitespaces)
-    |> ascii_char([@underscore, ?A..?Z, ?a..?z])
-    |> optional(repeat(ascii_char([@point, @underscore, @question_mark, ?0..?9, ?A..?Z, ?a..?z])))
-    |> concat(ignore_whitespaces)
-    |> reduce({List, :to_string, []})
-    |> tag(:variable_name)
-
-  defparsec(:variable_name, variable_name)
-
-  start_variable =
-    empty()
-    |> concat(string(@start_variable))
-    |> concat(ignore_whitespaces)
-    |> ignore()
-
-  end_variable =
-    ignore_whitespaces
-    |> concat(string(@end_variable))
-    |> ignore()
+  alias Liquid.Combinators.General
 
   liquid_variable =
-    start_variable
+    General.start_variable()
     |> concat(parsec(:variable_name))
-    |> concat(end_variable)
+    |> concat(General.end_variable())
     |> tag(:variable)
     |> optional(parsec(:__parse__))
 
   defparsec(:liquid_variable, liquid_variable)
-
-  start_tag =
-    empty()
-    |> string(@start_tag)
-    |> concat(ignore_whitespaces)
-    |> ignore()
-
-  defparsecp(:start_tag, start_tag)
-
-  end_tag =
-    ignore_whitespaces
-    |> concat(string(@end_tag))
-    |> ignore()
-
-  defparsecp(:end_tag, end_tag)
-  ############################### General use combinators  ############################
+  defparsec(:variable_name, General.variable_name())
+  defparsec(:start_tag, General.start_tag())
+  defparsec(:end_tag, General.end_tag())
 
   ################################        Tags              ###########################
 
@@ -80,48 +25,52 @@ defmodule Liquid.NimbleParser do
   assign =
     empty()
     |> parsec(:start_tag)
-    |> concat(string("assign"))
-    |> ignore()
-    |> concat(variable_name)
+    |> concat(ignore(string("assign")))
+    |> concat(parsec(:variable_name))
     |> concat(ignore(string("=")))
+    |> concat(parsec(:value))
     |> concat(parsec(:end_tag))
     |> tag(:assign)
     |> optional(parsec(:__parse__))
+
+  defparsec(:assign, assign)
 
   decrement =
     empty()
     |> parsec(:start_tag)
     |> string("decrement")
-    |> concat(variable_name)
+    |> concat(parsec(:variable_name))
     |> concat(parsec(:end_tag))
     |> tag(:decrement)
     |> optional(parsec(:__parse__))
+
+  defparsec(:decrement, decrement)
 
   increment =
     empty()
     |> parsec(:start_tag)
     |> string("increment")
-    |> concat(variable_name)
+    |> concat(parsec(:variable_name))
     |> concat(parsec(:end_tag))
     |> tag(:increment)
     |> optional(parsec(:__parse__))
 
+  defparsec(:increment, increment)
+
   ################################           raw          ###########################
 
-  word_raw =
+  raw_tag =
     string("raw")
     |> ignore()
 
-  word_end_raw =
+  raw_end_tag =
     string("endraw")
     |> ignore()
 
-  open_tag_raw = start_tag |> concat(word_raw) |> concat(end_tag)
-
-  close_tag_raw = start_tag |> concat(word_end_raw) |> concat(end_tag)
+  open_tag_raw = empty() |> parsec(:start_tag) |> concat(raw_tag) |> concat(parsec(:end_tag))
+  close_tag_raw = empty() |> parsec(:start_tag) |> concat(raw_end_tag) |> concat(parsec(:end_tag))
 
   defparsec(:open_tag_raw, open_tag_raw)
-
   defparsec(:close_tag_raw, close_tag_raw)
 
   not_close_tag_raw =
@@ -150,9 +99,9 @@ defmodule Liquid.NimbleParser do
     |> optional(parsec(:__parse__))
 
   defparsec(:raw, raw)
-  ################################           raw          ###########################
+  ##############################           raw            ###########################
 
-  ################################        comment          ###########################
+  ###############################        comment          ###########################
   not_end_comment =
     empty()
     |> ignore(utf8_char([]))
@@ -171,7 +120,7 @@ defmodule Liquid.NimbleParser do
   comment_content =
     empty()
     |> repeat_until(utf8_char([]), [
-      string(@start_tag)
+      string("{%")
     ])
     |> choice([parsec(:end_comment), parsec(:not_end_comment)])
 
@@ -297,14 +246,17 @@ defmodule Liquid.NimbleParser do
   #   - NullValue
   #   - ListValue[?Const]
   value =
-    choice([
-      float_value,
-      int_value,
-      string_value,
-      boolean_value,
-      null_value,
-      parsec(:list_value)
+    General.ignore_whitespaces()
+    |> choice([
+        float_value,
+        int_value,
+        string_value,
+        boolean_value,
+        null_value,
+        parsec(:list_value)
     ])
+    |> concat(General.ignore_whitespaces())
+    |> unwrap_and_tag(:value)
 
   defparsec(:value, value)
 
@@ -326,22 +278,9 @@ defmodule Liquid.NimbleParser do
 
   ########################################### Parser ##########################################
 
-  # All utf8 valid characters or empty limited by start/end of tag/variable
-  # Name :: /[_A-Za-z][_0-9A-Za-z]*/
-  literal =
-    empty()
-    |> repeat_until(utf8_char([]), [
-      string(@start_variable),
-      string(@end_variable),
-      string(@start_tag),
-      string(@end_tag)
-    ])
-    |> reduce({List, :to_string, []})
-    |> tag(:literal)
-
   defparsec(
     :__parse__,
-    literal
+    General.literal()
     |> optional(choice([parsec(:liquid_tag), parsec(:liquid_variable)]))
   )
 

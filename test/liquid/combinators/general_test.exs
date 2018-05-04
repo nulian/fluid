@@ -2,7 +2,17 @@ defmodule Liquid.Combinators.GeneralTest do
   use ExUnit.Case
   import Liquid.Helpers
 
-  alias Liquid.NimbleParser, as: Parser
+  defmodule Parser do
+    import NimbleParsec
+    alias Liquid.Combinators.General
+    defparsec(:whitespace, General.whitespace())
+    defparsec(:literal, General.literal())
+    defparsec(:ignore_whitespaces, General.ignore_whitespaces())
+    defparsec(:start_tag, General.start_tag())
+    defparsec(:end_tag, General.end_tag())
+    defparsec(:start_variable, General.start_variable())
+    defparsec(:end_variable, General.end_variable())
+  end
 
   test "whitespace must parse 0x0020 and 0x0009" do
     test_combinator(" ", &Parser.whitespace/1, ' ')
@@ -45,13 +55,13 @@ defmodule Liquid.Combinators.GeneralTest do
     test_combinator("   \t   \t%}", &Parser.end_tag/1, [])
   end
 
-  test "start_var" do
-    test_combinator("{{", &Parser.start_var/1, [])
-    test_combinator("{{   \t   \t", &Parser.start_var/1, [])
+  test "start_variable" do
+    test_combinator("{{", &Parser.start_variable/1, [])
+    test_combinator("{{   \t   \t", &Parser.start_variable/1, [])
   end
 
-  test "end_var" do
-    test_combinator("}}", &Parser.end_var/1, [])
-    test_combinator("   \t   \t}}", &Parser.end_var/1, [])
+  test "end_variable" do
+    test_combinator("}}", &Parser.end_variable/1, [])
+    test_combinator("   \t   \t}}", &Parser.end_variable/1, [])
   end
 end
