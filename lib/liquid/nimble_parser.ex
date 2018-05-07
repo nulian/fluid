@@ -158,7 +158,7 @@ defmodule Liquid.NimbleParser do
     |> ascii_char([General.codepoints().apostrophe])
     |> parsec(:ignore_whitespaces)
     |> reduce({List, :to_string, []})
-    |> tag(:snippet)
+    |> tag(:snippet_var)
 
   defparsecp(:snippet_var, snippet_var)
 
@@ -176,7 +176,6 @@ defmodule Liquid.NimbleParser do
 
   defparsec(:variable_atom, variable_atom)
 
-  # {% include 'snippet', my_variable: 'apples', my_other_variable: 'oranges' %}
   var_assignation =
     General.cleaned_comma()
     |> concat(parsec(:variable_atom))

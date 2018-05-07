@@ -23,15 +23,15 @@ defmodule Liquid.Combinators.GeneralTest do
     test_combinator(
       "Chinese: 你好, English: Whatever, Arabian: مرحبا",
       &Parser.literal/1,
-      literal: ["Chinese: 你好, English: Whatever, Arabian: مرحبا"]
+      ["Chinese: 你好, English: Whatever, Arabian: مرحبا"]
     )
 
-    test_combinator("stop in {{", &Parser.literal/1, literal: ["stop in "])
-    test_combinator("stop in {%", &Parser.literal/1, literal: ["stop in "])
-    test_combinator("stop in %}", &Parser.literal/1, literal: ["stop in "])
-    test_combinator("stop in }}", &Parser.literal/1, literal: ["stop in "])
-    test_combinator("{{ this is not processed", &Parser.literal/1, literal: [""])
-    test_combinator("", &Parser.literal/1, literal: [""])
+    test_combinator("stop in {{", &Parser.literal/1, ["stop in "])
+    test_combinator("stop in {%", &Parser.literal/1, ["stop in "])
+    test_combinator("stop in %}", &Parser.literal/1, ["stop in "])
+    test_combinator("stop in }}", &Parser.literal/1, ["stop in "])
+    test_combinator("{{ this is not processed", &Parser.literal/1, [""])
+    test_combinator("", &Parser.literal/1, [""])
   end
 
   test "extra_spaces ignore all :whitespaces" do

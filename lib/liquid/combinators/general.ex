@@ -9,7 +9,7 @@ defmodule Liquid.Combinators.General do
   @space 0x0020
   @colon 0x003A
   @point 0x002E
-  @comma 0x00CC
+  @comma 0x002C
   @apostrophe 0x0027
   @question_mark 0x003F
   @underscore 0x005F
@@ -24,6 +24,7 @@ defmodule Liquid.Combinators.General do
       space: @space,
       colon: @colon,
       point: @point,
+      comma: @comma,
       apostrophe: @apostrophe,
       question_mark: @question_mark,
       underscore: @underscore,
@@ -115,7 +116,6 @@ defmodule Liquid.Combinators.General do
       string(@end_tag)
     ])
     |> reduce({List, :to_string, []})
-    |> tag(:literal)
   end
 
   @doc """
