@@ -158,7 +158,7 @@ defmodule Liquid.NimbleParser do
     |> ascii_char([General.codepoints().apostrophe])
     |> parsec(:ignore_whitespaces)
     |> reduce({List, :to_string, []})
-    |> tag(:snippet_var)
+    |> tag(:snippet)
 
   defparsecp(:snippet_var, snippet_var)
 
@@ -211,6 +211,62 @@ defmodule Liquid.NimbleParser do
   defparsec(:include, include)
 
   ################################        include          ###########################
+  ################################        cycle            ###########################
+
+   word_cycle =
+    string("cycle")
+    |> ignore()
+
+  apostrophe =
+    string("'")
+    |> ignore()
+
+  coma =
+    string(",")
+    |> ignore()
+
+  defparsec(:coma, coma)
+
+  value_in_apostrophe =
+    parsec(:ignore_whitespaces)
+    |> concat(apostrophe)
+    |> concat(repeat(utf8_char(not: ?,, not: 0, not: ?')))
+    |> concat(parsec(:ignore_whitespaces))
+    |> concat(apostrophe)
+    |> concat(parsec(:ignore_whitespaces))
+
+  defparsec(:value_in_apostrophe, value_in_apostrophe)
+
+  last_cycle_value =
+    parsec(:ignore_whitespaces)
+    |> parsec(:value_in_apostrophe)
+    |> concat(parsec(:end_tag))
+    |> reduce({List, :to_string, []})
+
+  defparsec(:last_cycle_value, last_cycle_value)
+
+  cycle_values =
+    empty()
+    |> parsec(:value_in_apostrophe)
+    |> concat(parsec(:ignore_whitespaces))
+    |> concat(coma)
+    |> reduce({List, :to_string, []})
+    |> choice([parsec(:cycle_values), parsec(:last_cycle_value)])
+
+  defparsec(:cycle_values, cycle_values)
+
+  cycle =
+    empty()
+    |> parsec(:start_tag)
+    |> concat(word_cycle)
+    |> concat(parsec(:ignore_whitespaces))
+    |> concat(choice([parsec(:cycle_values), parsec(:last_cycle_value)]))
+    |> tag(:cycle)
+    |> optional(parsec(:__parse__))
+
+  defparsec(:cycle, cycle)
+
+  ############################        end of cycle       ##########################
 
   defparsec(
     :liquid_tag,
@@ -219,7 +275,9 @@ defmodule Liquid.NimbleParser do
       decrement,
       increment,
       parsec(:raw),
-      comment
+      parsec(:include),
+      parsec(:cycle),
+      parsec(:comment),
     ])
   )
 
