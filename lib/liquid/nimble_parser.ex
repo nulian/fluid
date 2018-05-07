@@ -18,6 +18,7 @@ defmodule Liquid.NimbleParser do
   defparsec(:variable_name, General.variable_name())
   defparsec(:start_tag, General.start_tag())
   defparsec(:end_tag, General.end_tag())
+  defparsec(:ignore_whitespaces, General.ignore_whitespaces())
 
   ################################        Tags              ###########################
 
@@ -146,6 +147,72 @@ defmodule Liquid.NimbleParser do
 
   ################################        comment          ###########################
 
+  ################################        include          ###########################
+  snippet_var =
+    parsec(:ignore_whitespaces)
+    |> concat(utf8_char([General.codepoints().apostrophe]))
+    |> ascii_char([General.codepoints().underscore, ?A..?Z, ?a..?z])
+    |> optional(repeat(ascii_char([General.codepoints().point,
+      General.codepoints().underscore,
+      General.codepoints().question_mark, ?0..?9, ?A..?Z, ?a..?z])))
+    |> ascii_char([General.codepoints().apostrophe])
+    |> parsec(:ignore_whitespaces)
+    |> reduce({List, :to_string, []})
+    |> tag(:snippet)
+
+  defparsecp(:snippet_var, snippet_var)
+
+  variable_atom =
+    empty()
+    |> parsec(:ignore_whitespaces)
+    |> ascii_char([General.codepoints().underscore, ?A..?Z, ?a..?z])
+    |> optional(repeat(ascii_char([General.codepoints().point,
+      General.codepoints().underscore,
+      General.codepoints().question_mark, ?0..?9, ?A..?Z, ?a..?z])))
+    |> concat(ascii_char([General.codepoints().colon]))
+    |> parsec(:ignore_whitespaces)
+    |> reduce({List, :to_string, []})
+    |> tag(:variable_atom)
+
+  defparsec(:variable_atom, variable_atom)
+
+  # {% include 'snippet', my_variable: 'apples', my_other_variable: 'oranges' %}
+  var_assignation =
+    General.cleaned_comma()
+    |> concat(parsec(:variable_atom))
+    |> concat(parsec(:ignore_whitespaces))
+    |> concat(parsec(:snippet_var))
+    |> parsec(:ignore_whitespaces)
+    |> optional(parsec(:var_assignation))
+
+  defparsecp(:var_assignation, var_assignation)
+
+  # {% include 'color' with 'red' %}
+  with_param =
+    empty()
+    |> ignore(string("with"))
+    |> concat(parsec(:ignore_whitespaces))
+    |> concat(parsec(:snippet_var))
+    |> concat(parsec(:ignore_whitespaces))
+
+  defparsecp(:with_param, with_param)
+
+  include =
+    empty()
+    |> parsec(:start_tag)
+    |> ignore(string("include"))
+    |> concat(parsec(:ignore_whitespaces))
+    |> concat(parsec(:snippet_var))
+    |> concat(parsec(:ignore_whitespaces))
+    |> optional(choice([parsec(:with_param), parsec(:var_assignation)]))
+    |> concat(parsec(:end_tag))
+    |> tag(:include)
+    |> optional(parsec(:__parse__))
+
+  defparsec(:include, include)
+
+  ################################        include          ###########################
+
   defparsec(
     :liquid_tag,
     choice([
@@ -256,14 +323,14 @@ defmodule Liquid.NimbleParser do
   value =
     General.ignore_whitespaces()
     |> choice([
-        float_value,
-        int_value,
-        string_value,
-        boolean_value,
-        null_value,
-        parsec(:list_value)
+      float_value,
+      int_value,
+      string_value,
+      boolean_value,
+      null_value,
+      parsec(:list_value)
     ])
-    |> concat(General.ignore_whitespaces())
+    |> concat(parsec(:ignore_whitespaces))
     |> unwrap_and_tag(:value)
 
   defparsec(:value, value)

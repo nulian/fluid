@@ -7,7 +7,10 @@ defmodule Liquid.Combinators.General do
   # Codepoints
   @horizontal_tab 0x0009
   @space 0x0020
+  @colon 0x003A
   @point 0x002E
+  @comma 0x00CC
+  @apostrophe 0x0027
   @question_mark 0x003F
   @underscore 0x005F
   @start_tag "{%"
@@ -19,7 +22,9 @@ defmodule Liquid.Combinators.General do
     %{
       horizontal_tab: @horizontal_tab,
       space: @space,
+      colon: @colon,
       point: @point,
+      apostrophe: @apostrophe,
       question_mark: @question_mark,
       underscore: @underscore,
       start_tag: @start_tag,
@@ -45,6 +50,16 @@ defmodule Liquid.Combinators.General do
   def ignore_whitespaces do
     whitespace()
     |> repeat()
+    |> ignore()
+  end
+
+  @doc """
+  Comma without spaces
+  """
+  def cleaned_comma do
+    ignore_whitespaces()
+    |> concat(ascii_char([@comma]))
+    |> concat(ignore_whitespaces())
     |> ignore()
   end
 
