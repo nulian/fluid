@@ -21,7 +21,6 @@ defmodule Liquid.NimbleParser do
 
   ################################        Tags              ###########################
 
-  # |> concat(value)
   assign =
     empty()
     |> parsec(:start_tag)
@@ -67,10 +66,20 @@ defmodule Liquid.NimbleParser do
     string("endraw")
     |> ignore()
 
-  open_tag_raw = empty() |> parsec(:start_tag) |> concat(raw_tag) |> concat(parsec(:end_tag))
-  close_tag_raw = empty() |> parsec(:start_tag) |> concat(raw_end_tag) |> concat(parsec(:end_tag))
+  open_tag_raw =
+    empty()
+    |> parsec(:start_tag)
+    |> concat(raw_tag)
+    |> concat(parsec(:end_tag))
 
   defparsec(:open_tag_raw, open_tag_raw)
+
+  close_tag_raw =
+    empty()
+    |> parsec(:start_tag)
+    |> concat(raw_end_tag)
+    |> concat(parsec(:end_tag))
+
   defparsec(:close_tag_raw, close_tag_raw)
 
   not_close_tag_raw =
@@ -80,11 +89,10 @@ defmodule Liquid.NimbleParser do
 
   defparsecp(:not_close_tag_raw, not_close_tag_raw)
 
-  # |> reduce({List, :to_string, []})
   raw_text =
     empty()
     |> repeat_until(utf8_char([]), [
-      string("{%")
+      string(General.codepoints().start_tag)
     ])
     |> choice([parsec(:close_tag_raw), parsec(:not_close_tag_raw)])
     |> tag(:raw_text)
@@ -120,7 +128,7 @@ defmodule Liquid.NimbleParser do
   comment_content =
     empty()
     |> repeat_until(utf8_char([]), [
-      string("{%")
+      string(General.codepoints().start_tag)
     ])
     |> choice([parsec(:end_comment), parsec(:not_end_comment)])
 
