@@ -11,4 +11,9 @@ defmodule Liquid.Helpers do
     {:ok, response, _, _, _, _} = combiner.(markdown)
     assert response == expected
   end
+
+  def test_combinator_error(markdown, combiner, expected) do
+    {:error, response, _, _, _, _} = combiner.(markdown)
+    assert response == expected
+  end
 end
