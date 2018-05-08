@@ -211,8 +211,20 @@ defmodule Liquid.NimbleParser do
     |> concat(parsec(:ignore_whitespaces))
     |> concat(parsec(:snippet_var))
     |> concat(parsec(:ignore_whitespaces))
+    |> tag(:with_param)
 
   defparsecp(:with_param, with_param)
+
+  # {% include 'color' for 'red' %}
+  for_param =
+    empty()
+    |> ignore(string("for"))
+    |> concat(parsec(:ignore_whitespaces))
+    |> concat(parsec(:snippet_var))
+    |> concat(parsec(:ignore_whitespaces))
+    |> tag(:for_param)
+
+  defparsecp(:for_param, for_param)
 
   include =
     empty()
@@ -221,109 +233,109 @@ defmodule Liquid.NimbleParser do
     |> concat(parsec(:ignore_whitespaces))
     |> concat(parsec(:snippet_var))
     |> concat(parsec(:ignore_whitespaces))
-    |> optional(choice([parsec(:with_param), parsec(:var_assignation)]))
+    |> optional(choice([parsec(:with_param), parsec(:for_param), parsec(:var_assignation)]))
     |> concat(parsec(:end_tag))
     |> tag(:include)
     |> optional(parsec(:__parse__))
 
   defparsec(:include, include)
 
-  ################################        include          ###########################
- ################################        cycle            ###########################
+  ################################       end include       ###########################
+  ################################        cycle            ###########################
 
- word_cycle =
-  string("cycle")
-  |> ignore()
+  word_cycle =
+    string("cycle")
+    |> ignore()
 
-quoted = ascii_char([?"])
+  quoted = ascii_char([?"])
 
-apostrophe =
-  string("'")
-  |> ignore()
+  apostrophe =
+    string("'")
+    |> ignore()
 
-coma =
-  string(",")
-  |> ignore()
+  coma =
+    string(",")
+    |> ignore()
 
-defparsec(:coma, coma)
+  defparsec(:coma, coma)
 
-single_quoted_string =
-  parsec(:ignore_whitespaces)
-  |> concat(apostrophe)
-  |> concat(repeat(utf8_char(not: ?,, not: ?')))
-  |> concat(parsec(:ignore_whitespaces))
-  |> concat(apostrophe)
-  |> concat(parsec(:ignore_whitespaces))
+  single_quoted_string =
+    parsec(:ignore_whitespaces)
+    |> concat(apostrophe)
+    |> concat(repeat(utf8_char(not: ?,, not: ?')))
+    |> concat(parsec(:ignore_whitespaces))
+    |> concat(apostrophe)
+    |> concat(parsec(:ignore_whitespaces))
 
-defparsec(:single_quoted_string, single_quoted_string)
+  defparsec(:single_quoted_string, single_quoted_string)
 
-double_quoted_string =
-  parsec(:ignore_whitespaces)
-  |> concat(quoted)
-  |> concat(repeat(utf8_char(not: ?,, not: ?")))
-  |> concat(quoted)
-  |> reduce({List, :to_string, []})
-  |> concat(parsec(:ignore_whitespaces))
+  double_quoted_string =
+    parsec(:ignore_whitespaces)
+    |> concat(quoted)
+    |> concat(repeat(utf8_char(not: ?,, not: ?")))
+    |> concat(quoted)
+    |> reduce({List, :to_string, []})
+    |> concat(parsec(:ignore_whitespaces))
 
-defparsec(:double_quoted_string, double_quoted_string)
+  defparsec(:double_quoted_string, double_quoted_string)
 
-integer_value = integer(min: 1)
+  integer_value = integer(min: 1)
 
-defparsec(:integer_value, integer_value)
+  defparsec(:integer_value, integer_value)
 
-cycle_group =
-  parsec(:ignore_whitespaces)
-  |> concat(
-    choice([
+  cycle_group =
+    parsec(:ignore_whitespaces)
+    |> concat(
+      choice([
+        parsec(:single_quoted_string),
+        parsec(:double_quoted_string),
+        repeat(utf8_char(not: ?,, not: ?:))
+      ])
+    )
+    |> reduce({List, :to_string, []})
+    |> concat(utf8_char([?:]) |> ignore())
+
+  defparsec(:cycle_group, cycle_group)
+
+  last_cycle_value =
+    parsec(:ignore_whitespaces)
+    |> choice([
       parsec(:single_quoted_string),
       parsec(:double_quoted_string),
-      repeat(utf8_char(not: ?,, not: ?:))
+      parsec(:integer_value)
     ])
-  )
-  |> reduce({List, :to_string, []})
-  |> concat(utf8_char([?:]) |> ignore())
+    |> concat(parsec(:end_tag))
+    |> reduce({List, :to_string, []})
 
-defparsec(:cycle_group, cycle_group)
+  defparsec(:last_cycle_value, last_cycle_value)
 
-last_cycle_value =
-  parsec(:ignore_whitespaces)
-  |> choice([
-    parsec(:single_quoted_string),
-    parsec(:double_quoted_string),
-    parsec(:integer_value)
-  ])
-  |> concat(parsec(:end_tag))
-  |> reduce({List, :to_string, []})
+  cycle_values =
+    empty()
+    |> choice([
+      parsec(:single_quoted_string),
+      parsec(:double_quoted_string),
+      parsec(:integer_value)
+    ])
+    |> concat(parsec(:ignore_whitespaces))
+    |> concat(coma)
+    |> reduce({List, :to_string, []})
+    |> choice([parsec(:cycle_values), parsec(:last_cycle_value)])
 
-defparsec(:last_cycle_value, last_cycle_value)
+  defparsec(:cycle_values, cycle_values)
 
-cycle_values =
-  empty()
-  |> choice([
-    parsec(:single_quoted_string),
-    parsec(:double_quoted_string),
-    parsec(:integer_value)
-  ])
-  |> concat(parsec(:ignore_whitespaces))
-  |> concat(coma)
-  |> reduce({List, :to_string, []})
-  |> choice([parsec(:cycle_values), parsec(:last_cycle_value)])
+  cycle =
+    empty()
+    |> parsec(:start_tag)
+    |> concat(word_cycle)
+    |> concat(optional(parsec(:cycle_group)))
+    |> concat(parsec(:ignore_whitespaces))
+    |> concat(choice([parsec(:cycle_values), parsec(:last_cycle_value)]))
+    |> tag(:cycle)
+    |> optional(parsec(:__parse__))
 
-defparsec(:cycle_values, cycle_values)
+  defparsec(:cycle, cycle)
 
-cycle =
-  empty()
-  |> parsec(:start_tag)
-  |> concat(word_cycle)
-  |> concat(optional(parsec(:cycle_group)))
-  |> concat(parsec(:ignore_whitespaces))
-  |> concat(choice([parsec(:cycle_values), parsec(:last_cycle_value)]))
-  |> tag(:cycle)
-  |> optional(parsec(:__parse__))
-
-defparsec(:cycle, cycle)
-
-############################        end of cycle       ##########################
+  ############################        end of cycle       ##########################
 
   defparsec(
     :liquid_tag,
@@ -334,7 +346,7 @@ defparsec(:cycle, cycle)
       parsec(:raw),
       parsec(:include),
       parsec(:cycle),
-      parsec(:comment),
+      parsec(:comment)
     ])
   )
 

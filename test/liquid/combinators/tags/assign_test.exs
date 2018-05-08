@@ -5,10 +5,9 @@ defmodule Liquid.Combinator.Tags.AssignTest do
   alias Liquid.NimbleParser, as: Parser
 
   test "assign" do
-    test_combinator(
-      "{% assign cart = 5 %}",
-      &Parser.assign/1,
-      [{:assign, [variable_name: "cart", value: 5]}, ""]
-    )
+    test_combinator("{% assign cart = 5 %}", &Parser.assign/1, [
+      {:assign, [variable_name: "cart", value: 5]},
+      ""
+    ])
   end
 end
