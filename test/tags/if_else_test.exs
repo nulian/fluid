@@ -1,8 +1,5 @@
-Code.require_file("../../test_helper.exs", __ENV__.file)
-
 defmodule IfElseTagTest do
   use ExUnit.Case
-  use ExUnit.Callbacks
   alias Liquid.Template, as: Template
 
   setup_all do
