@@ -152,9 +152,18 @@ defmodule Liquid.NimbleParser do
     parsec(:ignore_whitespaces)
     |> concat(utf8_char([General.codepoints().apostrophe]))
     |> ascii_char([General.codepoints().underscore, ?A..?Z, ?a..?z])
-    |> optional(repeat(ascii_char([General.codepoints().point,
-      General.codepoints().underscore,
-      General.codepoints().question_mark, ?0..?9, ?A..?Z, ?a..?z])))
+    |> optional(
+      repeat(
+        ascii_char([
+          General.codepoints().point,
+          General.codepoints().underscore,
+          General.codepoints().question_mark,
+          ?0..?9,
+          ?A..?Z,
+          ?a..?z
+        ])
+      )
+    )
     |> ascii_char([General.codepoints().apostrophe])
     |> parsec(:ignore_whitespaces)
     |> reduce({List, :to_string, []})
@@ -166,9 +175,18 @@ defmodule Liquid.NimbleParser do
     empty()
     |> parsec(:ignore_whitespaces)
     |> ascii_char([General.codepoints().underscore, ?A..?Z, ?a..?z])
-    |> optional(repeat(ascii_char([General.codepoints().point,
-      General.codepoints().underscore,
-      General.codepoints().question_mark, ?0..?9, ?A..?Z, ?a..?z])))
+    |> optional(
+      repeat(
+        ascii_char([
+          General.codepoints().point,
+          General.codepoints().underscore,
+          General.codepoints().question_mark,
+          ?0..?9,
+          ?A..?Z,
+          ?a..?z
+        ])
+      )
+    )
     |> concat(ascii_char([General.codepoints().colon]))
     |> parsec(:ignore_whitespaces)
     |> reduce({List, :to_string, []})
@@ -211,62 +229,101 @@ defmodule Liquid.NimbleParser do
   defparsec(:include, include)
 
   ################################        include          ###########################
-  ################################        cycle            ###########################
+ ################################        cycle            ###########################
 
-   word_cycle =
-    string("cycle")
-    |> ignore()
+ word_cycle =
+  string("cycle")
+  |> ignore()
 
-  apostrophe =
-    string("'")
-    |> ignore()
+quoted = ascii_char([?"])
 
-  coma =
-    string(",")
-    |> ignore()
+apostrophe =
+  string("'")
+  |> ignore()
 
-  defparsec(:coma, coma)
+coma =
+  string(",")
+  |> ignore()
 
-  value_in_apostrophe =
-    parsec(:ignore_whitespaces)
-    |> concat(apostrophe)
-    |> concat(repeat(utf8_char(not: ?,, not: 0, not: ?')))
-    |> concat(parsec(:ignore_whitespaces))
-    |> concat(apostrophe)
-    |> concat(parsec(:ignore_whitespaces))
+defparsec(:coma, coma)
 
-  defparsec(:value_in_apostrophe, value_in_apostrophe)
+single_quoted_string =
+  parsec(:ignore_whitespaces)
+  |> concat(apostrophe)
+  |> concat(repeat(utf8_char(not: ?,, not: ?')))
+  |> concat(parsec(:ignore_whitespaces))
+  |> concat(apostrophe)
+  |> concat(parsec(:ignore_whitespaces))
 
-  last_cycle_value =
-    parsec(:ignore_whitespaces)
-    |> parsec(:value_in_apostrophe)
-    |> concat(parsec(:end_tag))
-    |> reduce({List, :to_string, []})
+defparsec(:single_quoted_string, single_quoted_string)
 
-  defparsec(:last_cycle_value, last_cycle_value)
+double_quoted_string =
+  parsec(:ignore_whitespaces)
+  |> concat(quoted)
+  |> concat(repeat(utf8_char(not: ?,, not: ?")))
+  |> concat(quoted)
+  |> reduce({List, :to_string, []})
+  |> concat(parsec(:ignore_whitespaces))
 
-  cycle_values =
-    empty()
-    |> parsec(:value_in_apostrophe)
-    |> concat(parsec(:ignore_whitespaces))
-    |> concat(coma)
-    |> reduce({List, :to_string, []})
-    |> choice([parsec(:cycle_values), parsec(:last_cycle_value)])
+defparsec(:double_quoted_string, double_quoted_string)
 
-  defparsec(:cycle_values, cycle_values)
+integer_value = integer(min: 1)
 
-  cycle =
-    empty()
-    |> parsec(:start_tag)
-    |> concat(word_cycle)
-    |> concat(parsec(:ignore_whitespaces))
-    |> concat(choice([parsec(:cycle_values), parsec(:last_cycle_value)]))
-    |> tag(:cycle)
-    |> optional(parsec(:__parse__))
+defparsec(:integer_value, integer_value)
 
-  defparsec(:cycle, cycle)
+cycle_group =
+  parsec(:ignore_whitespaces)
+  |> concat(
+    choice([
+      parsec(:single_quoted_string),
+      parsec(:double_quoted_string),
+      repeat(utf8_char(not: ?,, not: ?:))
+    ])
+  )
+  |> reduce({List, :to_string, []})
+  |> concat(utf8_char([?:]) |> ignore())
 
-  ############################        end of cycle       ##########################
+defparsec(:cycle_group, cycle_group)
+
+last_cycle_value =
+  parsec(:ignore_whitespaces)
+  |> choice([
+    parsec(:single_quoted_string),
+    parsec(:double_quoted_string),
+    parsec(:integer_value)
+  ])
+  |> concat(parsec(:end_tag))
+  |> reduce({List, :to_string, []})
+
+defparsec(:last_cycle_value, last_cycle_value)
+
+cycle_values =
+  empty()
+  |> choice([
+    parsec(:single_quoted_string),
+    parsec(:double_quoted_string),
+    parsec(:integer_value)
+  ])
+  |> concat(parsec(:ignore_whitespaces))
+  |> concat(coma)
+  |> reduce({List, :to_string, []})
+  |> choice([parsec(:cycle_values), parsec(:last_cycle_value)])
+
+defparsec(:cycle_values, cycle_values)
+
+cycle =
+  empty()
+  |> parsec(:start_tag)
+  |> concat(word_cycle)
+  |> concat(optional(parsec(:cycle_group)))
+  |> concat(parsec(:ignore_whitespaces))
+  |> concat(choice([parsec(:cycle_values), parsec(:last_cycle_value)]))
+  |> tag(:cycle)
+  |> optional(parsec(:__parse__))
+
+defparsec(:cycle, cycle)
+
+############################        end of cycle       ##########################
 
   defparsec(
     :liquid_tag,

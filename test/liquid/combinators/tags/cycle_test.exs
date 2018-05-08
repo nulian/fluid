@@ -4,32 +4,121 @@ defmodule Liquid.Combinator.Tags.CycleTest do
   import Liquid.Helpers
   alias Liquid.NimbleParser, as: Parser
 
-  test "include tag parser" do
-    test_combinator(
-      "{% include 'snippet', my_variable: 'apples', my_other_variable: 'oranges' %}",
-      &Parser.cycle/1,
-      [{:include, [snippet_var: ["'snippet'"],
-                   variable_atom: ["my_variable:"],
-                   snippet_var: ["'apples'"],
-                   variable_atom: ["my_other_variable:"],
-                   snippet_var: ["'oranges'"]]}, ""]
-    )
-    test_combinator(
-      "{% include 'pick_a_source' %}",
-      &Parser.cycle/1,
-      [{:include, [snippet_var: ["'pick_a_source'"]]}, ""]
-    )
-    # TODO: work with list
-    # test_combinator(
-    #   "{% include 'product' with products[0] %}",
-    #   &Parser.include/1,
-    #   [{:include, [snippet: ["'pick_a_source'"]]}, ""]
-    # )
+  test "cycle tag with 2 values" do
+    test_combinator("{%cycle \"one\", \"two\"%}", &Parser.cycle/1, [
+      {:cycle, ["\"one\"", "\"two\""]},
+      ""
+    ])
+  end
 
+  test "cycle tag 2 times" do
+    test_combinator("{%cycle \"one\", \"two\"%} {%cycle \"one\", \"two\"%}", &Parser.cycle/1, [
+      {:cycle, ["\"one\"", "\"two\""]},
+      " ",
+      {:cycle, ["\"one\"", "\"two\""]},
+      ""
+    ])
+  end
+
+  test "cycle tag with quoted blanks" do
+    test_combinator("{%cycle \"\", \"two\"%} {%cycle \"\", \"two\"%}", &Parser.cycle/1, [
+      {:cycle, ["\"\"", "\"two\""]},
+      " ",
+      {:cycle, ["\"\"", "\"two\""]},
+      ""
+    ])
+  end
+
+  test "cycle tag 3 times" do
     test_combinator(
-      "{% include 'product' with 'products' %}",
+      "{%cycle \"one\", \"two\"%} {%cycle \"one\", \"two\"%} {%cycle \"one\", \"two\"%}",
       &Parser.cycle/1,
-      [{:include, [snippet_var: ["'product'"], snippet_var: ["'products'"]]}, ""]
+      [
+        {:cycle, ["\"one\"", "\"two\""]},
+        " ",
+        {:cycle, ["\"one\"", "\"two\""]},
+        " ",
+        {:cycle, ["\"one\"", "\"two\""]},
+        ""
+      ]
+    )
+  end
+
+  test "cycle with html values" do
+    test_combinator(
+      "{%cycle \"text-align: left\", \"text-align: right\" %} {%cycle \"text-align: left\", \"text-align: right\"%}",
+      &Parser.cycle/1,
+      [
+        {:cycle, ["\"text-align: left\"", "\"text-align: right\""]},
+        " ",
+        {:cycle, ["\"text-align: left\"", "\"text-align: right\""]},
+        ""
+      ]
+    )
+  end
+
+  test "cycle tag with integers" do
+    test_combinator(
+      "{%cycle 1,2%} {%cycle 1,2%} {%cycle 1,2%} {%cycle 1,2,3%} {%cycle 1,2,3%} {%cycle 1,2,3%} {%cycle 1,2,3%}",
+      &Parser.cycle/1,
+      [
+        {:cycle, [<<1>>, <<2>>]},
+        " ",
+        {:cycle, [<<1>>, <<2>>]},
+        " ",
+        {:cycle, [<<1>>, <<2>>]},
+        " ",
+        {:cycle, [<<1>>, <<2>>, <<3>>]},
+        " ",
+        {:cycle, [<<1>>, <<2>>, <<3>>]},
+        " ",
+        {:cycle, [<<1>>, <<2>>, <<3>>]},
+        " ",
+        {:cycle, [<<1>>, <<2>>, <<3>>]},
+        ""
+      ]
+    )
+  end
+
+  test "cycle tag group by numbers" do
+    test_combinator(
+      "{%cycle 1: \"one\", \"two\" %} {%cycle 2: \"one\", \"two\" %} {%cycle 1: \"one\", \"two\" %} {%cycle 2: \"one\", \"two\" %} {%cycle 1: \"one\", \"two\" %} {%cycle 2: \"one\", \"two\" %}",
+      &Parser.cycle/1,
+      [
+        {:cycle, ["1", "\"one\"", "\"two\""]},
+        " ",
+        {:cycle, ["2", "\"one\"", "\"two\""]},
+        " ",
+        {:cycle, ["1", "\"one\"", "\"two\""]},
+        " ",
+        {:cycle, ["2", "\"one\"", "\"two\""]},
+        " ",
+        {:cycle, ["1", "\"one\"", "\"two\""]},
+        " ",
+        {:cycle, ["2", "\"one\"", "\"two\""]},
+        ""
+      ]
+    )
+  end
+
+  test "cycle tag group by strings" do
+    test_combinator(
+      "{%cycle var1: \"one\", \"two\" %} {%cycle var2: \"one\", \"two\" %} {%cycle var1: \"one\", \"two\" %} {%cycle var2: \"one\", \"two\" %} {%cycle var1: \"one\", \"two\" %} {%cycle var2: \"one\", \"two\" %}",
+      &Parser.cycle/1,
+      [
+        {:cycle, ["var1", "\"one\"", "\"two\""]},
+        " ",
+        {:cycle, ["var2", "\"one\"", "\"two\""]},
+        " ",
+        {:cycle, ["var1", "\"one\"", "\"two\""]},
+        " ",
+        {:cycle, ["var2", "\"one\"", "\"two\""]},
+        " ",
+        {:cycle, ["var1", "\"one\"", "\"two\""]},
+        " ",
+        {:cycle, ["var2", "\"one\"", "\"two\""]},
+        ""
+      ]
     )
   end
 end
