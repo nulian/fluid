@@ -7,326 +7,14 @@ defmodule Liquid.NimbleParser do
 
   alias Liquid.Combinators.General
   alias Liquid.Combinators.Tags.{
-    Raw
+    Assign,
+    Comment,
+    Decrement,
+    Increment,
+    Include,
+    Raw,
+    Cycle
   }
-
-  defparsec(:liquid_variable, General.liquid_variable())
-  defparsec(:variable_name, General.variable_name())
-  defparsec(:start_tag, General.start_tag())
-  defparsec(:end_tag, General.end_tag())
-  defparsec(:ignore_whitespaces, General.ignore_whitespaces())
-
-  ################################        Tags              ###########################
-
-  assign =
-    empty()
-    |> parsec(:start_tag)
-    |> concat(ignore(string("assign")))
-    |> concat(parsec(:variable_name))
-    |> concat(ignore(string("=")))
-    |> concat(parsec(:value))
-    |> concat(parsec(:end_tag))
-    |> tag(:assign)
-    |> optional(parsec(:__parse__))
-
-  defparsec(:assign, assign)
-
-  decrement =
-    empty()
-    |> parsec(:start_tag)
-    |> concat(ignore(string("decrement")))
-    |> concat(parsec(:variable_name))
-    |> concat(parsec(:end_tag))
-    |> tag(:decrement)
-    |> optional(parsec(:__parse__))
-
-  defparsec(:decrement, decrement)
-
-  increment =
-    empty()
-    |> parsec(:start_tag)
-    |> concat(ignore(string("increment")))
-    |> concat(parsec(:variable_name))
-    |> concat(parsec(:end_tag))
-    |> tag(:increment)
-    |> optional(parsec(:__parse__))
-
-  defparsec(:increment, increment)
-
-  ################################           raw          ###########################
-
-  defparsec(:open_tag_raw, Raw.open_tag())
-  defparsec(:close_tag_raw, Raw.close_tag())
-
-  not_close_tag_raw =
-    empty()
-    |> ignore(utf8_char([]))
-    |> parsec(:raw_content)
-
-  defparsecp(:not_close_tag_raw, not_close_tag_raw)
-
-  raw_content =
-    empty()
-    |> repeat_until(utf8_char([]), [
-      string(General.codepoints().start_tag)
-    ])
-    |> choice([parsec(:close_tag_raw), parsec(:not_close_tag_raw)])
-    |> reduce({List, :to_string, []})
-    |> tag(:raw_content)
-
-  defparsec(:raw_content, raw_content)
-
-  raw =
-    empty()
-    |> parsec(:open_tag_raw)
-    |> concat(parsec(:raw_content))
-    |> tag(:raw)
-    |> optional(parsec(:__parse__))
-
-  defparsec(:raw, raw)
-  ##############################           raw            ###########################
-
-  ###############################        comment          ###########################
-  not_end_comment =
-    empty()
-    |> ignore(utf8_char([]))
-    |> parsec(:comment_content)
-
-  defparsecp(:not_end_comment, not_end_comment)
-
-  end_comment =
-    empty()
-    |> parsec(:start_tag)
-    |> ignore(string("endcomment"))
-    |> concat(parsec(:end_tag))
-
-  defparsecp(:end_comment, end_comment)
-
-  comment_content =
-    empty()
-    |> repeat_until(utf8_char([]), [
-      string(General.codepoints().start_tag)
-    ])
-    |> choice([parsec(:end_comment), parsec(:not_end_comment)])
-
-  defparsecp(:comment_content, comment_content)
-
-  comment =
-    empty()
-    |> parsec(:start_tag)
-    |> ignore(string("comment"))
-    |> concat(parsec(:end_tag))
-    |> ignore(parsec(:comment_content))
-    |> optional(parsec(:__parse__))
-
-  defparsec(:comment, comment)
-
-  ################################        comment          ###########################
-
-  ################################        include          ###########################
-  snippet_var =
-    parsec(:ignore_whitespaces)
-    |> concat(utf8_char([General.codepoints().apostrophe]))
-    |> ascii_char([General.codepoints().underscore, ?A..?Z, ?a..?z])
-    |> optional(
-      repeat(
-        ascii_char([
-          General.codepoints().point,
-          General.codepoints().underscore,
-          General.codepoints().question_mark,
-          ?0..?9,
-          ?A..?Z,
-          ?a..?z
-        ])
-      )
-    )
-    |> ascii_char([General.codepoints().apostrophe])
-    |> parsec(:ignore_whitespaces)
-    |> reduce({List, :to_string, []})
-    |> tag(:snippet)
-
-  defparsecp(:snippet_var, snippet_var)
-
-  variable_atom =
-    empty()
-    |> parsec(:ignore_whitespaces)
-    |> ascii_char([General.codepoints().underscore, ?A..?Z, ?a..?z])
-    |> optional(
-      repeat(
-        ascii_char([
-          General.codepoints().point,
-          General.codepoints().underscore,
-          General.codepoints().question_mark,
-          ?0..?9,
-          ?A..?Z,
-          ?a..?z
-        ])
-      )
-    )
-    |> concat(ascii_char([General.codepoints().colon]))
-    |> parsec(:ignore_whitespaces)
-    |> reduce({List, :to_string, []})
-    |> tag(:variable_atom)
-
-  defparsec(:variable_atom, variable_atom)
-
-  var_assignation =
-    General.cleaned_comma()
-    |> concat(parsec(:variable_atom))
-    |> concat(parsec(:ignore_whitespaces))
-    |> concat(parsec(:snippet_var))
-    |> parsec(:ignore_whitespaces)
-    |> optional(parsec(:var_assignation))
-
-  defparsecp(:var_assignation, var_assignation)
-
-  # {% include 'color' with 'red' %}
-  with_param =
-    empty()
-    |> ignore(string("with"))
-    |> concat(parsec(:ignore_whitespaces))
-    |> concat(parsec(:snippet_var))
-    |> concat(parsec(:ignore_whitespaces))
-    |> tag(:with_param)
-
-  defparsecp(:with_param, with_param)
-
-  # {% include 'color' for 'red' %}
-  for_param =
-    empty()
-    |> ignore(string("for"))
-    |> concat(parsec(:ignore_whitespaces))
-    |> concat(parsec(:snippet_var))
-    |> concat(parsec(:ignore_whitespaces))
-    |> tag(:for_param)
-
-  defparsecp(:for_param, for_param)
-
-  include =
-    empty()
-    |> parsec(:start_tag)
-    |> ignore(string("include"))
-    |> concat(parsec(:ignore_whitespaces))
-    |> concat(parsec(:snippet_var))
-    |> concat(parsec(:ignore_whitespaces))
-    |> optional(choice([parsec(:with_param), parsec(:for_param), parsec(:var_assignation)]))
-    |> concat(parsec(:end_tag))
-    |> tag(:include)
-    |> optional(parsec(:__parse__))
-
-  defparsec(:include, include)
-
-  ################################       end include       ###########################
-  ################################        cycle            ###########################
-
-  word_cycle =
-    string("cycle")
-    |> ignore()
-
-  quoted = ascii_char([?"])
-
-  apostrophe =
-    string("'")
-    |> ignore()
-
-  coma =
-    string(",")
-    |> ignore()
-
-  defparsec(:coma, coma)
-
-  single_quoted_string =
-    parsec(:ignore_whitespaces)
-    |> concat(apostrophe)
-    |> concat(repeat(utf8_char(not: ?,, not: ?')))
-    |> concat(parsec(:ignore_whitespaces))
-    |> concat(apostrophe)
-    |> concat(parsec(:ignore_whitespaces))
-
-  defparsec(:single_quoted_string, single_quoted_string)
-
-  double_quoted_string =
-    parsec(:ignore_whitespaces)
-    |> concat(quoted)
-    |> concat(repeat(utf8_char(not: ?,, not: ?")))
-    |> concat(quoted)
-    |> reduce({List, :to_string, []})
-    |> concat(parsec(:ignore_whitespaces))
-
-  defparsec(:double_quoted_string, double_quoted_string)
-
-  integer_value = integer(min: 1)
-
-  defparsec(:integer_value, integer_value)
-
-  cycle_group =
-    parsec(:ignore_whitespaces)
-    |> concat(
-      choice([
-        parsec(:single_quoted_string),
-        parsec(:double_quoted_string),
-        repeat(utf8_char(not: ?,, not: ?:))
-      ])
-    )
-    |> reduce({List, :to_string, []})
-    |> concat(utf8_char([?:]) |> ignore())
-
-  defparsec(:cycle_group, cycle_group)
-
-  last_cycle_value =
-    parsec(:ignore_whitespaces)
-    |> choice([
-      parsec(:single_quoted_string),
-      parsec(:double_quoted_string),
-      parsec(:integer_value)
-    ])
-    |> concat(parsec(:end_tag))
-    |> reduce({List, :to_string, []})
-
-  defparsec(:last_cycle_value, last_cycle_value)
-
-  cycle_values =
-    empty()
-    |> choice([
-      parsec(:single_quoted_string),
-      parsec(:double_quoted_string),
-      parsec(:integer_value)
-    ])
-    |> concat(parsec(:ignore_whitespaces))
-    |> concat(coma)
-    |> reduce({List, :to_string, []})
-    |> choice([parsec(:cycle_values), parsec(:last_cycle_value)])
-
-  defparsec(:cycle_values, cycle_values)
-
-  cycle =
-    empty()
-    |> parsec(:start_tag)
-    |> concat(word_cycle)
-    |> concat(optional(parsec(:cycle_group)))
-    |> concat(parsec(:ignore_whitespaces))
-    |> concat(choice([parsec(:cycle_values), parsec(:last_cycle_value)]))
-    |> tag(:cycle)
-    |> optional(parsec(:__parse__))
-
-  defparsec(:cycle, cycle)
-
-  ############################        end of cycle       ##########################
-
-  defparsec(
-    :liquid_tag,
-    choice([
-      assign,
-      decrement,
-      increment,
-      parsec(:raw),
-      parsec(:include),
-      parsec(:cycle),
-      parsec(:comment)
-    ])
-  )
-
-  ################################ end Tags #######################################
 
   ################################## Lexical Tokens ###############################
 
@@ -435,8 +123,6 @@ defmodule Liquid.NimbleParser do
     |> concat(parsec(:ignore_whitespaces))
     |> unwrap_and_tag(:value)
 
-  defparsec(:value, value)
-
   # ListValue[Const] :
   #   - [ ]
   #   - [ Value[?Const]+ ]
@@ -449,17 +135,72 @@ defmodule Liquid.NimbleParser do
       |> ascii_char([?]])
     ])
 
-  defparsec(:list_value, list_value)
-
   #################################### End lexical Tokens #####################################
 
-  ########################################### Parser ##########################################
-
+  defparsec(:liquid_variable, General.liquid_variable())
+  defparsec(:variable_name, General.variable_name())
+  defparsec(:start_tag, General.start_tag())
+  defparsec(:end_tag, General.end_tag())
+  defparsec(:ignore_whitespaces, General.ignore_whitespaces())
+  defparsec(:value, value)
+  defparsec(:list_value, list_value)
   defparsec(
     :__parse__,
     General.literal()
     |> optional(choice([parsec(:liquid_tag), parsec(:liquid_variable)]))
   )
+
+  ################################        Tags              ###########################
+
+  defparsec(:assign, Assign.tag())
+
+  defparsec(:decrement, Decrement.tag())
+
+  defparsec(:increment, Increment.tag())
+
+  defparsecp(:open_tag_comment, Comment.open_tag())
+  defparsecp(:close_tag_comment, Comment.close_tag())
+  defparsecp(:not_close_tag_comment, Comment.not_close_tag_comment())
+  defparsecp(:comment_content, Comment.comment_content())
+  defparsec(:comment, Comment.tag())
+
+  defparsec(:single_quoted_string, Cycle.single_quoted_string())
+  defparsec(:double_quoted_string, Cycle.double_quoted_string())
+  defparsec(:integer_value, Cycle.integer_value())
+  defparsec(:cycle_group, Cycle.cycle_group())
+  defparsec(:last_cycle_value, Cycle.last_cycle_value())
+  defparsec(:cycle_values, Cycle.cycle_values())
+  defparsec(:cycle, Cycle.tag())
+
+  defparsec(:open_tag_raw, Raw.open_tag())
+  defparsec(:close_tag_raw, Raw.close_tag())
+  defparsecp(:not_close_tag_raw, Raw.not_close_tag_raw())
+  defparsec(:raw_content, Raw.raw_content())
+  defparsec(:raw, Raw.tag())
+
+  defparsecp(:snippet_var, Include.snippet_var())
+  defparsec(:variable_atom, Include.variable_atom())
+  defparsecp(:var_assignation, Include.var_assignation())
+  defparsecp(:with_param, Include.with_param())
+  defparsecp(:for_param, Include.for_param())
+  defparsec(:include, Include.tag())
+
+  defparsec(
+    :liquid_tag,
+    choice([
+      parsec(:assign),
+      parsec(:increment),
+      parsec(:decrement),
+      parsec(:raw),
+      parsec(:include),
+      parsec(:cycle),
+      parsec(:comment)
+    ])
+  )
+
+  ################################ end Tags #######################################
+
+  ########################################### Parser ##########################################
 
   @doc """
   Valid and parse liquid markup.
