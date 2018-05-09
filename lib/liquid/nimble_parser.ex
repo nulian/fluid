@@ -6,15 +6,11 @@ defmodule Liquid.NimbleParser do
   import NimbleParsec
 
   alias Liquid.Combinators.General
+  alias Liquid.Combinators.Tags.{
+    Raw
+  }
 
-  liquid_variable =
-    General.start_variable()
-    |> concat(parsec(:variable_name))
-    |> concat(General.end_variable())
-    |> tag(:variable)
-    |> optional(parsec(:__parse__))
-
-  defparsec(:liquid_variable, liquid_variable)
+  defparsec(:liquid_variable, General.liquid_variable())
   defparsec(:variable_name, General.variable_name())
   defparsec(:start_tag, General.start_tag())
   defparsec(:end_tag, General.end_tag())
@@ -38,7 +34,7 @@ defmodule Liquid.NimbleParser do
   decrement =
     empty()
     |> parsec(:start_tag)
-    |> string("decrement")
+    |> concat(ignore(string("decrement")))
     |> concat(parsec(:variable_name))
     |> concat(parsec(:end_tag))
     |> tag(:decrement)
@@ -49,7 +45,7 @@ defmodule Liquid.NimbleParser do
   increment =
     empty()
     |> parsec(:start_tag)
-    |> string("increment")
+    |> concat(ignore(string("increment")))
     |> concat(parsec(:variable_name))
     |> concat(parsec(:end_tag))
     |> tag(:increment)
@@ -59,51 +55,31 @@ defmodule Liquid.NimbleParser do
 
   ################################           raw          ###########################
 
-  raw_tag =
-    string("raw")
-    |> ignore()
-
-  raw_end_tag =
-    string("endraw")
-    |> ignore()
-
-  open_tag_raw =
-    empty()
-    |> parsec(:start_tag)
-    |> concat(raw_tag)
-    |> concat(parsec(:end_tag))
-
-  defparsec(:open_tag_raw, open_tag_raw)
-
-  close_tag_raw =
-    empty()
-    |> parsec(:start_tag)
-    |> concat(raw_end_tag)
-    |> concat(parsec(:end_tag))
-
-  defparsec(:close_tag_raw, close_tag_raw)
+  defparsec(:open_tag_raw, Raw.open_tag())
+  defparsec(:close_tag_raw, Raw.close_tag())
 
   not_close_tag_raw =
     empty()
     |> ignore(utf8_char([]))
-    |> parsec(:raw_text)
+    |> parsec(:raw_content)
 
   defparsecp(:not_close_tag_raw, not_close_tag_raw)
 
-  raw_text =
+  raw_content =
     empty()
     |> repeat_until(utf8_char([]), [
       string(General.codepoints().start_tag)
     ])
     |> choice([parsec(:close_tag_raw), parsec(:not_close_tag_raw)])
-    |> tag(:raw_text)
+    |> reduce({List, :to_string, []})
+    |> tag(:raw_content)
 
-  defparsec(:raw_text, raw_text)
+  defparsec(:raw_content, raw_content)
 
   raw =
     empty()
     |> parsec(:open_tag_raw)
-    |> concat(parsec(:raw_text))
+    |> concat(parsec(:raw_content))
     |> tag(:raw)
     |> optional(parsec(:__parse__))
 

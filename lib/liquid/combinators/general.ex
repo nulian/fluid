@@ -131,4 +131,12 @@ defmodule Liquid.Combinators.General do
     |> reduce({List, :to_string, []})
     |> unwrap_and_tag(:variable_name)
   end
+
+  def liquid_variable do
+    start_variable()
+    |> concat(variable_name())
+    |> concat(end_variable())
+    |> tag(:variable)
+    |> optional(parsec(:__parse__))
+  end
 end
