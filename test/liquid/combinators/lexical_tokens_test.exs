@@ -4,12 +4,14 @@ defmodule Liquid.Combinators.LexicalTokensTest do
 
   defmodule Parser do
     import NimbleParsec
-    alias Liquid.Combinators.LexicalTokens
-    alias Liquid.Combinators.General
+    alias Liquid.Combinators.{LexicalTokens, General}
 
     defparsec(:ignore_whitespaces, General.ignore_whitespaces())
+    defparsec(:variable_definition, General.variable_definition())
+    defparsec(:variable_name, General.variable_name())
     defparsec(:number, LexicalTokens.number())
     defparsec(:list_value, LexicalTokens.list_value())
+    defparsec(:value_definition, LexicalTokens.value_definition())
     defparsec(:value, LexicalTokens.value())
   end
 
@@ -41,5 +43,17 @@ defmodule Liquid.Combinators.LexicalTokensTest do
   test "boolean values" do
     test_combinator("true", &Parser.value/1, value: "true")
     test_combinator("false", &Parser.value/1, value: "false")
+  end
+
+  test "null values" do
+    test_combinator("nil", &Parser.value/1, value: "nil")
+    test_combinator("null", &Parser.value/1, value: "null")
+  end
+
+  test "list values" do
+    test_combinator("product[0]", &Parser.value/1, value: "product[0]")
+    test_combinator("product[  0  ]", &Parser.value/1, value: "product[0]")
+    test_combinator("product[]", &Parser.value/1, value: "product[]")
+    test_combinator("product[   ]", &Parser.value/1, value: "product[]")
   end
 end

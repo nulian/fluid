@@ -127,20 +127,6 @@ defmodule Liquid.Combinators.General do
     |> reduce({List, :to_string, []})
   end
 
-  # @doc """
-  # Valid variable name represented by:
-  # /[_A-Za-z][.][_0-9A-Za-z][?]*/
-  # """
-  # def variable_name do
-  #   empty()
-  #   |> concat(ignore_whitespaces())
-  #   |> ascii_char([@underscore, ?A..?Z, ?a..?z])
-  #   |> optional(repeat(ascii_char([@point, @underscore, @question_mark, ?0..?9, ?A..?Z, ?a..?z])))
-  #   |> concat(ignore_whitespaces())
-  #   |> reduce({List, :to_string, []})
-  #   |> unwrap_and_tag(:variable_name)
-  # end
-
   defp restricted_chars do
     [
       @digit,
@@ -156,7 +142,7 @@ defmodule Liquid.Combinators.General do
   optional utf8 valid character, except point or whitespace plus
   [A..Z, a..z, 0..9, _, -] (mandatory)
   """
-  def variable_name do
+  def variable_definition do
     empty()
     |> concat(ignore_whitespaces())
     |> optional(
@@ -169,6 +155,10 @@ defmodule Liquid.Combinators.General do
     |> concat(times(utf8_char(restricted_chars()), min: 1))
     |> concat(ignore_whitespaces())
     |> reduce({List, :to_string, []})
+  end
+
+  def variable_name do
+    parsec(:variable_definition)
     |> unwrap_and_tag(:variable_name)
   end
 

@@ -4,8 +4,7 @@ defmodule Liquid.NimbleParser do
   """
   import NimbleParsec
 
-  alias Liquid.Combinators.General
-  alias Liquid.Combinators.LexicalTokens, as: LT
+  alias Liquid.Combinators.{General, LexicalTokens}
 
   alias Liquid.Combinators.Tags.{
     Assign,
@@ -18,6 +17,7 @@ defmodule Liquid.NimbleParser do
   }
 
   defparsec(:liquid_variable, General.liquid_variable())
+  defparsec(:variable_definition, General.variable_definition())
   defparsec(:variable_name, General.variable_name())
   defparsec(:start_tag, General.start_tag())
   defparsec(:end_tag, General.end_tag())
@@ -26,9 +26,10 @@ defmodule Liquid.NimbleParser do
   defparsec(:token, General.token())
   defparsec(:ignore_whitespaces, General.ignore_whitespaces())
 
-  defparsec(:number, LT.number())
-  defparsec(:value, LT.value())
-  defparsec(:list_value, LT.list_value())
+  defparsec(:number, LexicalTokens.number())
+  defparsec(:value_definition, LexicalTokens.value_definition())
+  defparsec(:value, LexicalTokens.value())
+  defparsec(:list_value, LexicalTokens.list_value())
 
   defparsec(
     :__parse__,
@@ -72,9 +73,9 @@ defmodule Liquid.NimbleParser do
       parsec(:assign),
       parsec(:increment),
       parsec(:decrement),
-      parsec(:raw),
       parsec(:include),
       parsec(:cycle),
+      parsec(:raw),
       parsec(:comment)
     ])
   )

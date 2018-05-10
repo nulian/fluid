@@ -100,10 +100,10 @@ defmodule Liquid.Combinators.LexicalTokens do
   end
 
   # NullValue : `nil`
-  def null_value, do: string("nil")
+  def null_value, do: choice([string("nil"), string("null")])
 
   def number do
-    choice([int_value(), float_value()])
+    choice([float_value(), int_value()])
   end
 
   # Value[Const] :
@@ -113,30 +113,45 @@ defmodule Liquid.Combinators.LexicalTokens do
   #   - BooleanValue
   #   - NullValue
   #   - ListValue[?Const]
-  def value do
+  def value_definition do
     parsec(:ignore_whitespaces)
-    |> choice([
-      float_value(),
-      int_value(),
-      string_value(),
-      boolean_value(),
-      null_value(),
-      parsec(:list_value)
-    ])
-    |> concat(parsec(:ignore_whitespaces))
+      |> choice([
+          number(),
+          string_value(),
+          boolean_value(),
+          null_value(),
+          parsec(:list_value)
+        ])
+      |> concat(parsec(:ignore_whitespaces))
+  end
+
+  def value do
+    parsec(:value_definition)
     |> unwrap_and_tag(:value)
   end
+
+  # # ListValue[Const] :
+  # #   - [ ]
+  # #   - [ Value[?Const]+ ]
+  # def list_value do
+  #   choice([
+  #     ascii_char([?[])
+  #     |> ascii_char([?]]),
+  #     ascii_char([?[])
+  #     |> times(parsec(:value), min: 1)
+  #     |> ascii_char([?]])
+  #   ])
+  # end
 
   # ListValue[Const] :
   #   - [ ]
   #   - [ Value[?Const]+ ]
   def list_value do
-    choice([
-      ascii_char([?[])
-      |> ascii_char([?]]),
-      ascii_char([?[])
-      |> times(parsec(:value), min: 1)
-      |> ascii_char([?]])
-    ])
+    parsec(:variable_definition)
+      |> concat(string("["))
+      |> concat(optional(parsec(:value_definition)))
+      |> parsec(:ignore_whitespaces)
+      |> concat(string("]"))
+      |> reduce({Enum, :join, []})
   end
 end
