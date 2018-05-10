@@ -1,8 +1,17 @@
-defmodule Liquid.NimbleParserTest do
+defmodule Liquid.Combinators.LexicalTokensTest do
   use ExUnit.Case
   import Liquid.Helpers
 
-  alias Liquid.NimbleParser, as: Parser
+  defmodule Parser do
+    import NimbleParsec
+    alias Liquid.Combinators.LexicalTokens
+    alias Liquid.Combinators.General
+
+    defparsec(:ignore_whitespaces, General.ignore_whitespaces())
+    defparsec(:number, LexicalTokens.number())
+    defparsec(:list_value, LexicalTokens.list_value())
+    defparsec(:value, LexicalTokens.value())
+  end
 
   test "integer value" do
     test_combinator("5", &Parser.value/1, value: 5)
