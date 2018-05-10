@@ -11,6 +11,7 @@ defmodule Liquid.Combinators.General do
   @point 0x002E
   @comma 0x002C
   @apostrophe 0x0027
+  @quote 0x0022
   @question_mark 0x003F
   @underscore 0x005F
   @start_tag "{%"
@@ -25,6 +26,7 @@ defmodule Liquid.Combinators.General do
       colon: @colon,
       point: @point,
       comma: @comma,
+      quote: @quote,
       apostrophe: @apostrophe,
       question_mark: @question_mark,
       underscore: @underscore,
@@ -138,5 +140,27 @@ defmodule Liquid.Combinators.General do
     |> concat(end_variable())
     |> tag(:variable)
     |> optional(parsec(:__parse__))
+  end
+
+  def single_quoted_token do
+    parsec(:ignore_whitespaces)
+    |> concat(utf8_char([@apostrophe]) |> ignore())
+    |> concat(repeat(utf8_char(not: @comma, not: @apostrophe)))
+    |> concat(parsec(:ignore_whitespaces))
+    |> concat(utf8_char([@apostrophe]) |> ignore())
+    |> concat(parsec(:ignore_whitespaces))
+  end
+
+  def double_quoted_token do
+    parsec(:ignore_whitespaces)
+    |> concat(ascii_char([?"]))
+    |> concat(repeat(utf8_char(not: @comma, not: @quote)))
+    |> concat(ascii_char([?"]))
+    |> reduce({List, :to_string, []})
+    |> concat(parsec(:ignore_whitespaces))
+  end
+
+  def token do
+    choice([double_quoted_token(), single_quoted_token()])
   end
 end
