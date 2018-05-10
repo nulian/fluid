@@ -40,7 +40,7 @@ defmodule Liquid.Combinators.General do
       end_variable: @end_variable,
       digit: @digit,
       uppercase_letter: @uppercase_letter,
-      lowercase_letter: @lowercase_letter,
+      lowercase_letter: @lowercase_letter
     }
   end
 
@@ -159,11 +159,13 @@ defmodule Liquid.Combinators.General do
   def variable_name do
     empty()
     |> concat(ignore_whitespaces())
-    |> optional(repeat_until(utf8_char([]), [
-              utf8_char(restricted_chars()),
-              utf8_char([@point]),
-              utf8_char([@space])
-            ]))
+    |> optional(
+      repeat_until(utf8_char([]), [
+        utf8_char(restricted_chars()),
+        utf8_char([@point]),
+        utf8_char([@space])
+      ])
+    )
     |> concat(times(utf8_char(restricted_chars()), min: 1))
     |> concat(ignore_whitespaces())
     |> reduce({List, :to_string, []})

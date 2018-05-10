@@ -29,7 +29,7 @@ defmodule Liquid.Combinators.LexicalTokens do
       ascii_char([?0]),
       non_zero_digit() |> repeat(digit())
     ])
-    end
+  end
 
   # IntValue :: IntegerPart
   def int_value do
@@ -37,6 +37,7 @@ defmodule Liquid.Combinators.LexicalTokens do
     |> concat(integer_part())
     |> reduce({List, :to_integer, []})
   end
+
   # FractionalPart :: . Digit+
   def fractional_part do
     empty()
