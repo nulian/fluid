@@ -14,10 +14,14 @@ defmodule Liquid.Combinators.General do
   @quote 0x0022
   @question_mark 0x003F
   @underscore 0x005F
+  @dash 0x002D
   @start_tag "{%"
   @end_tag "%}"
   @start_variable "{{"
   @end_variable "}}"
+  @digit ?0..?9
+  @uppercase_letter ?A..?Z
+  @lowercase_letter ?a..?z
 
   def codepoints do
     %{
@@ -33,7 +37,10 @@ defmodule Liquid.Combinators.General do
       start_tag: @start_tag,
       end_tag: @end_tag,
       start_variable: @start_variable,
-      end_variable: @end_variable
+      end_variable: @end_variable,
+      digit: @digit,
+      uppercase_letter: @uppercase_letter,
+      lowercase_letter: @lowercase_letter,
     }
   end
 
@@ -120,15 +127,44 @@ defmodule Liquid.Combinators.General do
     |> reduce({List, :to_string, []})
   end
 
+  # @doc """
+  # Valid variable name represented by:
+  # /[_A-Za-z][.][_0-9A-Za-z][?]*/
+  # """
+  # def variable_name do
+  #   empty()
+  #   |> concat(ignore_whitespaces())
+  #   |> ascii_char([@underscore, ?A..?Z, ?a..?z])
+  #   |> optional(repeat(ascii_char([@point, @underscore, @question_mark, ?0..?9, ?A..?Z, ?a..?z])))
+  #   |> concat(ignore_whitespaces())
+  #   |> reduce({List, :to_string, []})
+  #   |> unwrap_and_tag(:variable_name)
+  # end
+
+  defp restricted_chars do
+    [
+      @digit,
+      @uppercase_letter,
+      @lowercase_letter,
+      @underscore,
+      @dash
+    ]
+  end
+
   @doc """
   Valid variable name represented by:
-  /[_A-Za-z][.][_0-9A-Za-z][?]*/
+  optional utf8 valid character, except point or whitespace plus
+  [A..Z, a..z, 0..9, _, -] (mandatory)
   """
   def variable_name do
     empty()
     |> concat(ignore_whitespaces())
-    |> ascii_char([@underscore, ?A..?Z, ?a..?z])
-    |> optional(repeat(ascii_char([@point, @underscore, @question_mark, ?0..?9, ?A..?Z, ?a..?z])))
+    |> optional(repeat_until(utf8_char([]), [
+              utf8_char(restricted_chars()),
+              utf8_char([@point]),
+              utf8_char([@space])
+            ]))
+    |> concat(times(utf8_char(restricted_chars()), min: 1))
     |> concat(ignore_whitespaces())
     |> reduce({List, :to_string, []})
     |> unwrap_and_tag(:variable_name)
