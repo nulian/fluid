@@ -24,11 +24,11 @@ defmodule Liquid.NimbleParser do
   defparsec(:single_quoted_token, General.single_quoted_token())
   defparsec(:double_quoted_token, General.double_quoted_token())
   defparsec(:token, General.token())
-  defparsec(:number, LT.number())
   defparsec(:ignore_whitespaces, General.ignore_whitespaces())
 
-  defparsec(:value, LT.value)
-  defparsec(:list_value, LT.list_value)
+  defparsec(:number, LT.number())
+  defparsec(:value, LT.value())
+  defparsec(:list_value, LT.list_value())
 
   defparsec(
     :__parse__,

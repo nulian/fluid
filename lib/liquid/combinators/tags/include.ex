@@ -15,9 +15,9 @@ defmodule Liquid.Combinators.Tags.Include do
           General.codepoints().point,
           General.codepoints().underscore,
           General.codepoints().question_mark,
-          ?0..?9,
-          ?A..?Z,
-          ?a..?z
+          General.codepoints().digit,
+          General.codepoints().uppercase_letter,
+          General.codepoints().lowercase_letter
         ])
       )
     )
@@ -37,9 +37,9 @@ defmodule Liquid.Combinators.Tags.Include do
           General.codepoints().point,
           General.codepoints().underscore,
           General.codepoints().question_mark,
-          ?0..?9,
-          ?A..?Z,
-          ?a..?z
+          General.codepoints().digit,
+          General.codepoints().uppercase_letter,
+          General.codepoints().lowercase_letter
         ])
       )
     )

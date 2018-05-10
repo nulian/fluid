@@ -23,9 +23,7 @@ defmodule Liquid.Combinator.Tags.IncludeTest do
 
     test_combinator_error(
       "{% include 'snippet' my_variable: 'apples', my_other_variable: 'oranges' %}",
-      &Parser.include/1,
-      ~S(expected string "%}")
-    )
+      &Parser.include/1)
 
     test_combinator("{% include 'pick_a_source' %}", &Parser.include/1, [
       {:include, [snippet: ["'pick_a_source'"]]},

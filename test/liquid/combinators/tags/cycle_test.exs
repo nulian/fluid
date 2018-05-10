@@ -125,8 +125,6 @@ defmodule Liquid.Combinator.Tags.CycleTest do
   test "cycle tag without coma" do
     test_combinator_error(
       "{%cycle 1 2 %}",
-      &Parser.cycle/1,
-      "expected string \"%}\""
-    )
+      &Parser.cycle/1)
   end
 end
