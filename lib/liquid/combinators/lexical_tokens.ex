@@ -73,9 +73,9 @@ defmodule Liquid.Combinators.LexicalTokens do
 
   defp double_quoted_string do
     empty()
-      |> ignore(ascii_char([?"]))
-      |> repeat_until(utf8_char([]), [utf8_char([?"])])
-      |> ignore(ascii_char([?"]))
+    |> ignore(ascii_char([?"]))
+    |> repeat_until(utf8_char([]), [utf8_char([?"])])
+    |> ignore(ascii_char([?"]))
   end
 
   defp quoted_string do
@@ -127,14 +127,15 @@ defmodule Liquid.Combinators.LexicalTokens do
   #   - ListValue[?Const]
   def value_definition do
     parsec(:ignore_whitespaces)
-      |> choice([
-          number(),
-          string_value(),
-          boolean_value(),
-          null_value(),
-          parsec(:list_value)
-        ])
-      |> concat(parsec(:ignore_whitespaces))
+    |> choice([
+      number(),
+      string_value(),
+      boolean_value(),
+      null_value(),
+      parsec(:list_value),
+      parsec(:variable_definition)
+    ])
+    |> concat(parsec(:ignore_whitespaces))
   end
 
   def value do
@@ -158,12 +159,23 @@ defmodule Liquid.Combinators.LexicalTokens do
   # ListValue[Const] :
   #   - [ ]
   #   - [ Value[?Const]+ ]
+
+  defp list_definition do
+    choice([
+      int_value(),
+      parsec(:variable_definition)
+    ])
+  end
+
   def list_value do
     parsec(:variable_definition)
-      |> concat(string("["))
-      |> concat(optional(parsec(:value_definition)))
-      |> parsec(:ignore_whitespaces)
-      |> concat(string("]"))
-      |> reduce({Enum, :join, []})
+    |> times(list_index(), min: 1)
+    |> reduce({Enum, :join, []})
+  end
+
+  defp list_index do
+    string("[")
+    |> concat(optional(list_definition()))
+    |> concat(string("]"))
   end
 end
