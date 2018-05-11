@@ -10,7 +10,8 @@ defmodule Liquid.Combinators.LexicalTokensTest do
     defparsec(:variable_definition, General.variable_definition())
     defparsec(:variable_name, General.variable_name())
     defparsec(:number, LexicalTokens.number())
-    defparsec(:list_value, LexicalTokens.list_value())
+    defparsec(:object_property, LexicalTokens.object_property())
+    defparsec(:object_value, LexicalTokens.object_value())
     defparsec(:value_definition, LexicalTokens.value_definition())
     defparsec(:value, LexicalTokens.value())
   end
@@ -51,10 +52,11 @@ defmodule Liquid.Combinators.LexicalTokensTest do
     test_combinator("null", &Parser.value/1, value: "null")
   end
 
-  test "list values" do
+  test "object values" do
     test_combinator("product[0][0][0]", &Parser.value/1, value: "product[0][0][0]")
     test_combinator("product[    0][0][0]", &Parser.value/1, value: "product[0][0][0]")
     test_combinator("product[var1][var2]", &Parser.value/1, value: "product[var1][var2]")
     test_combinator("product[    ]", &Parser.value/1, value: "product[]")
+    test_combinator("product[0][1].name[0]", &Parser.value/1, value: "product[0][1].name[0]")
   end
 end

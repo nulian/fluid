@@ -29,7 +29,8 @@ defmodule Liquid.NimbleParser do
   defparsec(:number, LexicalTokens.number())
   defparsec(:value_definition, LexicalTokens.value_definition())
   defparsec(:value, LexicalTokens.value())
-  defparsec(:list_value, LexicalTokens.list_value())
+  defparsec(:object_property, LexicalTokens.object_property())
+  defparsec(:object_value, LexicalTokens.object_value())
 
   defparsec(
     :__parse__,

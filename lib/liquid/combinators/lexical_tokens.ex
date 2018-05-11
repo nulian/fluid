@@ -1,5 +1,6 @@
 defmodule Liquid.Combinators.LexicalTokens do
   import NimbleParsec
+
   # Token ::
   #   - Punctuator
   #   - IntValue
@@ -119,12 +120,12 @@ defmodule Liquid.Combinators.LexicalTokens do
   end
 
   # Value[Const] :
-  #   - IntValue
-  #   - FloatValue
+  #   - Number
   #   - StringValue
   #   - BooleanValue
   #   - NullValue
   #   - ListValue[?Const]
+  #   - Variable
 
   def value_definition do
     parsec(:ignore_whitespaces)
@@ -133,8 +134,7 @@ defmodule Liquid.Combinators.LexicalTokens do
       string_value(),
       boolean_value(),
       null_value(),
-      parsec(:list_value),
-      parsec(:variable_definition)
+      object_value(),
     ])
     |> concat(parsec(:ignore_whitespaces))
   end
@@ -144,12 +144,17 @@ defmodule Liquid.Combinators.LexicalTokens do
     |> unwrap_and_tag(:value)
   end
 
-  # ListValue[Const] :
+  # ObjectValue[Const] :
   #   - [ ]
   #   - [ Value[?Const]+ ]
-  def list_value do
+  def object_property do
+  string(".")
+  |> parsec(:object_value)
+  end
+
+  def object_value do
     parsec(:variable_definition)
-    |> times(list_index(), min: 1)
+    |> optional(choice([times(list_index(), min: 1), parsec(:object_property)]))
     |> reduce({Enum, :join, []})
   end
 
@@ -166,5 +171,6 @@ defmodule Liquid.Combinators.LexicalTokens do
     |> concat(optional(list_definition()))
     |> parsec(:ignore_whitespaces)
     |> concat(string("]"))
+    |> optional(parsec(:object_property))
   end
 end

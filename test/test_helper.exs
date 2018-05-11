@@ -9,7 +9,7 @@ defmodule Liquid.Helpers do
 
   def test_combinator(markup, combiner, expected) do
     {:ok, response, _, _, _, _} = combiner.(markup)
-    assert response == expected, "Failed with markup: #{markup}"
+    assert response == expected
   end
 
   def test_combinator_error(markup, combiner) do

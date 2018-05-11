@@ -39,18 +39,26 @@ defmodule Liquid.Combinator.Tags.AssignTest do
                     ])
   end
 
-  @tag :skip
   test "assign an object" do
-    test_combinator("{% assign var = company.name %} Hello {{ var }}", &Parser.assign/1, [
-      {:assign, [variable_name: "var", value: "company.name"]},
+    test_combinator("{% assign cart = company.employees.first.name %}", &Parser.assign/1, [
+      {:assign, [variable_name: "cart", value: "company.employees.first.name"]},
       ""
     ])
 
     test_combinator(
-      "{% assign var = company.managers[1].name %} Hello {{ var }}",
+      "{% assign cart = company.managers[1].name %}",
       &Parser.assign/1,
       [
-        {:assign, [variable_name: "cart", value: "product[0]"]},
+        {:assign, [variable_name: "cart", value: "company.managers[1].name"]},
+        ""
+      ]
+    )
+
+    test_combinator(
+      "{% assign cart = company.managers[1][0].name %}",
+      &Parser.assign/1,
+      [
+        {:assign, [variable_name: "cart", value: "company.managers[1][0].name"]},
         ""
       ]
     )
