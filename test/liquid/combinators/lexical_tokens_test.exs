@@ -53,6 +53,8 @@ defmodule Liquid.Combinators.LexicalTokensTest do
 
   test "list values" do
     test_combinator("product[0][0][0]", &Parser.value/1, value: "product[0][0][0]")
-    test_combinator("product[]", &Parser.value/1, value: "product[]")
+    test_combinator("product[    0][0][0]", &Parser.value/1, value: "product[0][0][0]")
+    test_combinator("product[var1][var2]", &Parser.value/1, value: "product[var1][var2]")
+    test_combinator("product[    ]", &Parser.value/1, value: "product[]")
   end
 end

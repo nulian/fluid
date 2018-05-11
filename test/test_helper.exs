@@ -7,13 +7,13 @@ defmodule Liquid.Helpers do
     text |> Liquid.Template.parse() |> Liquid.Template.render(data) |> elem(1)
   end
 
-  def test_combinator(markdown, combiner, expected) do
-    {:ok, response, _, _, _, _} = combiner.(markdown)
-    assert response == expected
+  def test_combinator(markup, combiner, expected) do
+    {:ok, response, _, _, _, _} = combiner.(markup)
+    assert response == expected, "Failed with markup: #{markup}"
   end
 
-  def test_combinator_error(markdown, combiner) do
-    {:error, _, _, _, _, _} = combiner.(markdown)
+  def test_combinator_error(markup, combiner) do
+    {:error, _, _, _, _, _} = combiner.(markup)
     assert true
   end
 end

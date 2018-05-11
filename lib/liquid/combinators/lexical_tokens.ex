@@ -125,6 +125,7 @@ defmodule Liquid.Combinators.LexicalTokens do
   #   - BooleanValue
   #   - NullValue
   #   - ListValue[?Const]
+
   def value_definition do
     parsec(:ignore_whitespaces)
     |> choice([
@@ -143,22 +144,14 @@ defmodule Liquid.Combinators.LexicalTokens do
     |> unwrap_and_tag(:value)
   end
 
-  # # ListValue[Const] :
-  # #   - [ ]
-  # #   - [ Value[?Const]+ ]
-  # def list_value do
-  #   choice([
-  #     ascii_char([?[])
-  #     |> ascii_char([?]]),
-  #     ascii_char([?[])
-  #     |> times(parsec(:value), min: 1)
-  #     |> ascii_char([?]])
-  #   ])
-  # end
-
   # ListValue[Const] :
   #   - [ ]
   #   - [ Value[?Const]+ ]
+  def list_value do
+    parsec(:variable_definition)
+    |> times(list_index(), min: 1)
+    |> reduce({Enum, :join, []})
+  end
 
   defp list_definition do
     choice([
@@ -167,15 +160,11 @@ defmodule Liquid.Combinators.LexicalTokens do
     ])
   end
 
-  def list_value do
-    parsec(:variable_definition)
-    |> times(list_index(), min: 1)
-    |> reduce({Enum, :join, []})
-  end
-
   defp list_index do
     string("[")
+    |> parsec(:ignore_whitespaces)
     |> concat(optional(list_definition()))
+    |> parsec(:ignore_whitespaces)
     |> concat(string("]"))
   end
 end

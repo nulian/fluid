@@ -5,22 +5,10 @@ defmodule Liquid.Combinators.Tags.Include do
   import NimbleParsec
   alias Liquid.Combinators.General
 
-  def snippet_var do
+  def snippet do
     parsec(:ignore_whitespaces)
     |> concat(utf8_char([General.codepoints().apostrophe]))
-    |> ascii_char([General.codepoints().underscore, ?A..?Z, ?a..?z])
-    |> optional(
-      repeat(
-        ascii_char([
-          General.codepoints().point,
-          General.codepoints().underscore,
-          General.codepoints().question_mark,
-          General.codepoints().digit,
-          General.codepoints().uppercase_letter,
-          General.codepoints().lowercase_letter
-        ])
-      )
-    )
+    |> parsec(:variable_definition)
     |> ascii_char([General.codepoints().apostrophe])
     |> parsec(:ignore_whitespaces)
     |> reduce({List, :to_string, []})
@@ -30,31 +18,20 @@ defmodule Liquid.Combinators.Tags.Include do
   def variable_atom do
     empty()
     |> parsec(:ignore_whitespaces)
-    |> ascii_char([General.codepoints().underscore, ?A..?Z, ?a..?z])
-    |> optional(
-      repeat(
-        ascii_char([
-          General.codepoints().point,
-          General.codepoints().underscore,
-          General.codepoints().question_mark,
-          General.codepoints().digit,
-          General.codepoints().uppercase_letter,
-          General.codepoints().lowercase_letter
-        ])
-      )
-    )
+    |> parsec(:variable_definition)
     |> concat(ascii_char([General.codepoints().colon]))
     |> parsec(:ignore_whitespaces)
     |> reduce({List, :to_string, []})
-    |> tag(:variable_atom)
+    |> tag(:variable_name)
   end
 
   def var_assignation do
     General.cleaned_comma()
     |> concat(parsec(:variable_atom))
     |> concat(parsec(:ignore_whitespaces))
-    |> concat(parsec(:snippet_var))
+    |> concat(parsec(:value))
     |> parsec(:ignore_whitespaces)
+    |> tag(:variables)
     |> optional(parsec(:var_assignation))
   end
 
@@ -63,7 +40,7 @@ defmodule Liquid.Combinators.Tags.Include do
     empty()
     |> ignore(string("with"))
     |> concat(parsec(:ignore_whitespaces))
-    |> concat(parsec(:snippet_var))
+    |> concat(parsec(:value_definition))
     |> concat(parsec(:ignore_whitespaces))
     |> tag(:with_param)
   end
@@ -73,7 +50,7 @@ defmodule Liquid.Combinators.Tags.Include do
     empty()
     |> ignore(string("for"))
     |> concat(parsec(:ignore_whitespaces))
-    |> concat(parsec(:snippet_var))
+    |> concat(parsec(:value_definition))
     |> concat(parsec(:ignore_whitespaces))
     |> tag(:for_param)
   end
@@ -83,7 +60,7 @@ defmodule Liquid.Combinators.Tags.Include do
     |> parsec(:start_tag)
     |> ignore(string("include"))
     |> concat(parsec(:ignore_whitespaces))
-    |> concat(parsec(:snippet_var))
+    |> concat(parsec(:snippet))
     |> concat(parsec(:ignore_whitespaces))
     |> optional(choice([parsec(:with_param), parsec(:for_param), parsec(:var_assignation)]))
     |> concat(parsec(:end_tag))
