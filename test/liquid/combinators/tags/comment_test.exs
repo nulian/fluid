@@ -8,7 +8,7 @@ defmodule Liquid.Combinator.Tags.CommentTest do
     test_combinator(
       "{% comment %} Allows you to leave un-rendered code inside a Liquid template. Any text within the opening and closing comment blocks will not be output, and any Liquid code within will not be executed. {% endcomment %}",
       &Parser.comment/1,
-      [literal: [""]]
+      [""]
     )
   end
 end

@@ -7,25 +7,46 @@ defmodule Liquid.Combinators.General do
   # Codepoints
   @horizontal_tab 0x0009
   @space 0x0020
+  @colon 0x003A
   @point 0x002E
+  @comma 0x002C
+  @single_quote 0x0027
+  @quote 0x0022
   @question_mark 0x003F
   @underscore 0x005F
+  @dash 0x002D
   @start_tag "{%"
   @end_tag "%}"
   @start_variable "{{"
   @end_variable "}}"
+  @equals "=="
+  @does_not_equal "!="
+  @greater_than ">"
+  @less_than "<"
+  @greater_or_equal ">="
+  @less_or_equal "<="
+  @digit ?0..?9
+  @uppercase_letter ?A..?Z
+  @lowercase_letter ?a..?z
 
   def codepoints do
     %{
       horizontal_tab: @horizontal_tab,
       space: @space,
+      colon: @colon,
       point: @point,
+      comma: @comma,
+      quote: @quote,
+      single_quote: @single_quote,
       question_mark: @question_mark,
       underscore: @underscore,
       start_tag: @start_tag,
       end_tag: @end_tag,
       start_variable: @start_variable,
-      end_variable: @end_variable
+      end_variable: @end_variable,
+      digit: @digit,
+      uppercase_letter: @uppercase_letter,
+      lowercase_letter: @lowercase_letter
     }
   end
 
@@ -45,6 +66,16 @@ defmodule Liquid.Combinators.General do
   def ignore_whitespaces do
     whitespace()
     |> repeat()
+    |> ignore()
+  end
+
+  @doc """
+  Comma without spaces
+  """
+  def cleaned_comma do
+    ignore_whitespaces()
+    |> concat(ascii_char([@comma]))
+    |> concat(ignore_whitespaces())
     |> ignore()
   end
 
@@ -88,6 +119,21 @@ defmodule Liquid.Combinators.General do
     |> ignore()
   end
 
+  def math_operators do
+    choice([
+    string(@equals),
+    string(@does_not_equal),
+    string(@greater_than),
+    string(@less_than),
+    string(@greater_or_equal ),
+    string(@less_or_equal)
+    ])
+  end
+
+  def logical_operators do
+    choice([string("or"), string("and")])
+  end
+
   @doc """
   All utf8 valid characters or empty limited by start/end of tag/variable
   """
@@ -100,20 +146,63 @@ defmodule Liquid.Combinators.General do
       string(@end_tag)
     ])
     |> reduce({List, :to_string, []})
-    |> tag(:literal)
+  end
+
+  defp allowed_chars do
+    [
+      @digit,
+      @uppercase_letter,
+      @lowercase_letter,
+      @underscore,
+      @dash
+    ]
   end
 
   @doc """
   Valid variable name represented by:
-  /[_A-Za-z][.][_0-9A-Za-z][?]*/
+  start char [A..Z, a..z, _] plus optional n times [A..Z, a..z, 0..9, _, -]
   """
-  def variable_name do
+  def variable_definition do
     empty()
     |> concat(ignore_whitespaces())
-    |> ascii_char([@underscore, ?A..?Z, ?a..?z])
-    |> optional(repeat(ascii_char([@point, @underscore, @question_mark, ?0..?9, ?A..?Z, ?a..?z])))
+    |> utf8_char([@uppercase_letter, @lowercase_letter, @underscore])
+    |> optional(times(utf8_char(allowed_chars()), min: 1))
     |> concat(ignore_whitespaces())
     |> reduce({List, :to_string, []})
+  end
+
+  def variable_name do
+    parsec(:variable_definition)
     |> unwrap_and_tag(:variable_name)
+  end
+
+  def liquid_variable do
+    start_variable()
+    |> concat(variable_name())
+    |> concat(end_variable())
+    |> tag(:variable)
+    |> optional(parsec(:__parse__))
+  end
+
+  def single_quoted_token do
+    parsec(:ignore_whitespaces)
+    |> concat(utf8_char([@single_quote]) |> ignore())
+    |> concat(repeat(utf8_char(not: @comma, not: @single_quote)))
+    |> concat(parsec(:ignore_whitespaces))
+    |> concat(utf8_char([@single_quote]) |> ignore())
+    |> concat(parsec(:ignore_whitespaces))
+  end
+
+  def double_quoted_token do
+    parsec(:ignore_whitespaces)
+    |> concat(ascii_char([?"]))
+    |> concat(repeat(utf8_char(not: @comma, not: @quote)))
+    |> concat(ascii_char([?"]))
+    |> reduce({List, :to_string, []})
+    |> concat(parsec(:ignore_whitespaces))
+  end
+
+  def token do
+    choice([double_quoted_token(), single_quoted_token()])
   end
 end
