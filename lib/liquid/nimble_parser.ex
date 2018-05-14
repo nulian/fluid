@@ -13,7 +13,8 @@ defmodule Liquid.NimbleParser do
     Increment,
     Include,
     Raw,
-    Cycle
+    Cycle,
+    If
   }
 
   defparsec(:liquid_variable, General.liquid_variable())
@@ -24,6 +25,8 @@ defmodule Liquid.NimbleParser do
   defparsec(:single_quoted_token, General.single_quoted_token())
   defparsec(:double_quoted_token, General.double_quoted_token())
   defparsec(:token, General.token())
+  defparsec(:math_operators, General.math_operators())
+  defparsec(:logical_operators, General.logical_operators())
   defparsec(:ignore_whitespaces, General.ignore_whitespaces())
 
   defparsec(:number, LexicalTokens.number())
@@ -67,6 +70,14 @@ defmodule Liquid.NimbleParser do
   defparsecp(:with_param, Include.with_param())
   defparsecp(:for_param, Include.for_param())
   defparsec(:include, Include.tag())
+
+  defparsec(:if, If.open_tag())
+  defparsec(:conditions, If.conditions())
+  defparsecp(:logical_conditions, If.logical_conditions())
+
+
+
+
 
   defparsec(
     :liquid_tag,

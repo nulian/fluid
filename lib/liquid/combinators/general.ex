@@ -10,7 +10,7 @@ defmodule Liquid.Combinators.General do
   @colon 0x003A
   @point 0x002E
   @comma 0x002C
-  @apostrophe 0x0027
+  @single_quote 0x0027
   @quote 0x0022
   @question_mark 0x003F
   @underscore 0x005F
@@ -19,6 +19,12 @@ defmodule Liquid.Combinators.General do
   @end_tag "%}"
   @start_variable "{{"
   @end_variable "}}"
+  @equals "=="
+  @does_not_equal "!="
+  @greater_than ">"
+  @less_than "<"
+  @greater_or_equal ">="
+  @less_or_equal "<="
   @digit ?0..?9
   @uppercase_letter ?A..?Z
   @lowercase_letter ?a..?z
@@ -31,7 +37,7 @@ defmodule Liquid.Combinators.General do
       point: @point,
       comma: @comma,
       quote: @quote,
-      apostrophe: @apostrophe,
+      single_quote: @single_quote,
       question_mark: @question_mark,
       underscore: @underscore,
       start_tag: @start_tag,
@@ -113,6 +119,21 @@ defmodule Liquid.Combinators.General do
     |> ignore()
   end
 
+  def math_operators do
+    choice([
+    string(@equals),
+    string(@does_not_equal),
+    string(@greater_than),
+    string(@less_than),
+    string(@greater_or_equal ),
+    string(@less_or_equal)
+    ])
+  end
+
+  def logical_operators do
+    choice([string("or"), string("and")])
+  end
+
   @doc """
   All utf8 valid characters or empty limited by start/end of tag/variable
   """
@@ -165,10 +186,10 @@ defmodule Liquid.Combinators.General do
 
   def single_quoted_token do
     parsec(:ignore_whitespaces)
-    |> concat(utf8_char([@apostrophe]) |> ignore())
-    |> concat(repeat(utf8_char(not: @comma, not: @apostrophe)))
+    |> concat(utf8_char([@single_quote]) |> ignore())
+    |> concat(repeat(utf8_char(not: @comma, not: @single_quote)))
     |> concat(parsec(:ignore_whitespaces))
-    |> concat(utf8_char([@apostrophe]) |> ignore())
+    |> concat(utf8_char([@single_quote]) |> ignore())
     |> concat(parsec(:ignore_whitespaces))
   end
 

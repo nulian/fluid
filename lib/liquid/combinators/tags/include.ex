@@ -7,9 +7,9 @@ defmodule Liquid.Combinators.Tags.Include do
 
   def snippet do
     parsec(:ignore_whitespaces)
-    |> concat(utf8_char([General.codepoints().apostrophe]))
+    |> concat(utf8_char([General.codepoints().single_quote]))
     |> parsec(:variable_definition)
-    |> ascii_char([General.codepoints().apostrophe])
+    |> ascii_char([General.codepoints().single_quote])
     |> parsec(:ignore_whitespaces)
     |> reduce({List, :to_string, []})
     |> tag(:snippet)
