@@ -19,24 +19,23 @@ defmodule Liquid.Combinator.Tags.AssignTest do
         ""
       ])
     end)
-
   end
 
   test "assign a list" do
     test_combinator("{% assign cart = product[0] %}", &Parser.assign/1, [
-                      {:assign, [variable_name: "cart", value: "product[0]"]},
-                      ""
-                    ])
+      {:assign, [variable_name: "cart", value: "product[0]"]},
+      ""
+    ])
 
     test_combinator("{% assign cart = products[0][0] %}", &Parser.assign/1, [
-                      {:assign, [variable_name: "cart", value: "products[0][0]"]},
-                      ""
-                    ])
+      {:assign, [variable_name: "cart", value: "products[0][0]"]},
+      ""
+    ])
 
     test_combinator("{% assign cart = products[  0  ][ 0  ] %}", &Parser.assign/1, [
-                      {:assign, [variable_name: "cart", value: "products[0][0]"]},
-                      ""
-                    ])
+      {:assign, [variable_name: "cart", value: "products[0][0]"]},
+      ""
+    ])
   end
 
   test "assign an object" do
