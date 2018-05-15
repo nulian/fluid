@@ -25,14 +25,14 @@ defmodule Liquid.Combinators.Tags.Include do
     |> tag(:variable_name)
   end
 
-  def var_assignation do
+  def var_assignment do
     General.cleaned_comma()
     |> concat(parsec(:variable_atom))
     |> concat(parsec(:ignore_whitespaces))
     |> concat(parsec(:value))
     |> parsec(:ignore_whitespaces)
     |> tag(:variables)
-    |> optional(parsec(:var_assignation))
+    |> optional(parsec(:var_assignment))
   end
 
   #   # {% include 'color' with 'red' %}
@@ -62,7 +62,7 @@ defmodule Liquid.Combinators.Tags.Include do
     |> concat(parsec(:ignore_whitespaces))
     |> concat(parsec(:snippet))
     |> concat(parsec(:ignore_whitespaces))
-    |> optional(choice([parsec(:with_param), parsec(:for_param), parsec(:var_assignation)]))
+    |> optional(choice([parsec(:with_param), parsec(:for_param), parsec(:var_assignment)]))
     |> concat(parsec(:end_tag))
     |> tag(:include)
     |> optional(parsec(:__parse__))

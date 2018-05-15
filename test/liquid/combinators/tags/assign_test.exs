@@ -63,7 +63,7 @@ defmodule Liquid.Combinator.Tags.AssignTest do
     )
   end
 
-  test "incorrect variable assignation" do
+  test "incorrect variable assignment" do
     test_combinator_error("{% assign cart@ = 5 %}", &Parser.assign/1)
     test_combinator_error("{% assign cart. = 5 %}", &Parser.assign/1)
     test_combinator_error("{% assign .cart = 5 %}", &Parser.assign/1)
