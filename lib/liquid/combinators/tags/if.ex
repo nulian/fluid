@@ -111,7 +111,7 @@ defmodule Liquid.Combinators.Tags.If do
         min: 1
       )
     )
-    |> optional(parsec(:else_tag))
+    |> optional(times(parsec(:else_tag), min: 1))
     |> parsec(:close_tag_if)
   end
 
