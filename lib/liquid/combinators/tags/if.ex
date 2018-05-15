@@ -34,6 +34,7 @@ defmodule Liquid.Combinators.Tags.If do
       min: 1
     )
     |> concat(parsec(:end_tag))
+    |> concat(parsec(:output_text))
   end
 
   def conditions do
@@ -63,24 +64,27 @@ defmodule Liquid.Combinators.Tags.If do
     |> ignore(string("elsif"))
     |> concat(parsec(:ignore_whitespaces))
     |> times(
-      choice([parsec(:conditions), parsec(:logical_conditions), parsec(:boolean_value)]),
+      choice([
+        parsec(:conditions),
+        parsec(:logical_conditions),
+        parsec(:boolean_value),
+        parsec(:token),
+        parsec(:logical_conditions_wo_math)
+      ]),
       min: 1
     )
     |> concat(parsec(:end_tag))
+    |> concat(parsec(:output_text))
     |> tag(:elsif)
   end
 
   def else_tag do
-    # |> repeat_until(utf8_char([]), [string(General.codepoints().start_tag)])
-    # |> reduce({List, :to_string, []})
     parsec(:ignore_whitespaces)
     |> concat(parsec(:start_tag))
     |> ignore(string("else"))
     |> concat(parsec(:end_tag))
-    |> repeat_until(utf8_char([]), [string(General.codepoints().start_tag)])
+    |> parsec(:output_text)
     |> tag(:else)
-
-    # |> repeat_until(utf8_char([]), [string(General.codepoints().start_tag)])
   end
 
   @doc "Close if tag: {% endif %}"
@@ -90,26 +94,25 @@ defmodule Liquid.Combinators.Tags.If do
     |> concat(parsec(:end_tag))
   end
 
-  def not_close_tag_if do
-    empty()
-    |> ignore(utf8_char([]))
-    |> parsec(:if_content)
+  def output_text do
+    repeat_until(utf8_char([]), [string(General.codepoints().start_tag)])
+    |> reduce({List, :to_string, []})
+    |> tag(:output_text)
   end
 
   def if_content do
     empty()
-    |> repeat_until(utf8_char([]), [string(General.codepoints().start_tag)])
-    |> reduce({List, :to_string, []})
-    |> times(
-      choice([
-        parsec(:elsif_tag),
-        parsec(:else_tag),
-        parsec(:close_tag_if),
-        parsec(:if),
-        parsec(:not_close_tag_if)
-      ]),
-      min: 1
+    |> optional(
+      times(
+        choice([
+          parsec(:elsif_tag),
+          parsec(:if)
+        ]),
+        min: 1
+      )
     )
+    |> optional(parsec(:else_tag))
+    |> parsec(:close_tag_if)
   end
 
   def tag do
