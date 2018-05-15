@@ -69,7 +69,7 @@ defmodule Liquid.NimbleParser do
 
   defparsecp(:snippet, Include.snippet())
   defparsec(:variable_atom, Include.variable_atom())
-  defparsecp(:var_assignation, Include.var_assignment())
+  defparsecp(:var_assignment, Include.var_assignment())
   defparsecp(:with_param, Include.with_param())
   defparsecp(:for_param, Include.for_param())
   defparsec(:include, Include.tag())
@@ -108,7 +108,7 @@ defmodule Liquid.NimbleParser do
       parsec(:comment),
       parsec(:for),
       parsec(:break_tag_for),
-      parsec(:continue_tag_for)
+      parsec(:continue_tag_for),
       parsec(:if)
     ])
   )
