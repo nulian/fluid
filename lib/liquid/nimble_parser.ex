@@ -72,14 +72,14 @@ defmodule Liquid.NimbleParser do
   defparsecp(:for_param, Include.for_param())
   defparsec(:include, Include.tag())
 
-  defparsecp(:open_tag_if, If.open_tag())
+  defparsec(:open_tag_if, If.open_tag())
   defparsecp(:close_tag_if, If.close_tag())
+  defparsecp(:output_text, If.output_text())
   defparsecp(:conditions, If.conditions())
   defparsecp(:logical_conditions, If.logical_conditions())
   defparsecp(:logical_conditions_wo_math, If.logical_conditions_wo_math())
-  defparsecp(:elsif_tag, If.elsif_tag())
+  defparsec(:elsif_tag, If.elsif_tag())
   defparsecp(:else_tag, If.else_tag())
-  defparsecp(:not_close_tag_if, If.not_close_tag_if())
   defparsecp(:if_content, If.if_content())
 
   defparsec(:if, If.tag())
