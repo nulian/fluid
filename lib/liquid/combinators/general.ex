@@ -121,12 +121,13 @@ defmodule Liquid.Combinators.General do
 
   def math_operators do
     choice([
-    string(@equals),
-    string(@does_not_equal),
-    string(@greater_than),
-    string(@less_than),
-    string(@greater_or_equal ),
-    string(@less_or_equal)
+      string(@equals),
+      string(@does_not_equal),
+      string(@greater_than),
+      string(@less_than),
+      string(@greater_or_equal),
+      string(@less_or_equal),
+      string("contains")
     ])
   end
 

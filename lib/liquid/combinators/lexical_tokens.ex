@@ -134,7 +134,7 @@ defmodule Liquid.Combinators.LexicalTokens do
       string_value(),
       boolean_value(),
       null_value(),
-      object_value(),
+      object_value()
     ])
     |> concat(parsec(:ignore_whitespaces))
   end
@@ -148,8 +148,8 @@ defmodule Liquid.Combinators.LexicalTokens do
   #   - [ ]
   #   - [ Value[?Const]+ ]
   def object_property do
-  string(".")
-  |> parsec(:object_value)
+    string(".")
+    |> parsec(:object_value)
   end
 
   def object_value do

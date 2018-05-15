@@ -47,8 +47,9 @@ defmodule Liquid.Combinators.Tags.For do
 
   def tag do
     empty()
-    #|> parsec(:open_tag_for)
+    # |> parsec(:open_tag_for)
     |> optional(parsec(:__parse__))
-    #|> parsec(:open_tag_for)
+
+    # |> parsec(:open_tag_for)
   end
 end
