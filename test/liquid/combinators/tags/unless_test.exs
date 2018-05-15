@@ -36,7 +36,7 @@ defmodule Liquid.Combinator.Tags.UnlessTest do
     test_combinator("{% unless \"foo\" %} YES {% else %} NO {% endunless %}", &Parser.unless/1, [
       {:unless,
        [
-         "\"foo\"",
+         "foo",
          {:output_text, [" YES "]},
          {:else, [output_text: [" NO "]]}
        ]},

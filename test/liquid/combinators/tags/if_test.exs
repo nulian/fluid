@@ -36,7 +36,7 @@ defmodule Liquid.Combinator.Tags.IfTest do
     test_combinator("{% if \"foo\" %} YES {% else %} NO {% endif %}", &Parser.if/1, [
       {:if,
        [
-         "\"foo\"",
+         "foo",
          {:output_text, [" YES "]},
          {:else, [output_text: [" NO "]]}
        ]},

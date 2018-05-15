@@ -11,7 +11,8 @@ defmodule Liquid.Combinators.Tags.If do
     |> concat(parsec(:ignore_whitespaces))
     |> choice([
       parsec(:conditions),
-      parsec(:boolean_value),
+      parsec(:variable_definition),
+      parsec(:value_definition),
       parsec(:token)
     ])
     |> optional(
@@ -49,7 +50,8 @@ defmodule Liquid.Combinators.Tags.If do
     |> concat(parsec(:ignore_whitespaces))
     |> choice([
       parsec(:conditions),
-      parsec(:boolean_value),
+      parsec(:variable_definition),
+      parsec(:value_definition),
       parsec(:token)
     ])
     |> optional(
