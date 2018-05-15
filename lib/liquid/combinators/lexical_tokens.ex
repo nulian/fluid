@@ -119,6 +119,29 @@ defmodule Liquid.Combinators.LexicalTokens do
     choice([float_value(), int_value()])
   end
 
+  # RangeValue : (1..10) (my_var..10) (1..my_var)
+
+  # IntValue :: IntegerPart
+  def int_value_string do
+    empty()
+    |> concat(integer_part())
+   end
+
+  def range_value do
+    string("(")
+    |> parsec(:ignore_whitespaces)
+    |> concat(choice([parsec(:variable_definition), int_value_string()]))
+    |> reduce({List, :to_string, []})
+    |> concat(string("."))
+    |> concat(string("."))
+    |> concat(choice([parsec(:variable_definition), int_value_string()]))
+    |> reduce({List, :to_string, []})
+    |> parsec(:ignore_whitespaces)
+    |> concat(string(")"))
+    |> reduce({List, :to_string, []})
+    |> tag(:range_value)
+  end
+
   # Value[Const] :
   #   - Number
   #   - StringValue
@@ -173,4 +196,6 @@ defmodule Liquid.Combinators.LexicalTokens do
     |> concat(string("]"))
     |> optional(parsec(:object_property))
   end
+
+
 end
