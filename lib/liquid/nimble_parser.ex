@@ -15,6 +15,7 @@ defmodule Liquid.NimbleParser do
     Raw,
     Cycle,
     If,
+    Unless,
     For
   }
 
@@ -84,6 +85,10 @@ defmodule Liquid.NimbleParser do
   defparsecp(:else_tag, If.else_tag())
   defparsecp(:if_content, If.if_content())
   defparsec(:if, If.tag())
+
+  defparsec(:open_tag_unless, Unless.open_tag())
+  defparsecp(:close_tag_unless, Unless.close_tag())
+  defparsec(:unless, Unless.tag())
 
   defparsecp(:offset_param, For.offset_param())
   defparsecp(:limit_param, For.limit_param())
