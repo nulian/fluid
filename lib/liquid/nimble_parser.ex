@@ -14,7 +14,8 @@ defmodule Liquid.NimbleParser do
     Include,
     Raw,
     Cycle,
-    If
+    If,
+    For
   }
 
   defparsec(:liquid_variable, General.liquid_variable())
@@ -35,6 +36,7 @@ defmodule Liquid.NimbleParser do
   defparsec(:object_property, LexicalTokens.object_property())
   defparsec(:boolean_value, LexicalTokens.boolean_value())
   defparsec(:object_value, LexicalTokens.object_value())
+  defparsec(:range_value, LexicalTokens.range_value())
 
   defparsec(
     :__parse__,
@@ -82,6 +84,16 @@ defmodule Liquid.NimbleParser do
   defparsecp(:not_close_tag_if, If.not_close_tag_if())
   defparsecp(:if_content, If.if_content())
 
+  defparsecp(:offset_param, For.offset_param())
+  defparsecp(:limit_param, For.limit_param())
+  defparsecp(:reversed_param, For.reversed_param())
+  defparsecp(:open_tag_for, For.open_tag())
+  defparsecp(:close_tag_for, For.close_tag())
+  defparsecp(:else_tag_for, For.else_tag())
+  defparsecp(:for_sentences, For.for_sentences())
+  defparsec(:break_tag_for, For.break_tag())
+  defparsec(:continue_tag_for, For.continue_tag())
+  defparsec(:for, For.tag())
   defparsec(:if, If.tag())
 
   defparsec(
@@ -94,6 +106,9 @@ defmodule Liquid.NimbleParser do
       parsec(:cycle),
       parsec(:raw),
       parsec(:comment),
+      parsec(:for),
+      parsec(:break_tag_for),
+      parsec(:continue_tag_for)
       parsec(:if)
     ])
   )
