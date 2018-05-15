@@ -108,7 +108,7 @@ defmodule Liquid.NimbleParser do
       parsec(:comment),
       parsec(:for),
       parsec(:break_tag_for),
-      parsec(:continue_tag_for)
+      parsec(:continue_tag_for),
       parsec(:if)
     ])
   )
