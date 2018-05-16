@@ -135,6 +135,34 @@ defmodule Liquid.Combinators.General do
     choice([string("or"), string("and")])
   end
 
+  def or_contition_value do
+    string("or")
+    |> concat(parsec(:ignore_whitespaces))
+    |> concat(
+      choice([
+        parsec(:number),
+        parsec(:string_value),
+        parsec(:null_value),
+        parsec(:boolean_value)
+      ])
+    )
+    |> parsec(:ignore_whitespaces)
+  end
+
+  def comma_contition_value do
+    string(",")
+    |> concat(parsec(:ignore_whitespaces))
+    |> concat(
+      choice([
+        parsec(:number),
+        parsec(:string_value),
+        parsec(:null_value),
+        parsec(:boolean_value)
+      ])
+    )
+    |> parsec(:ignore_whitespaces)
+  end
+
   @doc """
   All utf8 valid characters or empty limited by start/end of tag/variable
   """
