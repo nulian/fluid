@@ -183,7 +183,28 @@ defmodule Liquid.Combinator.Tags.TablerowTest do
     )
   end
 
-  test "tablerow tag: invalid tag structure and variable values" do
+
+  test "tablerow tag: call with 2 parameters" do
+    test_combinator(
+      "{% tablerow i in (my_var..10) limit:2 cols:2 %}{{ i }}{% endtablerow %}",
+      &Parser.tablerow/1,
+      [
+        {:tablerow,
+          [
+            tablerow_conditions: [
+              variable_name: "i",
+              range_value: ["(my_var..10)"],
+              limit_param: [2],
+              cols_param: [2]
+            ],
+            tablerow_sentences: ["", {:variable, [variable_name: "i"]}, ""]
+          ]},
+        ""
+      ]
+    )
+  end
+
+    test "tablerow tag: invalid tag structure and variable values" do
     test_combinator_error(
       "{% tablerow i in (my_var..10) %}{{ i }}{% else %}{% else %}{% endtablerow %}",
       &Parser.tablerow/1

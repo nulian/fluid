@@ -78,7 +78,7 @@ defmodule Liquid.Combinators.Tags.Tablerow do
     |> ignore(string("in"))
     |> parsec(:ignore_whitespaces)
     |> choice([parsec(:range_value), parsec(:value)])
-    |> optional(choice([parsec(:offset_param), parsec(:cols_param), parsec(:limit_param)]))
+    |> optional(times(choice([parsec(:offset_param), parsec(:cols_param), parsec(:limit_param)]), min: 1))
     |> parsec(:ignore_whitespaces)
     |> concat(parsec(:end_tag))
     |> tag(:tablerow_conditions)
