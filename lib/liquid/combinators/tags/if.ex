@@ -1,37 +1,22 @@
 defmodule Liquid.Combinators.Tags.If do
-  @moduledoc """
-  Allows you to leave un-rendered code inside a Liquid template.
-  Any text within the opening and closing comment blocks will not be output,
-  and any Liquid code within will not be executed
-  Input:
-  ```
-    Anything you put between {% comment %} and {% endcomment %} tags
-    is turned into a comment.
-  ```
-  Output:
-  ```
-    Anything you put between  tags
-    is turned into a comment
-  ```
-  """
   import NimbleParsec
   alias Liquid.Combinators.General
 
   @doc "Open if tag: {% if variable ==  value %}"
+
   def open_tag do
     empty()
     |> parsec(:start_tag)
     |> ignore(string("if"))
     |> concat(parsec(:ignore_whitespaces))
-    |> times(
-      choice([
-        parsec(:conditions),
-        parsec(:logical_conditions),
-        parsec(:boolean_value),
-        parsec(:token),
-        parsec(:logical_conditions_wo_math)
-      ]),
-      min: 1
+    |> choice([
+      parsec(:conditions),
+      parsec(:variable_definition),
+      parsec(:value_definition),
+      parsec(:token)
+    ])
+    |> optional(
+      times(choice([parsec(:logical_conditions), parsec(:logical_conditions_wo_math)]), min: 1)
     )
     |> concat(parsec(:end_tag))
     |> concat(parsec(:output_text))
@@ -63,15 +48,14 @@ defmodule Liquid.Combinators.Tags.If do
     |> parsec(:start_tag)
     |> ignore(string("elsif"))
     |> concat(parsec(:ignore_whitespaces))
-    |> times(
-      choice([
-        parsec(:conditions),
-        parsec(:logical_conditions),
-        parsec(:boolean_value),
-        parsec(:token),
-        parsec(:logical_conditions_wo_math)
-      ]),
-      min: 1
+    |> choice([
+      parsec(:conditions),
+      parsec(:variable_definition),
+      parsec(:value_definition),
+      parsec(:token)
+    ])
+    |> optional(
+      times(choice([parsec(:logical_conditions), parsec(:logical_conditions_wo_math)]), min: 1)
     )
     |> concat(parsec(:end_tag))
     |> concat(parsec(:output_text))
@@ -106,19 +90,20 @@ defmodule Liquid.Combinators.Tags.If do
       times(
         choice([
           parsec(:elsif_tag),
-          parsec(:if)
+          parsec(:if),
+          parsec(:unless)
         ]),
         min: 1
       )
     )
-    |> optional(parsec(:else_tag))
-    |> parsec(:close_tag_if)
+    |> optional(times(parsec(:else_tag), min: 1))
   end
 
   def tag do
     empty()
     |> parsec(:open_tag_if)
     |> concat(parsec(:if_content))
+    |> parsec(:close_tag_if)
     |> tag(:if)
     |> optional(parsec(:__parse__))
   end
