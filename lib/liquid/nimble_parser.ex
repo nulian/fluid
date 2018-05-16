@@ -132,6 +132,7 @@ defmodule Liquid.NimbleParser do
       parsec(:break_tag_for),
       parsec(:continue_tag_for),
       parsec(:if),
+      parsec(:unless),
       parsec(:tablerow),
       parsec(:case)
     ])
