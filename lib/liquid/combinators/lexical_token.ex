@@ -1,15 +1,14 @@
-defmodule Liquid.Combinators.LexicalTokens do
+defmodule Liquid.Combinators.LexicalToken do
+  @moduledoc """
+  String with an assigned and thus identified meaning such as
+    - Punctuator
+    - Number
+    - String
+    - Boolean
+    - List
+    - Object
+  """
   import NimbleParsec
-
-  # Token ::
-  #   - Punctuator
-  #   - IntValue
-  #   - FloatValue
-  #   - StringValue
-
-  # Punctuator :: one of ! $ ( ) ... : = @ [ ] { | }
-  # Note: No `punctuator` combinator(s) defined; these characters are matched
-  #       explicitly with `ascii_char/1` in other combinators.
 
   # NegativeSign :: -
   def negative_sign, do: ascii_char([?-])

@@ -1,8 +1,25 @@
 # Start REPL with M-x inf-ruby
 require 'liquid'
 
-template = '{% if false %} Rodman {% else %} Pippen {% else %} bad behavior {% endif %}'
-
 Liquid::Template.error_mode = :strict
 
-Liquid::Template.parse(template).render()
+data = {
+  'companies' => [
+    {
+      'name' => 'Apple', 'founders' => [
+        { 'name' => 'Steve Jobs' },
+        { 'name' => 'Steve Wozniak' }
+      ]
+    },
+    {
+      'name' => 'Microsoft', 'founders' => [
+        { 'name' => 'Bill Gates' },
+        { 'name' => 'Paul Allen' }
+      ]
+    }
+  ]
+}
+
+template = ''
+
+Liquid::Template.parse(template).render(data)
