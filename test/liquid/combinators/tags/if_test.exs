@@ -36,7 +36,7 @@ defmodule Liquid.Combinator.Tags.IfTest do
     test_combinator("{% if \"foo\" %} YES {% else %} NO {% endif %}", &Parser.if/1, [
       {:if,
        [
-         "\"foo\"",
+         "foo",
          {:output_text, [" YES "]},
          {:else, [output_text: [" NO "]]}
        ]},
@@ -188,7 +188,16 @@ defmodule Liquid.Combinator.Tags.IfTest do
   end
 
   test "2 else conditions in one if" do
-    test_combinator_error("{% if true %}test{% else %} a {% else %} b {% endif %}", &Parser.if/1)
+    test_combinator("{% if true %}test{% else %} a {% else %} b {% endif %}", &Parser.if/1, [
+      {:if,
+       [
+         "true",
+         {:output_text, ["test"]},
+         {:else, [output_text: [" a "]]},
+         {:else, [output_text: [" b "]]}
+       ]},
+      ""
+    ])
   end
 
   test "missing a opening tag and a closing tag" do
