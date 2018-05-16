@@ -57,7 +57,7 @@ defmodule Liquid.Combinators.Tags.For do
     |> ignore(string("offset"))
     |> ignore(ascii_char([General.codepoints().colon]))
     |> parsec(:ignore_whitespaces)
-    |> concat(parsec(:number))
+    |> concat(choice([parsec(:number), parsec(:variable_definition)]))
     |> parsec(:ignore_whitespaces)
     |> tag(:offset_param)
   end
@@ -69,7 +69,7 @@ defmodule Liquid.Combinators.Tags.For do
     |> ignore(string("limit"))
     |> ignore(ascii_char([General.codepoints().colon]))
     |> parsec(:ignore_whitespaces)
-    |> concat(parsec(:number))
+    |> concat(choice([parsec(:number), parsec(:variable_definition)]))
     |> parsec(:ignore_whitespaces)
     |> tag(:limit_param)
   end
