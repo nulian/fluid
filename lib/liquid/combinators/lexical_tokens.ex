@@ -1,4 +1,4 @@
-defmodule Liquid.Combinators.LexicalToken do
+defmodule Liquid.Combinators.LexicalTokens do
   import NimbleParsec
 
   # Token ::
