@@ -4,7 +4,7 @@ defmodule Liquid.NimbleParser do
   """
   import NimbleParsec
 
-  alias Liquid.Combinators.{General, LexicalToken}
+  alias Liquid.Combinators.{General, LexicalTokens}
 
   alias Liquid.Combinators.Tags.{
     Assign,
@@ -17,7 +17,8 @@ defmodule Liquid.NimbleParser do
     If,
     Unless,
     For,
-    Tablerow
+    Tablerow,
+    Case
   }
 
   defparsec(:liquid_variable, General.liquid_variable())
@@ -30,15 +31,19 @@ defmodule Liquid.NimbleParser do
   defparsec(:token, General.token())
   defparsec(:math_operators, General.math_operators())
   defparsec(:logical_operators, General.logical_operators())
+  defparsec(:or_contition_value, General.or_contition_value())
+  defparsec(:comma_contition_value, General.comma_contition_value())
   defparsec(:ignore_whitespaces, General.ignore_whitespaces())
 
-  defparsec(:number, LexicalToken.number())
-  defparsec(:value_definition, LexicalToken.value_definition())
-  defparsec(:value, LexicalToken.value())
-  defparsec(:object_property, LexicalToken.object_property())
-  defparsec(:boolean_value, LexicalToken.boolean_value())
-  defparsec(:object_value, LexicalToken.object_value())
-  defparsec(:range_value, LexicalToken.range_value())
+  defparsec(:number, LexicalTokens.number())
+  defparsec(:value_definition, LexicalTokens.value_definition())
+  defparsec(:value, LexicalTokens.value())
+  defparsec(:object_property, LexicalTokens.object_property())
+  defparsec(:boolean_value, LexicalTokens.boolean_value())
+  defparsec(:null_value, LexicalTokens.null_value())
+  defparsec(:string_value, LexicalTokens.string_value())
+  defparsec(:object_value, LexicalTokens.object_value())
+  defparsec(:range_value, LexicalTokens.range_value())
 
   defparsec(
     :__parse__,
@@ -108,6 +113,10 @@ defmodule Liquid.NimbleParser do
   defparsecp(:tablerow_sentences, Tablerow.tablerow_sentences())
   defparsec(:tablerow, Tablerow.tag())
 
+  defparsec(:open_tag_case, Case.open_tag())
+  defparsec(:close_tag_case, Case.close_tag())
+  defparsec(:when_tag, Case.when_tag())
+  defparsec(:case, Case.tag())
 
   defparsec(
     :liquid_tag,
@@ -123,7 +132,8 @@ defmodule Liquid.NimbleParser do
       parsec(:break_tag_for),
       parsec(:continue_tag_for),
       parsec(:if),
-      parsec(:tablerow)
+      parsec(:tablerow),
+      parsec(:case)
     ])
   )
 
