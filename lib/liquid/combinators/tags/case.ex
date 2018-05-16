@@ -28,7 +28,8 @@ defmodule Liquid.Combinators.Tags.Case do
       times(choice([parsec(:or_contition_value), parsec(:comma_contition_value)]), min: 1)
     )
     |> parsec(:end_tag)
-    |> parsec(:output_text)
+    |> parsec(:ignore_whitespaces)
+    |> choice([times(parsec(:assign), min: 1), parsec(:output_text)])
     |> tag(:when)
   end
 
@@ -42,10 +43,9 @@ defmodule Liquid.Combinators.Tags.Case do
     parsec(:open_tag_case)
     |> concat(times(parsec(:when_tag), min: 1))
     |> concat(parsec(:ignore_whitespaces))
-    |> concat(optional(parsec(:else_tag)))
+    |> optional(times(parsec(:else_tag), min: 1))
     |> concat(parsec(:close_tag_case))
     |> tag(:case)
+    |> optional(parsec(:__parse__))
   end
-
-  # {% case condition %}{% when 1 or 2 or 3 %} its 1 or 2 or 3 {% when 4 %} its 4 {% endcase %}
 end

@@ -84,7 +84,8 @@ defmodule Liquid.Combinators.Tags.If do
     |> concat(parsec(:start_tag))
     |> ignore(string("else"))
     |> concat(parsec(:end_tag))
-    |> parsec(:output_text)
+    |> parsec(:ignore_whitespaces)
+    |> choice([times(parsec(:assign), min: 1), parsec(:output_text)])
     |> tag(:else)
   end
 

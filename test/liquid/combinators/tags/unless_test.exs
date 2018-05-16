@@ -38,7 +38,7 @@ defmodule Liquid.Combinator.Tags.UnlessTest do
        [
          "foo",
          {:output_text, [" YES "]},
-         {:else, [output_text: [" NO "]]}
+         {:else, [output_text: ["NO "]]}
        ]},
       ""
     ])
@@ -136,7 +136,7 @@ defmodule Liquid.Combinator.Tags.UnlessTest do
                 condition: ["shipping_method.title", "==", "Domestic Shipping"],
                 output_text: ["Your order should arrive in 3–4 days."]
               ],
-              else: [output_text: [" Thank you for your order!"]]
+              else: [output_text: ["Thank you for your order!"]]
             ]},
            ""
          ]},
@@ -188,7 +188,7 @@ defmodule Liquid.Combinator.Tags.UnlessTest do
              condition: ["shipping_method.title", "==", "Domestic Shipping"],
              output_text: ["Your order should arrive in 3–4 days."]
            ],
-           else: [output_text: [" Thank you for your order!"]]
+           else: [output_text: ["Thank you for your order!"]]
          ]},
         ""
       ]
@@ -204,8 +204,8 @@ defmodule Liquid.Combinator.Tags.UnlessTest do
          [
            "true",
            {:output_text, ["test"]},
-           {:else, [output_text: [" a "]]},
-           {:else, [output_text: [" b "]]}
+           {:else, [output_text: ["a "]]},
+           {:else, [output_text: ["b "]]}
          ]},
         ""
       ]
