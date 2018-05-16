@@ -16,7 +16,8 @@ defmodule Liquid.NimbleParser do
     Cycle,
     If,
     Unless,
-    For
+    For,
+    Tablerow
   }
 
   defparsec(:liquid_variable, General.liquid_variable())
@@ -101,6 +102,13 @@ defmodule Liquid.NimbleParser do
   defparsec(:continue_tag_for, For.continue_tag())
   defparsec(:for, For.tag())
 
+  defparsecp(:cols_param, Tablerow.cols_param())
+  defparsecp(:open_tag_tablerow, Tablerow.open_tag())
+  defparsecp(:close_tag_tablerow, Tablerow.close_tag())
+  defparsecp(:tablerow_sentences, Tablerow.tablerow_sentences())
+  defparsec(:tablerow, Tablerow.tag())
+
+
   defparsec(
     :liquid_tag,
     choice([
@@ -114,7 +122,8 @@ defmodule Liquid.NimbleParser do
       parsec(:for),
       parsec(:break_tag_for),
       parsec(:continue_tag_for),
-      parsec(:if)
+      parsec(:if),
+      parsec(:tablerow)
     ])
   )
 
