@@ -4,7 +4,7 @@ defmodule Liquid.NimbleParser do
   """
   import NimbleParsec
 
-  alias Liquid.Combinators.{General, LexicalTokens}
+  alias Liquid.Combinators.{General, LexicalToken}
 
   alias Liquid.Combinators.Tags.{
     Assign,
@@ -31,13 +31,13 @@ defmodule Liquid.NimbleParser do
   defparsec(:logical_operators, General.logical_operators())
   defparsec(:ignore_whitespaces, General.ignore_whitespaces())
 
-  defparsec(:number, LexicalTokens.number())
-  defparsec(:value_definition, LexicalTokens.value_definition())
-  defparsec(:value, LexicalTokens.value())
-  defparsec(:object_property, LexicalTokens.object_property())
-  defparsec(:boolean_value, LexicalTokens.boolean_value())
-  defparsec(:object_value, LexicalTokens.object_value())
-  defparsec(:range_value, LexicalTokens.range_value())
+  defparsec(:number, LexicalToken.number())
+  defparsec(:value_definition, LexicalToken.value_definition())
+  defparsec(:value, LexicalToken.value())
+  defparsec(:object_property, LexicalToken.object_property())
+  defparsec(:boolean_value, LexicalToken.boolean_value())
+  defparsec(:object_value, LexicalToken.object_value())
+  defparsec(:range_value, LexicalToken.range_value())
 
   defparsec(
     :__parse__,

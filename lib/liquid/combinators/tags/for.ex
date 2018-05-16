@@ -1,17 +1,50 @@
 defmodule Liquid.Combinators.Tags.For do
   @moduledoc """
-  Allows you to leave un-rendered code inside a Liquid template.
-  Any text within the opening and closing comment blocks will not be output,
-  and any Liquid code within will not be executed
-  Input:
+  "for" tag iterates over an array or collection.
+  Several useful variables are available to you within the loop.
+
+  Basic usage:
   ```
-    Anything you put between {% comment %} and {% endcomment %} tags
-    is turned into a comment.
+    {% for item in collection %}
+      {{ forloop.index }}: {{ item.name }}
+    {% endfor %}
   ```
-  Output:
+  Advanced usage:
   ```
-    Anything you put between  tags
-    is turned into a comment
+    {% for item in collection %}
+      <div {% if forloop.first %}class="first"{% endif %}>
+      Item {{ forloop.index }}: {{ item.name }}
+      </div>
+    {% else %}
+      There is nothing in the collection.
+    {% endfor %}
+  ```
+  You can also define a limit and offset much like SQL.  Remember
+  that offset starts at 0 for the first item.
+  ```
+    {% for item in collection limit:5 offset:10 %}
+      {{ item.name }}
+    {% end %}
+  ```
+  To reverse the for loop simply use {% for item in collection reversed %}
+
+  Available variables:
+  ```
+    forloop.name:: 'item-collection'
+    forloop.length:: Length of the loop
+    forloop.index:: The current item's position in the collection;
+    forloop.index starts at 1.
+    This is helpful for non-programmers who start believe
+    the first item in an array is 1, not 0.
+    forloop.index0:: The current item's position in the collection
+    where the first item is 0
+    forloop.rindex:: Number of items remaining in the loop
+    (length - index) where 1 is the last item.
+    forloop.rindex0:: Number of items remaining in the loop
+    where 0 is the last item.
+    forloop.first:: Returns true if the item is the first item.
+    forloop.last:: Returns true if the item is the last item.
+    forloop.parentloop:: Provides access to the parent loop, if present.
   ```
   """
   import NimbleParsec
@@ -26,7 +59,6 @@ defmodule Liquid.Combinators.Tags.For do
     |> parsec(:ignore_whitespaces)
     |> concat(parsec(:number))
     |> parsec(:ignore_whitespaces)
-    #|> reduce({List, :to_string, []})
     |> tag(:offset_param)
   end
 
@@ -39,7 +71,6 @@ defmodule Liquid.Combinators.Tags.For do
     |> parsec(:ignore_whitespaces)
     |> concat(parsec(:number))
     |> parsec(:ignore_whitespaces)
-    #|> reduce({List, :to_integer, []})
     |> tag(:limit_param)
   end
 
@@ -56,7 +87,7 @@ defmodule Liquid.Combinators.Tags.For do
     empty()
     |> optional(parsec(:__parse__))
     |> tag(:for_sentences)
-   end
+  end
 
   @doc "Open For tag: {% for products in products %}"
   def open_tag do
@@ -91,7 +122,6 @@ defmodule Liquid.Combinators.Tags.For do
     |> concat(parsec(:end_tag))
     |> optional(parsec(:__parse__))
     |> tag(:else_sentences)
-
   end
 
   @doc "For Break tag: {% break %}"

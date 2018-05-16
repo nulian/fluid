@@ -8,7 +8,7 @@ defmodule Liquid.Combinator.Tags.ForTest do
     tags = [
       "{% for item in array %}{% endfor %}",
       "{%for item in array%}{%endfor%}",
-      "{%     for     item    in     array    %}{%    endfor    %}",
+      "{%     for     item    in     array    %}{%    endfor    %}"
     ]
 
     Enum.each(
@@ -33,14 +33,13 @@ defmodule Liquid.Combinator.Tags.ForTest do
         )
       end
     )
-
   end
 
   test "for tag: else tag structures" do
     tags = [
       "{% for item in array %}{% else %}{% endfor %}",
       "{%for item in array%}{%else%}{%endfor%}",
-      "{%     for     item    in     array    %}{%   else    %}{%    endfor    %}",
+      "{%     for     item    in     array    %}{%   else    %}{%    endfor    %}"
     ]
 
     Enum.each(
@@ -66,7 +65,6 @@ defmodule Liquid.Combinator.Tags.ForTest do
         )
       end
     )
-
   end
 
   test "for tag: limit parameter" do
@@ -102,8 +100,6 @@ defmodule Liquid.Combinator.Tags.ForTest do
       end
     )
   end
-
-
 
   test "for tag: offset parameter" do
     tags = [
@@ -142,7 +138,7 @@ defmodule Liquid.Combinator.Tags.ForTest do
     tags = [
       "{% for item in array reversed %}{% else %}{% endfor %}",
       "{%for item in array reversed%}{%else%}{%endfor%}",
-      "{%     for     item    in     array  reversed  %}{%   else    %}{%    endfor    %}",
+      "{%     for     item    in     array  reversed  %}{%   else    %}{%    endfor    %}"
     ]
 
     Enum.each(
@@ -175,7 +171,7 @@ defmodule Liquid.Combinator.Tags.ForTest do
     tags = [
       "{% for i in (1..10) %}{{ i }}{% endfor %}",
       "{%for i in (1..10)%}{{ i }}{% endfor %}",
-      "{%     for     i     in     (1..10)      %}{{ i }}{%     endfor     %}",
+      "{%     for     i     in     (1..10)      %}{{ i }}{%     endfor     %}"
     ]
 
     Enum.each(
@@ -224,20 +220,20 @@ defmodule Liquid.Combinator.Tags.ForTest do
 
   test "for tag: break tag" do
     test_combinator(
-    "{% for i in (my_var..10) %}{{ i }}{% break %}{% endfor %}",
+      "{% for i in (my_var..10) %}{{ i }}{% break %}{% endfor %}",
       &Parser.for/1,
       [
         {:for,
-          [
-            for_conditions: [variable_name: "i", range_value: ["(my_var..10)"]],
-            for_sentences: [
-              "",
-              {:variable, [variable_name: "i"]},
-              "",
-              {:break, []},
-              ""
-            ]
-          ]},
+         [
+           for_conditions: [variable_name: "i", range_value: ["(my_var..10)"]],
+           for_sentences: [
+             "",
+             {:variable, [variable_name: "i"]},
+             "",
+             {:break, []},
+             ""
+           ]
+         ]},
         ""
       ]
     )
@@ -249,25 +245,35 @@ defmodule Liquid.Combinator.Tags.ForTest do
       &Parser.for/1,
       [
         {:for,
-          [
-            for_conditions: [variable_name: "i", range_value: ["(1..my_var)"]],
-            for_sentences: [
-              "",
-              {:variable, [variable_name: "i"]},
-              "",
-              {:continue, []},
-              ""
-            ]
-          ]},
+         [
+           for_conditions: [variable_name: "i", range_value: ["(1..my_var)"]],
+           for_sentences: [
+             "",
+             {:variable, [variable_name: "i"]},
+             "",
+             {:continue, []},
+             ""
+           ]
+         ]},
         ""
       ]
     )
   end
 
   test "for tag: invalid tag structure and variable values" do
-    test_combinator_error("{% for i in (my_var..10) %}{{ i }}{% else %}{% else %}{% endfor %}", &Parser.for/1)
-    test_combinator_error("{% for i in (my_var..product.title[2]) %}{{ i }}{% else %}{% endfor %}", &Parser.for/1)
-    test_combinator_error("{% for i in products limit: a %}{{ i }}{% else %}{% endfor %}", &Parser.for/1)
-  end
+    test_combinator_error(
+      "{% for i in (my_var..10) %}{{ i }}{% else %}{% else %}{% endfor %}",
+      &Parser.for/1
+    )
 
+    test_combinator_error(
+      "{% for i in (my_var..product.title[2]) %}{{ i }}{% else %}{% endfor %}",
+      &Parser.for/1
+    )
+
+    test_combinator_error(
+      "{% for i in products limit: a %}{{ i }}{% else %}{% endfor %}",
+      &Parser.for/1
+    )
+  end
 end

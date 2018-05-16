@@ -1,19 +1,19 @@
-defmodule Liquid.Combinators.LexicalTokensTest do
+defmodule Liquid.Combinators.LexicalTokenTest do
   use ExUnit.Case
   import Liquid.Helpers
 
   defmodule Parser do
     import NimbleParsec
-    alias Liquid.Combinators.{LexicalTokens, General}
+    alias Liquid.Combinators.{LexicalToken, General}
 
     defparsec(:ignore_whitespaces, General.ignore_whitespaces())
     defparsec(:variable_definition, General.variable_definition())
     defparsec(:variable_name, General.variable_name())
-    defparsec(:number, LexicalTokens.number())
-    defparsec(:object_property, LexicalTokens.object_property())
-    defparsec(:object_value, LexicalTokens.object_value())
-    defparsec(:value_definition, LexicalTokens.value_definition())
-    defparsec(:value, LexicalTokens.value())
+    defparsec(:number, LexicalToken.number())
+    defparsec(:object_property, LexicalToken.object_property())
+    defparsec(:object_value, LexicalToken.object_value())
+    defparsec(:value_definition, LexicalToken.value_definition())
+    defparsec(:value, LexicalToken.value())
   end
 
   test "integer value" do

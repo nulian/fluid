@@ -1,4 +1,4 @@
-defmodule Liquid.Combinators.LexicalTokens do
+defmodule Liquid.Combinators.LexicalToken do
   import NimbleParsec
 
   # Token ::
@@ -125,7 +125,7 @@ defmodule Liquid.Combinators.LexicalTokens do
   def int_value_string do
     empty()
     |> concat(integer_part())
-   end
+  end
 
   def range_value do
     string("(")
@@ -196,6 +196,4 @@ defmodule Liquid.Combinators.LexicalTokens do
     |> concat(string("]"))
     |> optional(parsec(:object_property))
   end
-
-
 end

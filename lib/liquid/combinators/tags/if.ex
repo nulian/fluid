@@ -1,4 +1,21 @@
 defmodule Liquid.Combinators.Tags.If do
+  @moduledoc """
+  Executes a block of code only if a certain condition is true.
+  If this condition is false executes `else` block of code
+  Input:
+  ```
+  {% if product.title == 'Awesome Shoes' %}
+    These shoes are awesome!
+  {% else %}
+    These shoes are ugly!
+  {% endif %}
+  ```
+  Output:
+  ```
+    These shoes are ugly!
+  ```
+  """
+
   import NimbleParsec
   alias Liquid.Combinators.General
 
