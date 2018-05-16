@@ -17,6 +17,7 @@ defmodule Liquid.NimbleParser do
     If,
     Unless,
     For,
+    Tablerow,
     Case
   }
 
@@ -106,6 +107,12 @@ defmodule Liquid.NimbleParser do
   defparsec(:continue_tag_for, For.continue_tag())
   defparsec(:for, For.tag())
 
+  defparsecp(:cols_param, Tablerow.cols_param())
+  defparsecp(:open_tag_tablerow, Tablerow.open_tag())
+  defparsecp(:close_tag_tablerow, Tablerow.close_tag())
+  defparsecp(:tablerow_sentences, Tablerow.tablerow_sentences())
+  defparsec(:tablerow, Tablerow.tag())
+
   defparsec(:open_tag_case, Case.open_tag())
   defparsec(:close_tag_case, Case.close_tag())
   defparsec(:when_tag, Case.when_tag())
@@ -125,6 +132,7 @@ defmodule Liquid.NimbleParser do
       parsec(:break_tag_for),
       parsec(:continue_tag_for),
       parsec(:if),
+      parsec(:tablerow),
       parsec(:case)
     ])
   )
