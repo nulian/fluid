@@ -270,10 +270,5 @@ defmodule Liquid.Combinator.Tags.ForTest do
       "{% for i in (my_var..product.title[2]) %}{{ i }}{% else %}{% endfor %}",
       &Parser.for/1
     )
-
-    test_combinator_error(
-      "{% for i in products limit: a %}{{ i }}{% else %}{% endfor %}",
-      &Parser.for/1
-    )
   end
 end

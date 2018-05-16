@@ -57,7 +57,7 @@ defmodule Liquid.Combinators.Tags.Tablerow do
     |> ignore(string("cols"))
     |> ignore(ascii_char([General.codepoints().colon]))
     |> parsec(:ignore_whitespaces)
-    |> concat(parsec(:number))
+    |> concat(choice([parsec(:number), parsec(:variable_definition)]))
     |> parsec(:ignore_whitespaces)
     |> tag(:cols_param)
   end
