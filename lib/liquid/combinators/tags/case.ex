@@ -25,7 +25,7 @@ defmodule Liquid.Combinators.Tags.Case do
       parsec(:variable_definition)
     ])
     |> optional(
-      times(choice([parsec(:or_contition_value), parsec(:comma_contition_value)]), min: 1)
+      times(choice([parsec(:logical_conditions), parsec(:comma_contition_value)]), min: 1)
     )
     |> parsec(:end_tag)
     |> parsec(:ignore_whitespaces)

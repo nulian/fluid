@@ -32,7 +32,6 @@ defmodule Liquid.NimbleParser do
   defparsec(:token, General.token())
   defparsec(:math_operators, General.math_operators())
   defparsec(:logical_operators, General.logical_operators())
-  defparsec(:or_contition_value, General.or_contition_value())
   defparsec(:comma_contition_value, General.comma_contition_value())
   defparsec(:ignore_whitespaces, General.ignore_whitespaces())
 
@@ -87,7 +86,6 @@ defmodule Liquid.NimbleParser do
   defparsecp(:output_text, If.output_text())
   defparsecp(:conditions, If.conditions())
   defparsecp(:logical_conditions, If.logical_conditions())
-  defparsecp(:logical_conditions_wo_math, If.logical_conditions_wo_math())
   defparsec(:elsif_tag, If.elsif_tag())
   defparsecp(:else_tag, If.else_tag())
   defparsecp(:if_content, If.if_content())

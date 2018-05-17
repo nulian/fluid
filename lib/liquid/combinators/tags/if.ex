@@ -32,9 +32,7 @@ defmodule Liquid.Combinators.Tags.If do
       parsec(:value_definition),
       parsec(:token)
     ])
-    |> optional(
-      times(choice([parsec(:logical_conditions), parsec(:logical_conditions_wo_math)]), min: 1)
-    )
+    |> optional(times(parsec(:logical_conditions), min: 1))
     |> concat(parsec(:end_tag))
     |> concat(parsec(:output_text))
   end
@@ -52,12 +50,7 @@ defmodule Liquid.Combinators.Tags.If do
 
   def logical_conditions do
     parsec(:logical_operators)
-    |> concat(parsec(:conditions))
-  end
-
-  def logical_conditions_wo_math do
-    parsec(:logical_operators)
-    |> concat(parsec(:variable_name))
+    |> concat(choice([parsec(:conditions), parsec(:variable_name), parsec(:value_definition)]))
   end
 
   def elsif_tag do
@@ -71,9 +64,7 @@ defmodule Liquid.Combinators.Tags.If do
       parsec(:value_definition),
       parsec(:token)
     ])
-    |> optional(
-      times(choice([parsec(:logical_conditions), parsec(:logical_conditions_wo_math)]), min: 1)
-    )
+    |> optional(times(parsec(:logical_conditions), min: 1))
     |> concat(parsec(:end_tag))
     |> concat(parsec(:output_text))
     |> tag(:elsif)
