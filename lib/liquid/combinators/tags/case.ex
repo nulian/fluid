@@ -11,6 +11,7 @@ defmodule Liquid.Combinators.Tags.Case do
       parsec(:token),
       parsec(:variable_definition)
     ])
+    |> optional(times(parsec(:logical_conditions), min: 1))
     |> concat(parsec(:end_tag))
   end
 
