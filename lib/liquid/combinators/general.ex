@@ -243,7 +243,7 @@ defmodule Liquid.Combinators.General do
   """
   def filter_param do
     empty()
-    |> optional(ignore((utf8_char([@colon]))))
+    |> optional(ignore(utf8_char([@colon])))
     |> parsec(:ignore_whitespaces)
     |> parsec(:value)
     |> tag(:filter_param)

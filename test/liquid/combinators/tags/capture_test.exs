@@ -10,16 +10,16 @@ defmodule Liquid.Combinators.Tags.CaptureTest do
       &Parser.capture/1,
       [
         {:capture,
-          [
-            variable_name: "about_me",
-            capture_sentences: [
-              " I am ",
-              {:variable, [variable_name: "age"]},
-              " and my favorite food is ",
-              {:variable, [variable_name: "favorite_food"]},
-              ". "
-            ]
-          ]},
+         [
+           variable_name: "about_me",
+           capture_sentences: [
+             " I am ",
+             {:variable, [variable_name: "age"]},
+             " and my favorite food is ",
+             {:variable, [variable_name: "favorite_food"]},
+             ". "
+           ]
+         ]},
         ""
       ]
     )

@@ -47,9 +47,4 @@ defmodule Liquid.Combinators.Tags.Capture do
     |> tag(:capture)
     |> optional(parsec(:__parse__))
   end
-
 end
-
-
-
-
