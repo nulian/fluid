@@ -14,9 +14,7 @@ defmodule Liquid.Combinators.Tags.Unless do
       parsec(:value_definition),
       parsec(:token)
     ])
-    |> optional(
-      times(choice([parsec(:logical_conditions), parsec(:logical_conditions_wo_math)]), min: 1)
-    )
+    |> optional(times(parsec(:logical_conditions), min: 1))
     |> concat(parsec(:end_tag))
     |> concat(parsec(:output_text))
   end
