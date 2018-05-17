@@ -14,6 +14,8 @@ defmodule Liquid.Combinators.GeneralTest do
     defparsec(:end_variable, General.end_variable())
     defparsec(:variable_definition, General.variable_definition())
     defparsec(:variable_name, General.variable_name())
+#    defparsec(:filter_param, General.filter_param())
+#    defparsec(:filter, General.filter())
   end
 
   test "whitespace must parse 0x0020 and 0x0009" do
@@ -75,4 +77,15 @@ defmodule Liquid.Combinators.GeneralTest do
       test_combinator_error(n, &Parser.variable_name/1)
     end)
   end
+
+#  test "filters parser" do
+#    test_combinator("| split ", &Parser.filter/1, [filter: [variable_name: "split"]])
+#    test_combinator("| join: ', '", &Parser.filter/1, [filter: [variable_name: "join", filter_param: [value: ", "]]])
+#    test_combinator("| uniq | join: ', '", &Parser.filter/1,
+#                     [
+#                       filter: [variable_name: "uniq"],
+#                       filter: [variable_name: "join", filter_param: [value: ", "]]
+#                     ])
+#  end
+
 end

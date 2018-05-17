@@ -27,6 +27,8 @@ defmodule Liquid.NimbleParser do
   defparsec(:variable_name, General.variable_name())
   defparsec(:start_tag, General.start_tag())
   defparsec(:end_tag, General.end_tag())
+  defparsec(:filter_param, General.filter_param())
+  defparsec(:filter, General.filter())
   defparsec(:single_quoted_token, General.single_quoted_token())
   defparsec(:double_quoted_token, General.double_quoted_token())
   defparsec(:token, General.token())
