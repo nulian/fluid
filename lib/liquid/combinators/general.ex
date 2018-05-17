@@ -19,6 +19,7 @@ defmodule Liquid.Combinators.General do
   @end_tag "%}"
   @start_variable "{{"
   @end_variable "}}"
+  @start_filter "|"
   @equals "=="
   @does_not_equal "!="
   @greater_than ">"
@@ -44,6 +45,7 @@ defmodule Liquid.Combinators.General do
       end_tag: @end_tag,
       start_variable: @start_variable,
       end_variable: @end_variable,
+      start_filter: @start_filter,
       digit: @digit,
       uppercase_letter: @uppercase_letter,
       lowercase_letter: @lowercase_letter
@@ -233,5 +235,31 @@ defmodule Liquid.Combinators.General do
 
   def token do
     choice([double_quoted_token(), single_quoted_token()])
+  end
+
+  @doc """
+  Filter basic structure, it acepts any kind of filter with the following structure:
+  start char: '|' plus flter's parameters as optional: ':' plus optional: parameters values [value]
+  """
+  def filter_param do
+    empty()
+    |> optional(ignore((utf8_char([@colon]))))
+    |> parsec(:ignore_whitespaces)
+    |> parsec(:value)
+    |> tag(:filter_param)
+    |> optional(parsec(:filter))
+  end
+
+  @doc """
+  Filter parameters structure:  it acepts any kind of parameters with the following structure:
+  start char: ':' plus optional: parameters values [value]
+  """
+  def filter do
+    ignore(string(@start_filter))
+    |> parsec(:ignore_whitespaces)
+    |> parsec(:variable_name)
+    |> optional(parsec(:filter_param))
+    |> tag(:filter)
+    |> optional(parsec(:filter))
   end
 end
