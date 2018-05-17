@@ -1,4 +1,4 @@
-defmodule Liquid.Combinator.Tags.UnlessTest do
+defmodule Liquid.Combinators.Tags.UnlessTest do
   use ExUnit.Case
 
   import Liquid.Helpers

@@ -1,4 +1,4 @@
-defmodule Liquid.Combinator.Tags.RawTest do
+defmodule Liquid.Combinators.Tags.RawTest do
   use ExUnit.Case
 
   import Liquid.Helpers

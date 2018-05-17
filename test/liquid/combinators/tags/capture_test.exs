@@ -1,4 +1,4 @@
-defmodule Liquid.Combinator.Tags.CaptureTest do
+defmodule Liquid.Combinators.Tags.CaptureTest do
   use ExUnit.Case
 
   import Liquid.Helpers

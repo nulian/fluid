@@ -1,4 +1,4 @@
-defmodule Liquid.Combinator.Tags.TablerowTest do
+defmodule Liquid.Combinators.Tags.TablerowTest do
   use ExUnit.Case
 
   import Liquid.Helpers
