@@ -69,7 +69,7 @@ defmodule Liquid.Combinators.GeneralTest do
   end
 
   test "variable name invalid" do
-    invalid_names = ~w(. .a)
+    invalid_names = ~w(. .a @a #a ^a 好a ,a -a)
 
     Enum.each(invalid_names, fn n ->
       test_combinator_error(n, &Parser.variable_name/1)
