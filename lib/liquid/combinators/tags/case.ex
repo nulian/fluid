@@ -30,7 +30,7 @@ defmodule Liquid.Combinators.Tags.Case do
     )
     |> parsec(:end_tag)
     |> parsec(:ignore_whitespaces)
-    |> choice([times(parsec(:assign), min: 1), parsec(:output_text)])
+    |> optional(parsec(:__parse__))
     |> tag(:when)
   end
 

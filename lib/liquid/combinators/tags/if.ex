@@ -34,7 +34,7 @@ defmodule Liquid.Combinators.Tags.If do
     ])
     |> optional(times(parsec(:logical_conditions), min: 1))
     |> concat(parsec(:end_tag))
-    |> concat(parsec(:output_text))
+    |> optional(parsec(:__parse__))
   end
 
   def conditions do
@@ -66,7 +66,7 @@ defmodule Liquid.Combinators.Tags.If do
     ])
     |> optional(times(parsec(:logical_conditions), min: 1))
     |> concat(parsec(:end_tag))
-    |> concat(parsec(:output_text))
+    |> optional(parsec(:__parse__))
     |> tag(:elsif)
   end
 
@@ -76,7 +76,7 @@ defmodule Liquid.Combinators.Tags.If do
     |> ignore(string("else"))
     |> concat(parsec(:end_tag))
     |> parsec(:ignore_whitespaces)
-    |> choice([times(parsec(:assign), min: 1), parsec(:output_text)])
+    |> optional(parsec(:__parse__))
     |> tag(:else)
   end
 
@@ -88,30 +88,25 @@ defmodule Liquid.Combinators.Tags.If do
   end
 
   def output_text do
-    repeat_until(utf8_char([]), [string(General.codepoints().start_tag)])
+    repeat_until(utf8_char([]), [
+      string(General.codepoints().start_tag),
+      string(General.codepoints().start_variable)
+    ])
     |> reduce({List, :to_string, []})
     |> tag(:output_text)
   end
 
   def if_content do
     empty()
-    |> optional(
-      times(
-        choice([
-          parsec(:elsif_tag),
-          parsec(:if),
-          parsec(:unless)
-        ]),
-        min: 1
-      )
-    )
-    |> optional(times(parsec(:else_tag), min: 1))
+    |> optional(parsec(:__parse__))
+    |> tag(:if_sentences)
   end
 
   def tag do
     empty()
     |> parsec(:open_tag_if)
-    |> concat(parsec(:if_content))
+    |> optional(times(parsec(:elsif_tag), min: 1))
+    |> optional(times(parsec(:else_tag), min: 1))
     |> parsec(:close_tag_if)
     |> tag(:if)
     |> optional(parsec(:__parse__))

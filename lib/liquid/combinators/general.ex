@@ -209,7 +209,8 @@ defmodule Liquid.Combinators.General do
 
   def liquid_variable do
     start_variable()
-    |> concat(variable_name())
+    |> concat(parsec(:variable_name))
+    |> optional(parsec(:filter))
     |> concat(end_variable())
     |> tag(:variable)
     |> optional(parsec(:__parse__))

@@ -16,7 +16,7 @@ defmodule Liquid.Combinators.Tags.Unless do
     ])
     |> optional(times(parsec(:logical_conditions), min: 1))
     |> concat(parsec(:end_tag))
-    |> concat(parsec(:output_text))
+    |> optional(parsec(:__parse__))
   end
 
   @doc "Close if tag: {% endif %}"
@@ -29,7 +29,8 @@ defmodule Liquid.Combinators.Tags.Unless do
   def tag do
     empty()
     |> parsec(:open_tag_unless)
-    |> concat(parsec(:if_content))
+    |> optional(times(parsec(:elsif_tag), min: 1))
+    |> optional(times(parsec(:else_tag), min: 1))
     |> parsec(:close_tag_unless)
     |> tag(:unless)
     |> optional(parsec(:__parse__))
