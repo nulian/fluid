@@ -38,6 +38,11 @@ defmodule Liquid.Combinators.LexicalToken do
     |> reduce({List, :to_integer, []})
   end
 
+  def int_value_string do
+    empty()
+    |> concat(integer_part())
+  end
+
   # FractionalPart :: . Digit+
   def fractional_part do
     empty()
@@ -69,6 +74,14 @@ defmodule Liquid.Combinators.LexicalToken do
       integer_part() |> concat(fractional_part())
     ])
     |> reduce({List, :to_float, []})
+  end
+
+  def float_value_string do
+    empty()
+    |> choice([
+      integer_part() |> concat(fractional_part()) |> concat(exponent_part()),
+      integer_part() |> concat(fractional_part())
+    ])
   end
 
   defp double_quoted_string do
@@ -118,13 +131,11 @@ defmodule Liquid.Combinators.LexicalToken do
     choice([float_value(), int_value()])
   end
 
-  # RangeValue : (1..10) (my_var..10) (1..my_var)
-
-  # IntValue :: IntegerPart
-  def int_value_string do
-    empty()
-    |> concat(integer_part())
+  def number_in_string do
+    choice([float_value_string(), int_value_string()])
   end
+
+  # RangeValue : (1..10) (my_var..10) (1..my_var)
 
   def range_value do
     string("(")

@@ -38,6 +38,7 @@ defmodule Liquid.NimbleParser do
   defparsec(:ignore_whitespaces, General.ignore_whitespaces())
 
   defparsec(:number, LexicalToken.number())
+  defparsec(:number_in_string, LexicalToken.number_in_string())
   defparsec(:value_definition, LexicalToken.value_definition())
   defparsec(:value, LexicalToken.value())
   defparsec(:object_property, LexicalToken.object_property())
