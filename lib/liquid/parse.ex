@@ -90,7 +90,7 @@ defmodule Liquid.Parse do
     end
   end
 
-  defp parse_tokens(<<string::binary>>, tag_name) do
+  def parse_tokens(<<string::binary>>, tag_name) do
     case Registers.lookup(tag_name) do
       {mod, Liquid.Block} ->
         try do
@@ -104,14 +104,14 @@ defmodule Liquid.Parse do
     end
   end
 
-  defp parse_tag_name(name) do
+  def parse_tag_name(name) do
     case Regex.named_captures(Liquid.parser(), name) do
       %{"tag" => tag_name, "variable" => _} -> tag_name
       _ -> nil
     end
   end
 
-  defp parse_node(<<name::binary>>, rest, %Template{} = template) do
+  def parse_node(<<name::binary>>, rest, %Template{} = template) do
     case Regex.named_captures(Liquid.parser(), name) do
       %{"tag" => "", "variable" => markup} when is_binary(markup) ->
         {Variable.create(markup), rest, template}
@@ -124,7 +124,7 @@ defmodule Liquid.Parse do
     end
   end
 
-  defp parse_markup(markup, rest, template) do
+  def parse_markup(markup, rest, template) do
     name = markup |> String.split(" ") |> hd
 
     case Registers.lookup(name) do
@@ -141,7 +141,7 @@ defmodule Liquid.Parse do
     end
   end
 
-  defp parse_block(mod, markup, rest, template) do
+  def parse_block(mod, markup, rest, template) do
     block = Liquid.Block.create(markup)
 
     {block, rest, template} =
