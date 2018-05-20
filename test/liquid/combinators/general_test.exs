@@ -14,9 +14,6 @@ defmodule Liquid.Combinators.GeneralTest do
     defparsec(:end_variable, General.end_variable())
     defparsec(:variable_definition, General.variable_definition())
     defparsec(:variable_name, General.variable_name())
-    #    defparsec(:liquid_object, General.liquid_object())
-    #    defparsec(:filter_param, General.filter_param())
-    #    defparsec(:filter, General.filter())
   end
 
   test "whitespace must parse 0x0020 and 0x0009" do
@@ -78,44 +75,4 @@ defmodule Liquid.Combinators.GeneralTest do
       test_combinator_error(n, &Parser.variable_name/1)
     end)
   end
-
-
-  #  test "tablerow tag: range parameter" do
-  #    tags = [
-  #      "{{ i }}",
-  #      "{{i}}",
-  #      "{{       i          }}"
-  #    ]
-  #
-  #    Enum.each(
-  #      tags,
-  #      fn tag ->
-  #        test_combinator(
-  #          tag,
-  #          &Parser.liquid_object/1,
-  #          [{:variable, ["i"]}, ""]
-  #        )
-  #      end
-  #    )
-  #  end
-
-  #  test "liquid object valid input" do
-  #    test_combinator("{{ a }}", &Parser.liquid_object/1, [{:variable, ["a"]}, ""])
-  #    test_combinator("{{ 'a' }}", &Parser.liquid_object/1, [{:variable, ["a"]}, ""])
-  #    test_combinator("{{ liquid.object }}", &Parser.liquid_object/1, [{:variable, ["liquid.object"]}, ""])
-  #    test_combinator("{{ 5 }}", &Parser.liquid_object/1, [{:variable, [5]}, ""])
-  #    test_combinator("{{ my_var }}", &Parser.liquid_object/1, [{:variable, ["my_var"]}, ""])
-  #    test_combinator("{{ liquid.object[0] }}", &Parser.liquid_object/1, [{:variable, ["liquid.object[0]"]}, ""])
-  #    test_combinator("{{ liquid[my_value].object[0] }}", &Parser.liquid_object/1, [{:variable, ["liquid[my_value].object[0]"]}, ""])
-  #  end
-
-  #  test "filters parser" do
-  #    test_combinator("| split ", &Parser.filter/1, [filter: [variable_name: "split"]])
-  #    test_combinator("| join: ', '", &Parser.filter/1, [filter: [variable_name: "join", filter_param: [value: ", "]]])
-  #    test_combinator("| uniq | join: ', '", &Parser.filter/1,
-  #                     [
-  #                       filter: [variable_name: "uniq"],
-  #                       filter: [variable_name: "join", filter_param: [value: ", "]]
-  #                     ])
-  #  end
 end
