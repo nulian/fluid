@@ -207,9 +207,9 @@ defmodule Liquid.Combinators.General do
     |> unwrap_and_tag(:variable_name)
   end
 
-  def liquid_variable do
+  def liquid_object do
     start_variable()
-    |> concat(parsec(:variable_name))
+    |> parsec(:value_definition)
     |> optional(parsec(:filter))
     |> concat(end_variable())
     |> tag(:variable)
@@ -247,6 +247,9 @@ defmodule Liquid.Combinators.General do
     |> optional(ignore(utf8_char([@colon])))
     |> parsec(:ignore_whitespaces)
     |> parsec(:value)
+    |> optional(ignore(utf8_char([@comma])))
+    |> optional(parsec(:ignore_whitespaces))
+    |> optional(parsec(:value))
     |> tag(:filter_param)
     |> optional(parsec(:filter))
   end
@@ -258,7 +261,7 @@ defmodule Liquid.Combinators.General do
   def filter do
     ignore(string(@start_filter))
     |> parsec(:ignore_whitespaces)
-    |> parsec(:variable_name)
+    |> parsec(:variable_definition)
     |> optional(parsec(:filter_param))
     |> tag(:filter)
     |> optional(parsec(:filter))

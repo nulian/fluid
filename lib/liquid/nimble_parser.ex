@@ -22,7 +22,7 @@ defmodule Liquid.NimbleParser do
     Capture
   }
 
-  defparsec(:liquid_variable, General.liquid_variable())
+  defparsec(:liquid_object, General.liquid_object())
   defparsec(:variable_definition, General.variable_definition())
   defparsec(:variable_name, General.variable_name())
   defparsec(:start_tag, General.start_tag())
@@ -51,7 +51,7 @@ defmodule Liquid.NimbleParser do
   defparsec(
     :__parse__,
     General.literal()
-    |> optional(choice([parsec(:liquid_tag), parsec(:liquid_variable)]))
+    |> optional(choice([parsec(:liquid_tag), parsec(:liquid_object)]))
   )
 
   defparsec(:assign, Assign.tag())
