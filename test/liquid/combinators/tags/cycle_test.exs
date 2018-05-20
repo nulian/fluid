@@ -62,19 +62,19 @@ defmodule Liquid.Combinators.Tags.CycleTest do
       "{%cycle 1,2%} {%cycle 1,2%} {%cycle 1,2%} {%cycle 1,2,3%} {%cycle 1,2,3%} {%cycle 1,2,3%} {%cycle 1,2,3%}",
       &Parser.cycle/1,
       [
-        {:cycle, [<<1>>, <<2>>]},
+        {:cycle, ["1", "2"]},
         " ",
-        {:cycle, [<<1>>, <<2>>]},
+        {:cycle, ["1", "2"]},
         " ",
-        {:cycle, [<<1>>, <<2>>]},
+        {:cycle, ["1", "2"]},
         " ",
-        {:cycle, [<<1>>, <<2>>, <<3>>]},
+        {:cycle, ["1", "2", "3"]},
         " ",
-        {:cycle, [<<1>>, <<2>>, <<3>>]},
+        {:cycle, ["1", "2", "3"]},
         " ",
-        {:cycle, [<<1>>, <<2>>, <<3>>]},
+        {:cycle, ["1", "2", "3"]},
         " ",
-        {:cycle, [<<1>>, <<2>>, <<3>>]},
+        {:cycle, ["1", "2", "3"]},
         ""
       ]
     )
@@ -85,17 +85,17 @@ defmodule Liquid.Combinators.Tags.CycleTest do
       "{%cycle 1: \"one\", \"two\" %} {%cycle 2: \"one\", \"two\" %} {%cycle 1: \"one\", \"two\" %} {%cycle 2: \"one\", \"two\" %} {%cycle 1: \"one\", \"two\" %} {%cycle 2: \"one\", \"two\" %}",
       &Parser.cycle/1,
       [
-        {:cycle, ["1", "\"one\"", "\"two\""]},
+        {:cycle, ["1:", "\"one\"", "\"two\""]},
         " ",
-        {:cycle, ["2", "\"one\"", "\"two\""]},
+        {:cycle, ["2:", "\"one\"", "\"two\""]},
         " ",
-        {:cycle, ["1", "\"one\"", "\"two\""]},
+        {:cycle, ["1:", "\"one\"", "\"two\""]},
         " ",
-        {:cycle, ["2", "\"one\"", "\"two\""]},
+        {:cycle, ["2:", "\"one\"", "\"two\""]},
         " ",
-        {:cycle, ["1", "\"one\"", "\"two\""]},
+        {:cycle, ["1:", "\"one\"", "\"two\""]},
         " ",
-        {:cycle, ["2", "\"one\"", "\"two\""]},
+        {:cycle, ["2:", "\"one\"", "\"two\""]},
         ""
       ]
     )
@@ -106,17 +106,17 @@ defmodule Liquid.Combinators.Tags.CycleTest do
       "{%cycle var1: \"one\", \"two\" %} {%cycle var2: \"one\", \"two\" %} {%cycle var1: \"one\", \"two\" %} {%cycle var2: \"one\", \"two\" %} {%cycle var1: \"one\", \"two\" %} {%cycle var2: \"one\", \"two\" %}",
       &Parser.cycle/1,
       [
-        {:cycle, ["var1", "\"one\"", "\"two\""]},
+        {:cycle, ["var1:", "\"one\"", "\"two\""]},
         " ",
-        {:cycle, ["var2", "\"one\"", "\"two\""]},
+        {:cycle, ["var2:", "\"one\"", "\"two\""]},
         " ",
-        {:cycle, ["var1", "\"one\"", "\"two\""]},
+        {:cycle, ["var1:", "\"one\"", "\"two\""]},
         " ",
-        {:cycle, ["var2", "\"one\"", "\"two\""]},
+        {:cycle, ["var2:", "\"one\"", "\"two\""]},
         " ",
-        {:cycle, ["var1", "\"one\"", "\"two\""]},
+        {:cycle, ["var1:", "\"one\"", "\"two\""]},
         " ",
-        {:cycle, ["var2", "\"one\"", "\"two\""]},
+        {:cycle, ["var2:", "\"one\"", "\"two\""]},
         ""
       ]
     )

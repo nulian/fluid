@@ -9,11 +9,7 @@ defmodule Liquid.Combinators.Tags.UnlessTest do
       "{% unless false %} this text should not go into the output {% endunless %}",
       &Parser.unless/1,
       [
-        {:unless,
-         [
-           "false",
-           {:output_text, [" this text should not go into the output "]}
-         ]},
+        {:unless, ["false", " this text should not go into the output "]},
         ""
       ]
     )
@@ -21,25 +17,13 @@ defmodule Liquid.Combinators.Tags.UnlessTest do
     test_combinator(
       "{% unless true %} this text should go into the output {% endunless %}",
       &Parser.unless/1,
-      [
-        {:unless,
-         [
-           "true",
-           {:output_text, [" this text should go into the output "]}
-         ]},
-        ""
-      ]
+      [{:unless, ["true", " this text should go into the output "]}, ""]
     )
   end
 
   test "unless else " do
     test_combinator("{% unless \"foo\" %} YES {% else %} NO {% endunless %}", &Parser.unless/1, [
-      {:unless,
-       [
-         "foo",
-         {:output_text, [" YES "]},
-         {:else, [output_text: ["NO "]]}
-       ]},
+      {:unless, ["foo", " YES ", {:else, ["NO "]}]},
       ""
     ])
   end
@@ -56,7 +40,7 @@ defmodule Liquid.Combinators.Tags.UnlessTest do
            {:condition, ["customer_address.city", "==", "Ottawa"]},
            "or",
            {:condition, ["customer_address.city", "==", "Seatle"]},
-           {:output_text, ["hello test"]}
+           "hello test"
          ]},
         ""
       ]
@@ -70,7 +54,7 @@ defmodule Liquid.Combinators.Tags.UnlessTest do
          {:condition, ["a", "==", "true"]},
          "or",
          {:condition, ["b", "==", 4]},
-         {:output_text, [" YES "]}
+         " YES "
        ]},
       ""
     ])
@@ -96,7 +80,7 @@ defmodule Liquid.Combinators.Tags.UnlessTest do
          {:variable_name, "foo"},
          "and",
          {:variable_name, "bar"},
-         {:output_text, [" YES "]}
+         " YES "
        ]},
       ""
     ])
@@ -106,16 +90,7 @@ defmodule Liquid.Combinators.Tags.UnlessTest do
     test_combinator(
       "{% unless false %}{% unless false %} NO {% endunless %}{% endunless %}",
       &Parser.unless/1,
-      [
-        {:unless,
-         [
-           "false",
-           {:output_text, [""]},
-           {:unless, ["false", {:output_text, [" NO "]}]},
-           ""
-         ]},
-        ""
-      ]
+      [{:unless, ["false", "", {:unless, ["false", " NO "]}, ""]}, ""]
     )
 
     test_combinator(
@@ -125,18 +100,17 @@ defmodule Liquid.Combinators.Tags.UnlessTest do
         {:unless,
          [
            "false",
-           {:output_text, [""]},
+           "",
            {:unless,
             [
-              condition: ["shipping_method.title", "==", "International Shipping"],
-              output_text: [
-                "You're shipping internationally. Your order should arrive in 2–3 weeks."
-              ],
-              elsif: [
-                condition: ["shipping_method.title", "==", "Domestic Shipping"],
-                output_text: ["Your order should arrive in 3–4 days."]
-              ],
-              else: [output_text: ["Thank you for your order!"]]
+              {:condition, ["shipping_method.title", "==", "International Shipping"]},
+              "You're shipping internationally. Your order should arrive in 2–3 weeks.",
+              {:elsif,
+               [
+                 {:condition, ["shipping_method.title", "==", "Domestic Shipping"]},
+                 "Your order should arrive in 3–4 days."
+               ]},
+              {:else, ["Thank you for your order!"]}
             ]},
            ""
          ]},
@@ -147,12 +121,12 @@ defmodule Liquid.Combinators.Tags.UnlessTest do
 
   test "comparing values" do
     test_combinator("{% unless null < 10 %} NO {% endunless %}", &Parser.unless/1, [
-      {:unless, [condition: ["null", "<", 10], output_text: [" NO "]]},
+      {:unless, [{:condition, ["null", "<", 10]}, " NO "]},
       ""
     ])
 
     test_combinator("{% unless 10 < null %} NO {% endunless %}", &Parser.unless/1, [
-      {:unless, [condition: [10, "<", "null"], output_text: [" NO "]]},
+      {:unless, [{:condition, [10, "<", "null"]}, " NO "]},
       ""
     ])
   end
@@ -162,12 +136,7 @@ defmodule Liquid.Combinators.Tags.UnlessTest do
       "{% unless 'bob' contains 'f' %}yes{% else %}no{% endunless %}",
       &Parser.unless/1,
       [
-        {:unless,
-         [
-           condition: ["bob", "contains", "f"],
-           output_text: ["yes"],
-           else: [output_text: ["no"]]
-         ]},
+        {:unless, [{:condition, ["bob", "contains", "f"]}, "yes", {:else, ["no"]}]},
         ""
       ]
     )
@@ -180,15 +149,14 @@ defmodule Liquid.Combinators.Tags.UnlessTest do
       [
         {:unless,
          [
-           condition: ["shipping_method.title", "==", "International Shipping"],
-           output_text: [
-             "You're shipping internationally. Your order should arrive in 2–3 weeks."
-           ],
-           elsif: [
-             condition: ["shipping_method.title", "==", "Domestic Shipping"],
-             output_text: ["Your order should arrive in 3–4 days."]
-           ],
-           else: [output_text: ["Thank you for your order!"]]
+           {:condition, ["shipping_method.title", "==", "International Shipping"]},
+           "You're shipping internationally. Your order should arrive in 2–3 weeks.",
+           {:elsif,
+            [
+              {:condition, ["shipping_method.title", "==", "Domestic Shipping"]},
+              "Your order should arrive in 3–4 days."
+            ]},
+           {:else, ["Thank you for your order!"]}
          ]},
         ""
       ]
@@ -199,16 +167,7 @@ defmodule Liquid.Combinators.Tags.UnlessTest do
     test_combinator(
       "{% unless true %}test{% else %} a {% else %} b {% endunless %}",
       &Parser.unless/1,
-      [
-        {:unless,
-         [
-           "true",
-           {:output_text, ["test"]},
-           {:else, [output_text: ["a "]]},
-           {:else, [output_text: ["b "]]}
-         ]},
-        ""
-      ]
+      [{:unless, ["true", "test", {:else, ["a "]}, {:else, ["b "]}]}, ""]
     )
   end
 

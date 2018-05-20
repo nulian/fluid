@@ -43,7 +43,7 @@ defmodule Liquid.Cycle do
     Variable.lookup(variable, context)
   end
 
-  defp get_name_and_values(markup) do
+  def get_name_and_values(markup) do
     [name | values] = markup |> String.split(@colon_parser, parts: 2, trim: true)
     values = if values == [], do: [name], else: values
     values = values |> hd |> String.split(",", trim: true) |> Enum.map(&String.trim(&1))
