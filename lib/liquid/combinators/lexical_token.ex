@@ -33,8 +33,7 @@ defmodule Liquid.Combinators.LexicalToken do
 
   # IntValue :: IntegerPart
   def int_value do
-    empty()
-    |> concat(integer_part())
+    int_value_string()
     |> reduce({List, :to_integer, []})
   end
 
@@ -68,11 +67,7 @@ defmodule Liquid.Combinators.LexicalToken do
   #   - IntegerPart ExponentPart
   #   - IntegerPart FractionalPart ExponentPart
   def float_value do
-    empty()
-    |> choice([
-      integer_part() |> concat(fractional_part()) |> concat(exponent_part()),
-      integer_part() |> concat(fractional_part())
-    ])
+    float_value_string()
     |> reduce({List, :to_float, []})
   end
 
