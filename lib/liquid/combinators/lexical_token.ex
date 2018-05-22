@@ -81,16 +81,16 @@ defmodule Liquid.Combinators.LexicalToken do
 
   defp double_quoted_string do
     empty()
-    |> ignore(ascii_char([?"]))
+    |> ascii_char([?"])
     |> repeat_until(utf8_char([]), [utf8_char([?"])])
-    |> ignore(ascii_char([?"]))
+    |> ascii_char([?"])
   end
 
   defp quoted_string do
     empty()
-    |> ignore(ascii_char([?']))
+    |> ascii_char([?'])
     |> repeat_until(utf8_char([]), [utf8_char([?'])])
-    |> ignore(ascii_char([?']))
+    |> ascii_char([?'])
   end
 
   # StringValue ::

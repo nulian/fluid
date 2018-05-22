@@ -24,6 +24,16 @@ defmodule Liquid.Combinators.Tags.AssignTest do
       {:assign, [variable_name: "cart", value: "old_var"]},
       ""
     ])
+
+    test_combinator("{% assign cart = 'empty cart' %}", &Parser.assign/1, [
+      {:assign, [variable_name: "cart", value: "'empty cart'"]},
+      ""
+    ])
+
+    test_combinator(~s({% assign cart = "empty cart" %}), &Parser.assign/1, [
+                      {:assign, [variable_name: "cart", value: "\"empty cart\""]},
+                      ""
+                    ])
   end
 
   test "assign a list" do

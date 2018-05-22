@@ -21,12 +21,12 @@ defmodule Liquid.NimbleParserTest do
   end
 
   test "string value" do
-    test_combinator(~S("abc"), &Parser.value/1, [value: "abc"])
-    test_combinator(~S(""), &Parser.value/1, [value: ""])
-    test_combinator(~S("mom's chicken"), &Parser.value/1, [value: "mom's chicken"])
-    test_combinator(~S("這是傳統的中文"), &Parser.value/1, [value: "這是傳統的中文"])
-    test_combinator(~S( "هذا باللغة العربية"), &Parser.value/1, [value: "هذا باللغة العربية"])
-    test_combinator(~S("😁😂😃😉"), &Parser.value/1, [value: "😁😂😃😉"])
+    test_combinator(~S("abc"), &Parser.value/1, [value: "\"abc\""])
+    test_combinator(~S(""), &Parser.value/1, [value: "\"\""])
+    test_combinator(~S("mom's chicken"), &Parser.value/1, [value: "\"mom's chicken\""])
+    test_combinator(~S("這是傳統的中文"), &Parser.value/1, [value: "\"這是傳統的中文\""])
+    test_combinator(~S( "هذا باللغة العربية"), &Parser.value/1, [value: "\"هذا باللغة العربية\""])
+    test_combinator(~S("😁😂😃😉"), &Parser.value/1, [value: "\"😁😂😃😉\""])
   end
 
   test "boolean values" do
