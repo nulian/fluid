@@ -8,7 +8,7 @@ defmodule Liquid.Combinators.Tags.Decrement do
   NOTE: decrement is a pre-decrement, -i, while increment is post: i+.
   (To achieve the survival, the application must keep the context)
 
-  if the variable does not exist, it is created with value 0:
+  if the variable does not exist, it is created with value -1:
   Input:
   ```
     Hello: {% decrement variable %}
@@ -24,7 +24,7 @@ defmodule Liquid.Combinators.Tags.Decrement do
   alias Liquid.Combinators.Tag
 
   def tag do
-    Tag.create_generic_tag(:decrement, fn combinator ->
+    Tag.define(:decrement, fn combinator ->
       combinator
       |> concat(parsec(:variable_name))
     end)

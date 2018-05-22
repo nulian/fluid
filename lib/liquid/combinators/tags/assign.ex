@@ -13,7 +13,7 @@ defmodule Liquid.Combinators.Tags.Assign do
   alias Liquid.Combinators.Tag
 
   def tag do
-    Tag.create_generic_tag(:assign, fn combinator ->
+    Tag.define(:assign, fn combinator ->
       combinator
       |> concat(parsec(:variable_name))
       |> concat(ignore(string("=")))
