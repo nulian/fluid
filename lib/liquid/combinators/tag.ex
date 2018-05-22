@@ -20,12 +20,12 @@ defmodule Liquid.Combinators.Tag do
 
         def ignorable, do: Tag.define(
           :ignorable,
-          fn combinator -> string("T") |> ignore() |> integer(2,2))
+          fn combinator -> combinator |> string("T") |> ignore() |> integer(2,2))
 
-      MyParser.ignorable("{% ignorable T12 }")
+      MyParser.ignorable("{% ignorable T12 %}")
       #=> {:ok, {:ignorable, [12]}, "", %{}, {1, 0}, 2}
   """
-  def define(tag_name, combinator \\ &(&1)) do
+  def define(tag_name, combinator \\ & &1) do
     empty()
     |> parsec(:start_tag)
     |> concat(ignore(string(Atom.to_string(tag_name))))

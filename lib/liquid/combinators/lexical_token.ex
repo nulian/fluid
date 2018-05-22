@@ -33,13 +33,8 @@ defmodule Liquid.Combinators.LexicalToken do
 
   # IntValue :: IntegerPart
   def int_value do
-    int_value_string()
+    integer_part()
     |> reduce({List, :to_integer, []})
-  end
-
-  def int_value_string do
-    empty()
-    |> concat(integer_part())
   end
 
   # FractionalPart :: . Digit+
@@ -93,6 +88,10 @@ defmodule Liquid.Combinators.LexicalToken do
     |> ascii_char([?'])
   end
 
+  def to_atom(_rest, [h | _], context, _line, _offset) do
+    {h |> String.to_atom() |> List.wrap(), context}
+  end
+
   # StringValue ::
   #   - `"` StringCharacter* `"`
   def string_value do
@@ -113,34 +112,36 @@ defmodule Liquid.Combinators.LexicalToken do
 
   # BooleanValue : one of `true` `false`
   def boolean_value do
-    choice([
+    empty()
+    |> choice([
       string("true"),
       string("false")
     ])
+    |> traverse({Liquid.Combinators.LexicalToken, :to_atom, []})
   end
 
   # NullValue : `nil`
-  def null_value, do: choice([string("nil"), string("null")])
+  def null_value do
+    empty()
+    |> choice([string("nil"), string("null")])
+    |> replace(nil)
+  end
 
   def number do
     choice([float_value(), int_value()])
   end
 
   def number_in_string do
-    choice([float_value_string(), int_value_string()])
+    choice([float_value_string(), integer_part()])
   end
 
   # RangeValue : (1..10) (my_var..10) (1..my_var)
-
   def range_value do
     string("(")
     |> parsec(:ignore_whitespaces)
-    |> concat(choice([parsec(:variable_definition), int_value_string()]))
-    |> reduce({List, :to_string, []})
-    |> concat(string("."))
-    |> concat(string("."))
-    |> concat(choice([parsec(:variable_definition), int_value_string()]))
-    |> reduce({List, :to_string, []})
+    |> concat(choice([parsec(:variable_definition), integer_part()]))
+    |> concat(string(".."))
+    |> concat(choice([parsec(:variable_definition), integer_part()]))
     |> parsec(:ignore_whitespaces)
     |> concat(string(")"))
     |> reduce({List, :to_string, []})
@@ -159,9 +160,9 @@ defmodule Liquid.Combinators.LexicalToken do
     parsec(:ignore_whitespaces)
     |> choice([
       number(),
-      string_value(),
       boolean_value(),
       null_value(),
+      string_value(),
       object_value()
     ])
     |> concat(parsec(:ignore_whitespaces))
