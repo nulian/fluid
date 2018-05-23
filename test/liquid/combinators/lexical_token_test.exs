@@ -55,19 +55,19 @@ defmodule Liquid.Combinators.LexicalTokenTest do
   end
 
   test "object values" do
-    test_combinator("variable", &Parser.value/1, value: "variable")
-    test_combinator("variable.value", &Parser.value/1, value: "variable.value")
+    test_combinator("variable", &Parser.value/1, value: {:variable, ["variable"]})
+    test_combinator("variable.value", &Parser.value/1, value: {:variable, ["variable", "value"]})
   end
 
   test "list values" do
-    test_combinator("product[0]", &Parser.value/1, value: "product[0]")
+    test_combinator("product[0]", &Parser.value/1, value: {:variable, ["product", "[0]"]})
   end
 
   test "object and list values" do
     test_combinator(
       "products[0].parts[0].providers[0]",
       &Parser.value/1,
-      value: "products[0].parts[0].providers[0]"
+      value: {:variable, ["products", "[0]", "parts", "[0]", "providers", "[0]"]}
     )
   end
 end

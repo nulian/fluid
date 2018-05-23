@@ -163,7 +163,7 @@ defmodule Liquid.Combinators.LexicalToken do
       boolean_value(),
       null_value(),
       string_value(),
-      object_value()
+      tag(object_value(), :variable)
     ])
     |> concat(parsec(:ignore_whitespaces))
   end
@@ -173,18 +173,15 @@ defmodule Liquid.Combinators.LexicalToken do
     |> unwrap_and_tag(:value)
   end
 
-  # ObjectValue[Const] :
-  #   - [ ]
-  #   - [ Value[?Const]+ ]
   def object_property do
     string(".")
+    |> ignore()
     |> parsec(:object_value)
   end
 
   def object_value do
     parsec(:variable_definition)
     |> optional(choice([times(list_index(), min: 1), parsec(:object_property)]))
-    |> reduce({Enum, :join, []})
   end
 
   defp list_definition do
@@ -200,6 +197,7 @@ defmodule Liquid.Combinators.LexicalToken do
     |> concat(optional(list_definition()))
     |> parsec(:ignore_whitespaces)
     |> concat(string("]"))
+    |> reduce({Enum, :join, []})
     |> optional(parsec(:object_property))
   end
 end

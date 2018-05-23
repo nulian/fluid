@@ -21,7 +21,7 @@ defmodule Liquid.Combinators.Tags.AssignTest do
     end)
 
     test_combinator("{% assign cart = old_var %}", &Parser.assign/1, [
-      {:assign, [variable_name: "cart", value: "old_var"]},
+      {:assign, [variable_name: "cart", value: {:variable, ["old_var"]}]},
       ""
     ])
 
@@ -38,24 +38,24 @@ defmodule Liquid.Combinators.Tags.AssignTest do
 
   test "assign a list" do
     test_combinator("{% assign cart = product[0] %}", &Parser.assign/1, [
-      {:assign, [variable_name: "cart", value: "product[0]"]},
+      {:assign, [variable_name: "cart", value: {:variable, ["product", "[0]"]}]},
       ""
     ])
 
     test_combinator("{% assign cart = products[0][0] %}", &Parser.assign/1, [
-      {:assign, [variable_name: "cart", value: "products[0][0]"]},
+      {:assign, [variable_name: "cart", value: {:variable, ["products", "[0]", "[0]"]}]},
       ""
     ])
 
     test_combinator("{% assign cart = products[  0  ][ 0  ] %}", &Parser.assign/1, [
-      {:assign, [variable_name: "cart", value: "products[0][0]"]},
+      {:assign, [variable_name: "cart", value: {:variable, ["products", "[0]", "[0]"]}]},
       ""
     ])
   end
 
   test "assign an object" do
     test_combinator("{% assign cart = company.employees.first.name %}", &Parser.assign/1, [
-      {:assign, [variable_name: "cart", value: "company.employees.first.name"]},
+      {:assign, [variable_name: "cart", value: {:variable, ["company", "employees", "first", "name"]}]},
       ""
     ])
 
@@ -63,7 +63,7 @@ defmodule Liquid.Combinators.Tags.AssignTest do
       "{% assign cart = company.managers[1].name %}",
       &Parser.assign/1,
       [
-        {:assign, [variable_name: "cart", value: "company.managers[1].name"]},
+        {:assign, [variable_name: "cart", value: {:variable, ["company", "managers", "[1]", "name"]}]},
         ""
       ]
     )
@@ -72,7 +72,7 @@ defmodule Liquid.Combinators.Tags.AssignTest do
       "{% assign cart = company.managers[1][0].name %}",
       &Parser.assign/1,
       [
-        {:assign, [variable_name: "cart", value: "company.managers[1][0].name"]},
+        {:assign, [variable_name: "cart", value: {:variable, ["company", "managers", "[1]", "[0]", "name"]}]},
         ""
       ]
     )
