@@ -38,8 +38,7 @@ defmodule Liquid.Combinators.LexicalTokenTest do
     )
 
     test_combinator(~S("這是傳統的中文"), &Parser.value/1, value: "這是傳統的中文")
-
-    # test_combinator(~S( "هذا باللغة العربية"), &Parser.value/1, value: "هذا باللغة العربية")
+    test_combinator(~S( "هذا باللغة العربية"), &Parser.value/1, value: "هذا باللغة العربية")
     test_combinator(~S("😁😂😃😉"), &Parser.value/1, value: "😁😂😃😉")
   end
 
@@ -54,10 +53,22 @@ defmodule Liquid.Combinators.LexicalTokenTest do
   end
 
   test "range values" do
-    test_combinator("(1..10)", &Parser.range_value/1, range_value: ["(1..10)"])
-    test_combinator("(1..var)", &Parser.range_value/1, range_value: ["(1..var)"])
-    test_combinator("(var..10)", &Parser.range_value/1, range_value: ["(var..10)"])
-    test_combinator("(var1..var2)", &Parser.range_value/1, range_value: ["(var1..var2)"])
+    test_combinator("(10..1)", &Parser.range_value/1, range_value: [{:start, 10}, {:end, 1}])
+    test_combinator("(-10..1)", &Parser.range_value/1, range_value: [{:start, -10}, {:end, 1}])
+    test_combinator("(1..10)", &Parser.range_value/1, range_value: [{:start, 1}, {:end, 10}])
+    test_combinator("(1..var)", &Parser.range_value/1, range_value: [{:start, 1}, {:end, "var"}])
+
+    test_combinator(
+      "(var..10)",
+      &Parser.range_value/1,
+      range_value: [{:start, "var"}, {:end, 10}]
+    )
+
+    test_combinator(
+      "(var1..var2)",
+      &Parser.range_value/1,
+      range_value: [{:start, "var1"}, {:end, "var2"}]
+    )
   end
 
   test "object values" do
@@ -66,14 +77,20 @@ defmodule Liquid.Combinators.LexicalTokenTest do
   end
 
   test "list values" do
-    test_combinator("product[0]", &Parser.value/1, value: {:variable, ["product", "[0]"]})
+    test_combinator("product[0]", &Parser.value/1, value: {:variable, ["product", {:index, [0]}]})
   end
 
   test "object and list values" do
     test_combinator(
       "products[0].parts[0].providers[0]",
       &Parser.value/1,
-      value: {:variable, ["products", "[0]", "parts", "[0]", "providers", "[0]"]}
+      value: {:variable, ["products", {:index, [0]}, "parts", {:index, [0]}, "providers", {:index, [0]}]}
+    )
+
+    test_combinator(
+      "products[parts[0].providers[0]]",
+      &Parser.value/1,
+      value: {:variable, ["products", {:index, ["parts", {:index, [0]}, "providers", {:index, [0]}]}]}
     )
   end
 end

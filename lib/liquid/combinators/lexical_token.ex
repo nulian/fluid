@@ -32,7 +32,7 @@ defmodule Liquid.Combinators.LexicalToken do
   end
 
   # IntValue :: IntegerPart
-  def int_value do
+  def integer_value do
     integer_part()
     |> reduce({List, :to_integer, []})
   end
@@ -62,16 +62,12 @@ defmodule Liquid.Combinators.LexicalToken do
   #   - IntegerPart ExponentPart
   #   - IntegerPart FractionalPart ExponentPart
   def float_value do
-    float_value_string()
-    |> reduce({List, :to_float, []})
-  end
-
-  def float_value_string do
     empty()
     |> choice([
       integer_part() |> concat(fractional_part()) |> concat(exponent_part()),
       integer_part() |> concat(fractional_part())
     ])
+    |> reduce({List, :to_float, []})
   end
 
   defp double_quoted_string do
@@ -128,23 +124,25 @@ defmodule Liquid.Combinators.LexicalToken do
   end
 
   def number do
-    choice([float_value(), int_value()])
+    choice([float_value(), integer_value()])
   end
 
-  def number_in_string do
-    choice([float_value_string(), integer_part()])
+  defp range_part(combinator \\ empty(), tag_name) do
+    combinator
+    |> choice([integer_value(), parsec(:variable_definition)])
+    |> unwrap_and_tag(tag_name)
   end
 
-  # RangeValue : (1..10) (my_var..10) (1..my_var)
+  # RangeValue :: (1..10) | (var..10) | (1..var) | (var1..var2)
   def range_value do
     string("(")
+    |> ignore()
     |> parsec(:ignore_whitespaces)
-    |> concat(choice([parsec(:variable_definition), integer_part()]))
-    |> concat(string(".."))
-    |> concat(choice([parsec(:variable_definition), integer_part()]))
+    |> range_part(:start)
+    |> ignore(string(".."))
+    |> concat(range_part(:end))
     |> parsec(:ignore_whitespaces)
-    |> concat(string(")"))
-    |> reduce({List, :to_string, []})
+    |> ignore(string(")"))
     |> tag(:range_value)
   end
 
@@ -155,7 +153,6 @@ defmodule Liquid.Combinators.LexicalToken do
   #   - NullValue
   #   - ListValue[?Const]
   #   - Variable
-
   def value_definition do
     parsec(:ignore_whitespaces)
     |> choice([
@@ -186,18 +183,19 @@ defmodule Liquid.Combinators.LexicalToken do
 
   defp list_definition do
     choice([
-      int_value(),
-      parsec(:variable_definition)
+      integer_value(),
+      parsec(:object_value)
     ])
   end
 
   defp list_index do
     string("[")
+    |> ignore()
     |> parsec(:ignore_whitespaces)
     |> concat(optional(list_definition()))
     |> parsec(:ignore_whitespaces)
-    |> concat(string("]"))
-    |> reduce({Enum, :join, []})
+    |> ignore(string("]"))
+    |> tag(:index)
     |> optional(parsec(:object_property))
   end
 end
