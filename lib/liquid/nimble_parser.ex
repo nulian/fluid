@@ -30,6 +30,7 @@ defmodule Liquid.NimbleParser do
   defparsec(:null_value, LexicalToken.null_value())
   defparsec(:string_value, LexicalToken.string_value())
   defparsec(:object_value, LexicalToken.object_value())
+  defparsec(:variable_value, LexicalToken.variable_value())
   defparsec(:range_value, LexicalToken.range_value())
 
   defparsec(

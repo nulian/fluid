@@ -160,10 +160,12 @@ defmodule Liquid.Combinators.LexicalToken do
       boolean_value(),
       null_value(),
       string_value(),
-      tag(object_value(), :variable)
+      variable_value()
     ])
     |> concat(parsec(:ignore_whitespaces))
   end
+
+  def variable_value, do: tag(object_value(), :variable)
 
   def value do
     parsec(:value_definition)
@@ -184,7 +186,7 @@ defmodule Liquid.Combinators.LexicalToken do
   defp list_definition do
     choice([
       integer_value(),
-      parsec(:object_value)
+      parsec(:variable_value)
     ])
   end
 
@@ -195,7 +197,7 @@ defmodule Liquid.Combinators.LexicalToken do
     |> concat(optional(list_definition()))
     |> parsec(:ignore_whitespaces)
     |> ignore(string("]"))
-    |> tag(:index)
+    |> unwrap_and_tag(:index)
     |> optional(parsec(:object_property))
   end
 end

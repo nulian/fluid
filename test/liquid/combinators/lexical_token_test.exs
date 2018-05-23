@@ -77,7 +77,7 @@ defmodule Liquid.Combinators.LexicalTokenTest do
   end
 
   test "list values" do
-    test_combinator("product[0]", &Parser.value/1, value: {:variable, ["product", {:index, [0]}]})
+    test_combinator("product[0]", &Parser.value/1, value: {:variable, ["product", {:index, 0}]})
   end
 
   test "object and list values" do
@@ -86,14 +86,14 @@ defmodule Liquid.Combinators.LexicalTokenTest do
       &Parser.value/1,
       value:
         {:variable,
-         ["products", {:index, [0]}, "parts", {:index, [0]}, "providers", {:index, [0]}]}
+         ["products", {:index, 0}, "parts", {:index, 0}, "providers", {:index, 0}]}
     )
 
     test_combinator(
       "products[parts[0].providers[0]]",
       &Parser.value/1,
       value:
-        {:variable, ["products", {:index, ["parts", {:index, [0]}, "providers", {:index, [0]}]}]}
+        {:variable, ["products", {:index, {:variable, ["parts", {:index, 0}, "providers", {:index, 0}]}}]}
     )
   end
 end
