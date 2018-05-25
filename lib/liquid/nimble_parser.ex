@@ -33,22 +33,31 @@ defmodule Liquid.NimbleParser do
   defparsec(:variable_value, LexicalToken.variable_value())
   defparsec(:range_value, LexicalToken.range_value())
 
+  defp clean_empty_strings(_rest, args, context, _line, _offset) do
+    result =
+      args
+      |> Enum.filter(fn e -> e != "" end)
+
+    {result, context}
+  end
+
   defparsec(
     :__parse__,
-    General.literal()
-    |> optional(choice([parsec(:liquid_tag), parsec(:liquid_object)]))
+    General.liquid_literal()
+    |> optional(choice([parsec(:liquid_tag), parsec(:liquid_variable)]))
+    |> traverse({:clean_empty_strings, []})
   )
 
   defparsec(:assign, Assign.tag())
-
+  defparsec(:capture, Capture.tag())
   defparsec(:decrement, Decrement.tag())
-
   defparsec(:increment, Increment.tag())
 
   defparsec(
     :liquid_tag,
     choice([
       parsec(:assign),
+      parsec(:capture),
       parsec(:increment),
       parsec(:decrement)
     ])
