@@ -223,6 +223,7 @@ defmodule Liquid.Combinators.General do
     |> parsec(:value_definition)
     |> optional(parsec(:filter))
     |> concat(end_variable())
+    |> tag(:variable)
     |> optional(parsec(:__parse__))
   end
 
