@@ -6,7 +6,7 @@ defmodule Liquid.Combinators.GeneralTest do
     import NimbleParsec
     alias Liquid.Combinators.General
     defparsec(:whitespace, General.whitespace())
-    defparsec(:literal, General.literal())
+    defparsec(:liquid_literal, General.liquid_literal())
     defparsec(:ignore_whitespaces, General.ignore_whitespaces())
     defparsec(:start_tag, General.start_tag())
     defparsec(:end_tag, General.end_tag())
@@ -22,16 +22,16 @@ defmodule Liquid.Combinators.GeneralTest do
   end
 
   test "literal: every utf8 valid character until open/close tag/variable" do
-    test_combinator("Chinese: 你好, English: Whatever, Arabian: مرحبا", &Parser.literal/1, [
+    test_combinator("Chinese: 你好, English: Whatever, Arabian: مرحبا", &Parser.liquid_literal/1, [
       "Chinese: 你好, English: Whatever, Arabian: مرحبا"
     ])
 
-    test_combinator("stop in {{", &Parser.literal/1, ["stop in "])
-    test_combinator("stop in {%", &Parser.literal/1, ["stop in "])
-    test_combinator("stop in %}", &Parser.literal/1, ["stop in "])
-    test_combinator("stop in }}", &Parser.literal/1, ["stop in "])
-    test_combinator("{{ this is not processed", &Parser.literal/1, [""])
-    test_combinator("", &Parser.literal/1, [""])
+    test_combinator("stop in {{", &Parser.liquid_literal/1, ["stop in "])
+    test_combinator("stop in {%", &Parser.liquid_literal/1, ["stop in "])
+    test_combinator("stop in %}", &Parser.liquid_literal/1, ["stop in "])
+    test_combinator("stop in }}", &Parser.liquid_literal/1, ["stop in "])
+    test_combinator("{{ this is not processed", &Parser.liquid_literal/1, [""])
+    test_combinator("", &Parser.liquid_literal/1, [""])
   end
 
   test "extra_spaces ignore all :whitespaces" do

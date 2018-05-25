@@ -176,7 +176,7 @@ defmodule Liquid.Combinators.General do
   @doc """
   All utf8 valid characters or empty limited by start/end of tag/variable
   """
-  def literal do
+  def liquid_literal do
     empty()
     |> repeat_until(utf8_char([]), [
       string(@start_variable),
@@ -218,7 +218,7 @@ defmodule Liquid.Combinators.General do
     |> unwrap_and_tag(:variable_name)
   end
 
-  def liquid_object do
+ def liquid_variable do
     start_variable()
     |> parsec(:value_definition)
     |> optional(parsec(:filter))

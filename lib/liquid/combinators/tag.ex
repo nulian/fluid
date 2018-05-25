@@ -5,12 +5,11 @@ defmodule Liquid.Combinators.Tag do
   import NimbleParsec
 
   @doc """
-  Define a tag from a tag_name and a function. The function `combinator` must expect
-  a combinator and must returns a combinator
+  Define a tag from a tag_name and, optionally, a function to parse tag parameters,
+  an end_tag_name to close the tag and a function to parse the body inside the tag
+  Both functions must receive a combinator and must return a combinator
 
   The returned tag is a combinator which expect a start tag `{%` a tag name and a end tag `%}`
-
-  The second parameter, function combinator, contains the specific behavior for defined tag
 
   ## Examples
 
@@ -19,19 +18,40 @@ defmodule Liquid.Combinators.Tag do
         alias Liquid.Combinators.Tag
 
         def ignorable, do: Tag.define(
-          :ignorable,
+          "ignorable",
           fn combinator -> combinator |> string("T") |> ignore() |> integer(2,2))
 
       MyParser.ignorable("{% ignorable T12 %}")
       #=> {:ok, {:ignorable, [12]}, "", %{}, {1, 0}, 2}
   """
-  def define(tag_name, combinator \\ & &1) do
+  def define(tag_name, combinator_open \\ & &1, end_tag_name \\ "", combinator_body \\ & &1) do
+    tag_name
+    |> open_definition(combinator_open)
+    |> combinator_body.()
+    |> close_tag(end_tag_name)
+    |> close_definition(tag_name)
+  end
+
+  defp open_definition(tag_name, combinator) do
     empty()
     |> parsec(:start_tag)
-    |> concat(ignore(string(Atom.to_string(tag_name))))
+    |> ignore(string(tag_name))
     |> combinator.()
-    |> concat(parsec(:end_tag))
-    |> tag(tag_name)
+    |> parsec(:end_tag)
+  end
+
+  defp close_tag(combinator, ""), do: combinator
+
+  defp close_tag(combinator, close_tag_name) do
+    combinator
+    |> parsec(:start_tag)
+    |> ignore(string(close_tag_name))
+    |> parsec(:end_tag)
+  end
+
+  defp close_definition(combinator, tag_name) do
+    combinator
+    |> tag(String.to_atom(tag_name))
     |> optional(parsec(:__parse__))
   end
 end

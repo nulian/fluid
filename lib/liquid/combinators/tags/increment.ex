@@ -20,7 +20,7 @@ defmodule Liquid.Combinators.Tags.Increment do
   alias Liquid.Combinators.Tag
 
   def tag do
-    Tag.define(:increment, fn combinator ->
+    Tag.define("increment", fn combinator ->
       combinator
       |> concat(parsec(:variable_name))
     end)

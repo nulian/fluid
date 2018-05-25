@@ -5,9 +5,14 @@ defmodule Liquid.NimbleParser do
   import NimbleParsec
 
   alias Liquid.Combinators.{General, LexicalToken}
-  alias Liquid.Combinators.Tags.{Assign, Decrement, Increment}
+  alias Liquid.Combinators.Tags.{
+    Assign,
+    Capture,
+    Decrement,
+    Increment
+  }
 
-  defparsec(:liquid_object, General.liquid_object())
+  defparsec(:liquid_variable, General.liquid_variable())
   defparsec(:variable_definition, General.variable_definition())
   defparsec(:variable_name, General.variable_name())
   defparsec(:start_tag, General.start_tag())
@@ -33,22 +38,31 @@ defmodule Liquid.NimbleParser do
   defparsec(:variable_value, LexicalToken.variable_value())
   defparsec(:range_value, LexicalToken.range_value())
 
+  defp clean_empty_strings(_rest, args, context, _line, _offset) do
+    result =
+      args
+      |> Enum.filter(fn e -> e != "" end)
+
+    {result, context}
+  end
+
   defparsec(
     :__parse__,
-    General.literal()
-    |> optional(choice([parsec(:liquid_tag), parsec(:liquid_object)]))
+    General.liquid_literal()
+    |> optional(choice([parsec(:liquid_tag), parsec(:liquid_variable)]))
+    |> traverse({:clean_empty_strings, []})
   )
 
   defparsec(:assign, Assign.tag())
-
+  defparsec(:capture, Capture.tag())
   defparsec(:decrement, Decrement.tag())
-
   defparsec(:increment, Increment.tag())
 
   defparsec(
     :liquid_tag,
     choice([
       parsec(:assign),
+      parsec(:capture),
       parsec(:increment),
       parsec(:decrement)
     ])
@@ -58,8 +72,6 @@ defmodule Liquid.NimbleParser do
   Validate and parse liquid markup.
   """
   @spec parse(String.t()) :: {:ok | :error, any()}
-  def parse(""), do: {:ok, ""}
-
   def parse(markup) do
     case __parse__(markup) do
       {:ok, template, "", _, _, _} ->
