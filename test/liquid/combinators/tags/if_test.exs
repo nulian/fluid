@@ -29,11 +29,9 @@ defmodule Liquid.Combinators.Tags.IfTest do
       "{% if line_item.grams > 20000 and customer_address.city == 'Ottawa' or customer_address.city == 'Seatle' %}hello test{% endif %}",
       &Parser.if/1,
       if: [
-        {:condition, [{:variable, ["line_item", "grams"]}, ">", 20000]},
-        "and",
-        {:condition, [{:variable, ["customer_address", "city"]}, "==", "Ottawa"]},
-        "or",
-        {:condition, [{:variable, ["customer_address", "city"]}, "==", "Seatle"]},
+        {:condition, [{:variable, ["line_item", "grams"]}, ">", 20_000]},
+        {:logical, ["and", {:condition, [{:variable, ["customer_address", "city"]}, "==", "Ottawa"]}]},
+        {:logical, ["or", {:condition, [{:variable, ["customer_address", "city"]}, "==", "Seatle"]}]},
         "hello test"
       ]
     )
@@ -44,8 +42,7 @@ defmodule Liquid.Combinators.Tags.IfTest do
       {:if,
        [
          {:condition, [{:variable, ["a"]}, "==", true]},
-         "or",
-         {:condition, [{:variable, ["b"]}, "==", 4]},
+         {:logical, ["or", {:condition, [{:variable, ["b"]}, "==", 4]}]},
          " YES "
        ]}
     ])
@@ -60,18 +57,12 @@ defmodule Liquid.Combinators.Tags.IfTest do
       &Parser.if/1,
       if: [
         {:condition, [{:variable, ["a"]}, "==", "and"]},
-        "and",
-        {:condition, [{:variable, ["b"]}, "==", "or"]},
-        "and",
-        {:condition, [{:variable, ["c"]}, "==", "foo and bar"]},
-        "and",
-        {:condition, [{:variable, ["d"]}, "==", "bar or baz"]},
-        "and",
-        {:condition, [{:variable, ["e"]}, "==", "foo"]},
-        "and",
-        {:variable_name, "foo"},
-        "and",
-        {:variable_name, "bar"},
+        {:logical, ["and", {:condition, [{:variable, ["b"]}, "==", "or"]}]},
+        {:logical, ["and", {:condition, [{:variable, ["c"]}, "==", "foo and bar"]}]},
+        {:logical, ["and", {:condition, [{:variable, ["d"]}, "==", "bar or baz"]}]},
+        {:logical, ["and", {:condition, [{:variable, ["e"]}, "==", "foo"]}]},
+        {:logical, ["and", {:variable_name, "foo"}]},
+        {:logical, ["and", {:variable_name, "bar"}]},
         " YES "
       ]
     )
@@ -169,13 +160,9 @@ defmodule Liquid.Combinators.Tags.IfTest do
 
   test "missing a opening tag and a closing tag" do
     test_combinator_error(" if true %}test{% else %} a {% endif %}", &Parser.if/1)
-
     test_combinator_error("test{% else %} a {% endif %}", &Parser.if/1)
-
     test_combinator_error("{% if true %}test{% else %} a ", &Parser.if/1)
-
     test_combinator_error(" if true %}test{% else  a {% endif %}", &Parser.if/1)
-
     test_combinator_error("{% if true %}test{% else %} a  endif %}", &Parser.if/1)
   end
 end

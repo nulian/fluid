@@ -57,5 +57,6 @@ defmodule Liquid.Combinators.Tags.If do
       condition(),
       parsec(:variable_name),
       parsec(:value_definition)])
+    |> tag(:logical)
   end
 end
