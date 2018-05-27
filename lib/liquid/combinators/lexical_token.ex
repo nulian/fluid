@@ -90,6 +90,7 @@ defmodule Liquid.Combinators.LexicalToken do
 
   # StringValue ::
   #   - `"` StringCharacter* `"`
+  #   - `'` StringCharacter* `'`
   def string_value do
     empty()
     |> choice([double_quoted_string(), quoted_string()])

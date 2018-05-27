@@ -19,23 +19,11 @@ defmodule Liquid.Combinators.Tags.If do
   import NimbleParsec
   alias Liquid.Combinators.Tag
 
-  def logical_condition do
-    parsec(:logical_operators)
-    |> choice([
-        condition(),
-        parsec(:variable_name),
-        parsec(:value_definition)])
-  end
-
-  def elsif_tag do
-    Tag.define("elsif", &predicate/1)
-  end
+  def elsif_tag, do: Tag.define("elsif", &predicate/1)
 
   def else_tag, do: Tag.define("else")
 
-  def tag do
-    Tag.define("if", &predicate/1, &body/1, "endif")
-  end
+  def tag, do: Tag.define("if", &predicate/1, &body/1, "endif")
 
   defp body(combinator) do
     combinator
@@ -52,7 +40,7 @@ defmodule Liquid.Combinators.Tags.If do
       parsec(:value_definition),
       parsec(:quoted_token)
     ])
-    |> optional(times(parsec(:logical_condition), min: 1))
+    |> optional(times(logical_condition(), min: 1))
   end
 
   defp condition do
@@ -62,5 +50,12 @@ defmodule Liquid.Combinators.Tags.If do
     |> parsec(:value_definition)
     |> tag(:condition)
   end
+
+  defp logical_condition do
+    parsec(:logical_operators)
+    |> choice([
+      condition(),
+      parsec(:variable_name),
+      parsec(:value_definition)])
+  end
 end
-# # 111
