@@ -24,7 +24,7 @@ defmodule Liquid.Combinators.Tag do
       MyParser.ignorable("{% ignorable T12 %}")
       #=> {:ok, {:ignorable, [12]}, "", %{}, {1, 0}, 2}
   """
-  def define(tag_name, combinator_open \\ & &1, end_tag_name \\ "", combinator_body \\ & &1) do
+  def define(tag_name, combinator_open \\ & &1, combinator_body \\ & &1, end_tag_name \\ "") do
     tag_name
     |> open_definition(combinator_open)
     |> combinator_body.()
