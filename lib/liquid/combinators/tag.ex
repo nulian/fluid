@@ -51,7 +51,7 @@ defmodule Liquid.Combinators.Tag do
 
   defp close_definition(combinator, tag_name) do
     combinator
-    |> tag(String.to_atom(tag_name))
     |> optional(parsec(:__parse__))
+    |> tag(String.to_atom(tag_name))
   end
 end
