@@ -18,6 +18,7 @@ defmodule Liquid.Combinators.Tags.If do
 
   import NimbleParsec
   alias Liquid.Combinators.General
+  alias Liquid.Combinators.Tag
 
   defp open_tag do
     empty()
@@ -66,15 +67,7 @@ defmodule Liquid.Combinators.Tags.If do
     |> tag(:elsif)
   end
 
-  def else_tag do
-    parsec(:ignore_whitespaces)
-    |> concat(parsec(:start_tag))
-    |> ignore(string("else"))
-    |> concat(parsec(:end_tag))
-    |> parsec(:ignore_whitespaces)
-    |> optional(parsec(:__parse__))
-    |> tag(:else)
-  end
+  def else_tag, do: Tag.define("else")
 
   defp close_tag do
     parsec(:start_tag)
