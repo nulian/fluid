@@ -9,6 +9,7 @@ defmodule Liquid.NimbleParser do
     Assign,
     Capture,
     Decrement,
+    If,
     Increment
   }
 
@@ -56,6 +57,12 @@ defmodule Liquid.NimbleParser do
   defparsec(:assign, Assign.tag())
   defparsec(:capture, Capture.tag())
   defparsec(:decrement, Decrement.tag())
+
+  defparsec(:condition, If.condition())
+  defparsec(:logical_condition, If.logical_condition())
+  defparsec(:elsif_tag, If.elsif_tag())
+  defparsec(:else_tag, If.else_tag())
+  defparsec(:if, If.tag())
   defparsec(:increment, Increment.tag())
 
   defparsec(
@@ -63,8 +70,9 @@ defmodule Liquid.NimbleParser do
     choice([
       parsec(:assign),
       parsec(:capture),
-      parsec(:increment),
-      parsec(:decrement)
+      parsec(:decrement),
+      parsec(:if),
+      parsec(:increment)
     ])
   )
 
