@@ -20,7 +20,7 @@ defmodule Liquid.Combinators.Tags.IfTest do
 
   test "if else " do
     test_combinator("{% if \"foo\" %} YES {% else %} NO {% endif %}", &Parser.if/1, [
-      {:if, ["foo", " YES ", {:else, ["NO "]}]}
+      {:if, ["foo", " YES ", {:else, [" NO "]}]}
     ])
   end
 
@@ -106,7 +106,7 @@ defmodule Liquid.Combinators.Tags.IfTest do
                ]},
               "Your order should arrive in 3–4 days."
             ]},
-           {:else, ["Thank you for your order!"]}
+           {:else, [" Thank you for your order!"]}
          ]}
       ]
     )
@@ -156,14 +156,14 @@ defmodule Liquid.Combinators.Tags.IfTest do
             ]},
            "Your order should arrive in 3–4 days."
          ]},
-        {:else, ["Thank you for your order!"]}
+        {:else, [" Thank you for your order!"]}
       ]
     )
   end
 
   test "2 else conditions in one if" do
     test_combinator("{% if true %}test{% else %} a {% else %} b {% endif %}", &Parser.if/1, [
-      {:if, ["true", "test", {:else, ["a "]}, {:else, ["b "]}]}
+      {:if, ["true", "test", {:else, [" a "]}, {:else, [" b "]}]}
     ])
   end
 
