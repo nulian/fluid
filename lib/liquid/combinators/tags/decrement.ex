@@ -25,8 +25,7 @@ defmodule Liquid.Combinators.Tags.Decrement do
 
   def tag do
     Tag.define("decrement", fn combinator ->
-      combinator
-      |> concat(parsec(:variable_name))
+      parsec(combinator, :variable_name)
     end)
   end
 end

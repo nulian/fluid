@@ -21,8 +21,7 @@ defmodule Liquid.Combinators.Tags.Increment do
 
   def tag do
     Tag.define("increment", fn combinator ->
-      combinator
-      |> concat(parsec(:variable_name))
+      parsec(combinator, :variable_name)
     end)
   end
 end
