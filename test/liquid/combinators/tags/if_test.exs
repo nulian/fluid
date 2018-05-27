@@ -4,7 +4,7 @@ defmodule Liquid.Combinators.Tags.IfTest do
   import Liquid.Helpers
   alias Liquid.NimbleParser, as: Parser
 
-  test "an if using booleans " do
+  test "if using booleans" do
     test_combinator(
       "{% if false %} this text should not go into the output {% endif %}",
       &Parser.if/1,
@@ -124,7 +124,7 @@ defmodule Liquid.Combinators.Tags.IfTest do
 
   test "usisng contains" do
     test_combinator(
-      "{% if 'bob' contains 'f' %}yes{% else %}no{% endif %}",
+      "{% if    'bob'     contains     'f'     %}yes{% else %}no{% endif %}",
       &Parser.if/1,
       if: [
         {:condition, ["bob", "contains", "f"]},
