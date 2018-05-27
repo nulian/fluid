@@ -53,10 +53,7 @@ defmodule Liquid.Combinators.Tags.If do
 
   defp logical_condition do
     parsec(:logical_operators)
-    |> choice([
-      condition(),
-      parsec(:variable_name),
-      parsec(:value_definition)])
+    |> choice([condition(), parsec(:variable_name), parsec(:value_definition)])
     |> tag(:logical)
   end
 end

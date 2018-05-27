@@ -30,8 +30,10 @@ defmodule Liquid.Combinators.Tags.IfTest do
       &Parser.if/1,
       if: [
         {:condition, [{:variable, ["line_item", "grams"]}, ">", 20_000]},
-        {:logical, ["and", {:condition, [{:variable, ["customer_address", "city"]}, "==", "Ottawa"]}]},
-        {:logical, ["or", {:condition, [{:variable, ["customer_address", "city"]}, "==", "Seatle"]}]},
+        {:logical,
+         ["and", {:condition, [{:variable, ["customer_address", "city"]}, "==", "Ottawa"]}]},
+        {:logical,
+         ["or", {:condition, [{:variable, ["customer_address", "city"]}, "==", "Seatle"]}]},
         "hello test"
       ]
     )

@@ -5,6 +5,7 @@ defmodule Liquid.NimbleParser do
   import NimbleParsec
 
   alias Liquid.Combinators.{General, LexicalToken}
+
   alias Liquid.Combinators.Tags.{
     Assign,
     Capture,
