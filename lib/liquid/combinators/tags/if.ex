@@ -23,6 +23,8 @@ defmodule Liquid.Combinators.Tags.If do
 
   def else_tag, do: Tag.define("else")
 
+  def unless_tag, do: Tag.define("unless", &predicate/1, &body/1, "endunless")
+
   def tag, do: Tag.define("if", &predicate/1, &body/1, "endif")
 
   defp body(combinator) do

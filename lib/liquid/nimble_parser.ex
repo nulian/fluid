@@ -59,9 +59,10 @@ defmodule Liquid.NimbleParser do
   defparsec(:capture, Capture.tag())
   defparsec(:decrement, Decrement.tag())
 
+  defparsec(:if, If.tag())
   defparsec(:elsif_tag, If.elsif_tag())
   defparsec(:else_tag, If.else_tag())
-  defparsec(:if, If.tag())
+  defparsec(:unless, If.unless_tag())
 
   defparsec(:increment, Increment.tag())
 
