@@ -50,7 +50,8 @@ defmodule Liquid.Combinators.Tags.If do
     |> parsec(:value_definition)
     |> parsec(:comparison_operators)
     |> parsec(:value_definition)
-    |> tag(:condition)
+    |> reduce({List, :to_tuple, []})
+    |> unwrap_and_tag(:condition)
   end
 
   defp logical_condition do
