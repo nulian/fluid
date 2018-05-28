@@ -37,26 +37,11 @@ defmodule Liquid.Combinators.Tags.If do
   defp predicate(combinator) do
     combinator
     |> choice([
-      condition(),
+      parsec(:condition),
       parsec(:variable_definition),
       parsec(:value_definition),
       parsec(:quoted_token)
     ])
-    |> optional(times(logical_condition(), min: 1))
-  end
-
-  defp condition do
-    empty()
-    |> parsec(:value_definition)
-    |> parsec(:comparison_operators)
-    |> parsec(:value_definition)
-    |> reduce({List, :to_tuple, []})
-    |> unwrap_and_tag(:condition)
-  end
-
-  defp logical_condition do
-    parsec(:logical_operators)
-    |> choice([condition(), parsec(:variable_name), parsec(:value_definition)])
-    |> tag(:logical)
+    |> optional(times(parsec(:logical_condition), min: 1))
   end
 end
