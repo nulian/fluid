@@ -8,13 +8,13 @@ defmodule Liquid.Combinators.Tags.IfTest do
     test_combinator(
       "{% if false %} this text should not go into the output {% endif %}",
       &Parser.if/1,
-      [{:if, ["false", " this text should not go into the output "]}]
+      [{:if, [false, " this text should not go into the output "]}]
     )
 
     test_combinator(
       "{% if true %} this text should go into the output {% endif %}",
       &Parser.if/1,
-      [{:if, ["true", " this text should go into the output "]}]
+      [{:if, [true, " this text should go into the output "]}]
     )
   end
 
@@ -63,8 +63,8 @@ defmodule Liquid.Combinators.Tags.IfTest do
         {:logical, [:and, {:condition, {{:variable, ["c"]}, "==", "foo and bar"}}]},
         {:logical, [:and, {:condition, {{:variable, ["d"]}, "==", "bar or baz"}}]},
         {:logical, [:and, {:condition, {{:variable, ["e"]}, "==", "foo"}}]},
-        {:logical, [:and, {:variable_name, "foo"}]},
-        {:logical, [:and, {:variable_name, "bar"}]},
+        {:logical, [:and, {:variable, ["foo"]}]},
+        {:logical, [:and, {:variable, ["bar"]}]},
         " YES "
       ]
     )
@@ -72,14 +72,14 @@ defmodule Liquid.Combinators.Tags.IfTest do
 
   test "nested if" do
     test_combinator("{% if false %}{% if false %} NO {% endif %}{% endif %}", &Parser.if/1, [
-      {:if, ["false", {:if, ["false", " NO "]}]}
+      {:if, [false, {:if, [false, " NO "]}]}
     ])
 
     test_combinator(
       "{% if false %}{% if shipping_method.title == 'International Shipping' %}You're shipping internationally. Your order should arrive in 2–3 weeks.{% elsif shipping_method.title == 'Domestic Shipping' %}Your order should arrive in 3–4 days.{% else %} Thank you for your order!{% endif %}{% endif %}",
       &Parser.if/1,
       if: [
-        "false",
+        false,
         {:if,
          [
            {:condition,
@@ -152,7 +152,7 @@ defmodule Liquid.Combinators.Tags.IfTest do
 
   test "2 else conditions in one if" do
     test_combinator("{% if true %}test{% else %} a {% else %} b {% endif %}", &Parser.if/1, [
-      {:if, ["true", "test", {:else, [" a "]}, {:else, [" b "]}]}
+      {:if, [true, "test", {:else, [" a "]}, {:else, [" b "]}]}
     ])
   end
 

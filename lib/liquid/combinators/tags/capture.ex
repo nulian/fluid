@@ -15,11 +15,10 @@ defmodule Liquid.Combinators.Tags.Capture do
   alias Liquid.Combinators.Tag
 
   def tag do
-    Tag.define(
+    Tag.define_closed(
       "capture",
       fn combinator -> parsec(combinator, :variable_name) end,
-      fn combinator -> optional(combinator, parsec(:__parse__) |> tag(:capture_sentences)) end,
-      "endcapture"
+      fn combinator -> optional(combinator, parsec(:__parse__) |> tag(:capture_sentences)) end
     )
   end
 end

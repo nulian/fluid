@@ -19,13 +19,13 @@ defmodule Liquid.Combinators.Tags.If do
   import NimbleParsec
   alias Liquid.Combinators.Tag
 
-  def elsif_tag, do: Tag.define("elsif", &predicate/1)
+  def elsif_tag, do: Tag.define_open("elsif", &predicate/1)
 
-  def else_tag, do: Tag.define("else")
+  def else_tag, do: Tag.define_open("else")
 
-  def unless_tag, do: Tag.define("unless", &predicate/1, &body/1, "endunless")
+  def unless_tag, do: Tag.define_closed("unless", &predicate/1, &body/1)
 
-  def tag, do: Tag.define("if", &predicate/1, &body/1, "endif")
+  def tag, do: Tag.define_closed("if", &predicate/1, &body/1)
 
   defp body(combinator) do
     combinator
@@ -38,9 +38,8 @@ defmodule Liquid.Combinators.Tags.If do
     combinator
     |> choice([
       parsec(:condition),
-      parsec(:variable_definition),
       parsec(:value_definition),
-      parsec(:quoted_token)
+      parsec(:variable_definition)
     ])
     |> optional(times(parsec(:logical_condition), min: 1))
   end
