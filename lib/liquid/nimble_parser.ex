@@ -28,6 +28,8 @@ defmodule Liquid.NimbleParser do
   defparsec(:logical_operators, General.logical_operators())
   defparsec(:comma_contition_value, General.comma_contition_value())
   defparsec(:ignore_whitespaces, General.ignore_whitespaces())
+  defparsec(:condition, General.condition())
+  defparsec(:logical_condition, General.logical_condition())
 
   defparsec(:number, LexicalToken.number())
   defparsec(:value_definition, LexicalToken.value_definition())

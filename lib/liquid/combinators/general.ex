@@ -149,6 +149,21 @@ defmodule Liquid.Combinators.General do
     |> traverse({__MODULE__, :to_atom, []})
   end
 
+  def condition do
+    empty()
+    |> parsec(:value_definition)
+    |> parsec(:comparison_operators)
+    |> parsec(:value_definition)
+    |> reduce({List, :to_tuple, []})
+    |> unwrap_and_tag(:condition)
+  end
+
+  def logical_condition do
+    parsec(:logical_operators)
+    |> choice([parsec(:condition), parsec(:variable_name), parsec(:value_definition)])
+    |> tag(:logical)
+  end
+
   # TODO: Check this `or` without `and`
   def or_contition_value do
     string("or")
