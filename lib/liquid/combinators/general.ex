@@ -135,12 +135,18 @@ defmodule Liquid.Combinators.General do
     ])
   end
 
+  def to_atom(_rest, [h | _], context, _line, _offset) do
+    {h |> String.to_atom() |> List.wrap(), context}
+  end
+
   @doc """
   Logical operators:
   `and` `or`
   """
   def logical_operators do
-    choice([string("or"), string("and")])
+    empty()
+    |> choice([string("or"), string("and")])
+    |> traverse({__MODULE__, :to_atom, []})
   end
 
   # TODO: Check this `or` without `and`
