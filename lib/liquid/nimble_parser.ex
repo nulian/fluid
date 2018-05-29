@@ -5,10 +5,12 @@ defmodule Liquid.NimbleParser do
   import NimbleParsec
 
   alias Liquid.Combinators.{General, LexicalToken}
+
   alias Liquid.Combinators.Tags.{
     Assign,
     Capture,
     Decrement,
+    If,
     Increment
   }
 
@@ -26,6 +28,8 @@ defmodule Liquid.NimbleParser do
   defparsec(:logical_operators, General.logical_operators())
   defparsec(:comma_contition_value, General.comma_contition_value())
   defparsec(:ignore_whitespaces, General.ignore_whitespaces())
+  defparsec(:condition, General.condition())
+  defparsec(:logical_condition, General.logical_condition())
 
   defparsec(:number, LexicalToken.number())
   defparsec(:value_definition, LexicalToken.value_definition())
@@ -56,6 +60,12 @@ defmodule Liquid.NimbleParser do
   defparsec(:assign, Assign.tag())
   defparsec(:capture, Capture.tag())
   defparsec(:decrement, Decrement.tag())
+
+  defparsec(:if, If.tag())
+  defparsec(:elsif_tag, If.elsif_tag())
+  defparsec(:else_tag, If.else_tag())
+  defparsec(:unless, If.unless_tag())
+
   defparsec(:increment, Increment.tag())
 
   defparsec(
@@ -63,8 +73,9 @@ defmodule Liquid.NimbleParser do
     choice([
       parsec(:assign),
       parsec(:capture),
-      parsec(:increment),
-      parsec(:decrement)
+      parsec(:decrement),
+      parsec(:if),
+      parsec(:increment)
     ])
   )
 

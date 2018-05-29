@@ -124,15 +124,21 @@ defmodule Liquid.Combinators.General do
   == != > < >= <=
   """
   def comparison_operators do
-    choice([
-      string(@equals),
-      string(@does_not_equal),
-      string(@greater_than),
-      string(@less_than),
-      string(@greater_or_equal),
-      string(@less_or_equal),
-      string("contains")
-    ])
+    empty()
+    |> choice([
+        string(@equals),
+        string(@does_not_equal),
+        string(@greater_than),
+        string(@less_than),
+        string(@greater_or_equal),
+        string(@less_or_equal),
+        string("contains")
+      ])
+    |> traverse({__MODULE__, :to_atom, []})
+  end
+
+  def to_atom(_rest, [h | _], context, _line, _offset) do
+    {h |> String.to_atom() |> List.wrap(), context}
   end
 
   @doc """
@@ -140,7 +146,24 @@ defmodule Liquid.Combinators.General do
   `and` `or`
   """
   def logical_operators do
-    choice([string("or"), string("and")])
+    empty()
+    |> choice([string("or"), string("and")])
+    |> traverse({__MODULE__, :to_atom, []})
+  end
+
+  def condition do
+    empty()
+    |> parsec(:value_definition)
+    |> parsec(:comparison_operators)
+    |> parsec(:value_definition)
+    |> reduce({List, :to_tuple, []})
+    |> unwrap_and_tag(:condition)
+  end
+
+  def logical_condition do
+    parsec(:logical_operators)
+    |> choice([parsec(:condition), parsec(:value_definition)])
+    |> tag(:logical)
   end
 
   # TODO: Check this `or` without `and`
@@ -218,7 +241,7 @@ defmodule Liquid.Combinators.General do
     |> unwrap_and_tag(:variable_name)
   end
 
- def liquid_variable do
+  def liquid_variable do
     start_variable()
     |> parsec(:value_definition)
     |> optional(parsec(:filter))

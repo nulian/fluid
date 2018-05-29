@@ -6,7 +6,7 @@ defmodule Liquid.Combinators.Tag do
 
   @doc """
   Define a tag from a tag_name and, optionally, a function to parse tag parameters,
-  an end_tag_name to close the tag and a function to parse the body inside the tag
+  the tag and a function to parse the body inside the tag
   Both functions must receive a combinator and must return a combinator
 
   The returned tag is a combinator which expect a start tag `{%` a tag name and a end tag `%}`
@@ -24,12 +24,20 @@ defmodule Liquid.Combinators.Tag do
       MyParser.ignorable("{% ignorable T12 %}")
       #=> {:ok, {:ignorable, [12]}, "", %{}, {1, 0}, 2}
   """
-  def define(tag_name, combinator_open \\ & &1, end_tag_name \\ "", combinator_body \\ & &1) do
+  def define_closed(tag_name, combinator_head \\ & &1, combinator_body \\ & &1) do
     tag_name
-    |> open_definition(combinator_open)
+    |> open_definition(combinator_head)
     |> combinator_body.()
-    |> close_tag(end_tag_name)
-    |> close_definition(tag_name)
+    |> close_tag(tag_name)
+    |> tag(String.to_atom(tag_name))
+    |> optional(parsec(:__parse__))
+  end
+
+  def define_open(tag_name, combinator_head \\ & &1) do
+    tag_name
+    |> open_definition(combinator_head)
+    |> optional(parsec(:__parse__))
+    |> tag(String.to_atom(tag_name))
   end
 
   defp open_definition(tag_name, combinator) do
@@ -40,18 +48,10 @@ defmodule Liquid.Combinators.Tag do
     |> parsec(:end_tag)
   end
 
-  defp close_tag(combinator, ""), do: combinator
-
-  defp close_tag(combinator, close_tag_name) do
+  defp close_tag(combinator, tag_name) do
     combinator
     |> parsec(:start_tag)
-    |> ignore(string(close_tag_name))
+    |> ignore(string("end" <> tag_name))
     |> parsec(:end_tag)
-  end
-
-  defp close_definition(combinator, tag_name) do
-    combinator
-    |> tag(String.to_atom(tag_name))
-    |> optional(parsec(:__parse__))
   end
 end
