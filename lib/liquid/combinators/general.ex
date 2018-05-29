@@ -124,15 +124,17 @@ defmodule Liquid.Combinators.General do
   == != > < >= <=
   """
   def comparison_operators do
-    choice([
-      string(@equals),
-      string(@does_not_equal),
-      string(@greater_than),
-      string(@less_than),
-      string(@greater_or_equal),
-      string(@less_or_equal),
-      string("contains")
-    ])
+    empty()
+    |> choice([
+        string(@equals),
+        string(@does_not_equal),
+        string(@greater_than),
+        string(@less_than),
+        string(@greater_or_equal),
+        string(@less_or_equal),
+        string("contains")
+      ])
+    |> traverse({__MODULE__, :to_atom, []})
   end
 
   def to_atom(_rest, [h | _], context, _line, _offset) do
