@@ -5,6 +5,7 @@ defmodule Liquid.NimbleParser do
   import NimbleParsec
 
   alias Liquid.Combinators.{General, LexicalToken}
+
   alias Liquid.Combinators.Tags.{
     Assign,
     Capture,
@@ -13,6 +14,7 @@ defmodule Liquid.NimbleParser do
     Decrement,
     For,
     Generic,
+    Include,
     Increment
   }
 
@@ -58,9 +60,7 @@ defmodule Liquid.NimbleParser do
   defparsec(
     :__parse__,
     General.liquid_literal()
-    |> optional(
-      choice([parsec(:liquid_tag), parsec(:liquid_variable)])
-    )
+    |> optional(choice([parsec(:liquid_tag), parsec(:liquid_variable)]))
     |> traverse({:clean_empty_strings, []})
   )
 
@@ -73,6 +73,9 @@ defmodule Liquid.NimbleParser do
   defparsec(:capture, Capture.tag())
   defparsec(:decrement, Decrement.tag())
   defparsec(:increment, Increment.tag())
+
+  defparsecp(:assignment, Include.assignment())
+  defparsec(:include, Include.tag())
 
   defparsecp(:offset_param, For.offset_param())
   defparsecp(:limit_param, For.limit_param())
@@ -88,13 +91,14 @@ defmodule Liquid.NimbleParser do
     choice([
       parsec(:assign),
       parsec(:capture),
-      parsec(:cycle),
-      parsec(:increment),
-      parsec(:decrement),
+      parsec(:case),
       parsec(:break_tag),
       parsec(:continue_tag),
+      parsec(:cycle),
+      parsec(:decrement),
       parsec(:for),
-      parsec(:case),
+      parsec(:include),
+      parsec(:increment)
     ])
   )
 
