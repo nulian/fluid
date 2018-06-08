@@ -5,11 +5,16 @@ defmodule Liquid.NimbleParser do
   import NimbleParsec
 
   alias Liquid.Combinators.{General, LexicalToken}
+
   alias Liquid.Combinators.Tags.{
     Assign,
     Capture,
+    Case,
+    Cycle,
     Decrement,
     For,
+    Generic,
+    Include,
     Increment
   }
 
@@ -28,7 +33,7 @@ defmodule Liquid.NimbleParser do
   defparsec(:quoted_token, General.quoted_token())
   defparsec(:comparison_operators, General.comparison_operators())
   defparsec(:logical_operators, General.logical_operators())
-  defparsec(:comma_contition_value, General.comma_contition_value())
+  defparsec(:logical_operator_coma, General.logical_operator_coma())
   defparsec(:ignore_whitespaces, General.ignore_whitespaces())
   defparsec(:condition, General.condition())
   defparsec(:logical_condition, General.logical_condition())
@@ -55,16 +60,22 @@ defmodule Liquid.NimbleParser do
   defparsec(
     :__parse__,
     General.liquid_literal()
-    |> optional(
-      choice([parsec(:liquid_tag), parsec(:liquid_variable)])
-    )
+    |> optional(choice([parsec(:liquid_tag), parsec(:liquid_variable)]))
     |> traverse({:clean_empty_strings, []})
   )
+
+  defparsec(:cycle_group, Cycle.cycle_group())
+  defparsec(:cycle_body, Cycle.cycle_body())
+  defparsec(:cycle_values, Cycle.cycle_values())
+  defparsec(:cycle, Cycle.tag())
 
   defparsec(:assign, Assign.tag())
   defparsec(:capture, Capture.tag())
   defparsec(:decrement, Decrement.tag())
   defparsec(:increment, Increment.tag())
+
+  defparsecp(:assignment, Include.assignment())
+  defparsec(:include, Include.tag())
 
   defparsecp(:offset_param, For.offset_param())
   defparsecp(:limit_param, For.limit_param())
@@ -72,16 +83,22 @@ defmodule Liquid.NimbleParser do
   defparsec(:continue_tag, For.continue_tag())
   defparsec(:for, For.tag())
 
+  defparsec(:case, Case.tag())
+  defparsec(:whens, Case.whens())
+
   defparsec(
     :liquid_tag,
     choice([
       parsec(:assign),
       parsec(:capture),
-      parsec(:increment),
-      parsec(:decrement),
+      parsec(:case),
       parsec(:break_tag),
       parsec(:continue_tag),
-      parsec(:for)
+      parsec(:cycle),
+      parsec(:decrement),
+      parsec(:for),
+      parsec(:include),
+      parsec(:increment)
     ])
   )
 

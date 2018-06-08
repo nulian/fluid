@@ -136,11 +136,11 @@ defmodule Liquid.Combinators.General do
     empty()
     |> choice([
       string(@equals),
+      string(@greater_or_equal),
+      string(@less_or_equal),
       string(@does_not_equal),
       string(@greater_than),
       string(@less_than),
-      string(@greater_or_equal),
-      string(@less_or_equal),
       string("contains")
     ])
     |> traverse({__MODULE__, :to_atom, []})
@@ -148,6 +148,10 @@ defmodule Liquid.Combinators.General do
 
   def to_atom(_rest, [h | _], context, _line, _offset) do
     {h |> String.to_atom() |> List.wrap(), context}
+  end
+
+  def to_or(_rest, [h | _], context, _line, _offset) do
+    {h |> String.replace(",", "or") |> String.to_atom() |> List.wrap(), context}
   end
 
   @doc """
@@ -160,6 +164,12 @@ defmodule Liquid.Combinators.General do
     |> traverse({__MODULE__, :to_atom, []})
   end
 
+  def logical_operator_coma do
+    empty()
+    |> string(",")
+    |> traverse({__MODULE__, :to_or, []})
+  end
+
   def condition do
     empty()
     |> parsec(:value_definition)
@@ -170,7 +180,7 @@ defmodule Liquid.Combinators.General do
   end
 
   def logical_condition do
-    parsec(:logical_operators)
+    choice([parsec(:logical_operators), parsec(:logical_operator_coma)])
     |> choice([parsec(:condition), parsec(:value_definition)])
     |> tag(:logical)
   end
@@ -178,21 +188,6 @@ defmodule Liquid.Combinators.General do
   # TODO: Check this `or` without `and`
   def or_contition_value do
     string("or")
-    |> concat(parsec(:ignore_whitespaces))
-    |> concat(
-      choice([
-        parsec(:number),
-        parsec(:string_value),
-        parsec(:null_value),
-        parsec(:boolean_value)
-      ])
-    )
-    |> parsec(:ignore_whitespaces)
-  end
-
-  def comma_contition_value do
-    empty()
-    |> utf8_char([@comma])
     |> concat(parsec(:ignore_whitespaces))
     |> concat(
       choice([

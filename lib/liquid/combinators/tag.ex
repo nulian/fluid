@@ -40,6 +40,13 @@ defmodule Liquid.Combinators.Tag do
     |> optional(parsec(:__parse__))
   end
 
+  def define_inverse_open(tag_name, combinator_head \\ & &1) do
+    tag_name
+    |> open_definition(combinator_head)
+    |> optional(parsec(:__parse__))
+    |> tag(String.to_atom(tag_name))
+  end
+
   defp open_definition(tag_name, combinator) do
     empty()
     |> parsec(:start_tag)
