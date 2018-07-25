@@ -9,6 +9,7 @@ defmodule Liquid.NimbleParser do
     Assign,
     Capture,
     Case,
+    Cycle,
     Decrement,
     For,
     Generic,
@@ -63,6 +64,11 @@ defmodule Liquid.NimbleParser do
     |> traverse({:clean_empty_strings, []})
   )
 
+  defparsec(:cycle_group, Cycle.cycle_group())
+  defparsec(:cycle_body, Cycle.cycle_body())
+  defparsec(:cycle_values, Cycle.cycle_values())
+  defparsec(:cycle, Cycle.tag())
+
   defparsec(:assign, Assign.tag())
   defparsec(:capture, Capture.tag())
   defparsec(:decrement, Decrement.tag())
@@ -80,6 +86,7 @@ defmodule Liquid.NimbleParser do
     choice([
       parsec(:assign),
       parsec(:capture),
+      parsec(:cycle),
       parsec(:increment),
       parsec(:decrement),
       parsec(:break_tag),
