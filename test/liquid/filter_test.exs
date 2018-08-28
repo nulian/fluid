@@ -104,21 +104,6 @@ defmodule Liquid.FilterTest do
     assert [] == Functions.split(nil, " ")
   end
 
-  test :escape do
-    assert "&lt;strong&gt;" == Functions.escape("<strong>")
-    assert "&lt;strong&gt;" == Functions.h("<strong>")
-  end
-
-  test :escape_once do
-    assert "&lt;strong&gt;Hulk&lt;/strong&gt;" ==
-             Functions.escape_once("&lt;strong&gt;Hulk</strong>")
-  end
-
-  test :url_encode do
-    assert "foo%2B1%40example.com" == Functions.url_encode("foo+1@example.com")
-    assert nil == Functions.url_encode(nil)
-  end
-
   test :truncatewords do
     assert "one two three" == Functions.truncatewords("one two three", 4)
     assert "one two..." == Functions.truncatewords("one two three", 2)
@@ -132,21 +117,6 @@ defmodule Liquid.FilterTest do
 
     assert "测试测试测试测试" == Functions.truncatewords("测试测试测试测试", 5)
     assert "one two three" == Functions.truncatewords("one two three", "4")
-  end
-
-  test :strip_html do
-    assert "test" == Functions.strip_html("<div>test</div>")
-    assert "test" == Functions.strip_html(~s{<div id="test">test</div>})
-
-    assert "" ==
-             Functions.strip_html(
-               ~S{<script type="text/javascript">document.write("some stuff");</script>}
-             )
-
-    assert "" == Functions.strip_html(~S{<style type="text/css">foo bar</style>})
-    assert "test" == Functions.strip_html(~S{<div\nclass="multiline">test</div>})
-    assert "test" == Functions.strip_html(~S{<!-- foo bar \n test -->test})
-    assert "" == Functions.strip_html(nil)
   end
 
   test :join do
@@ -232,36 +202,6 @@ defmodule Liquid.FilterTest do
     assert "2 2 2 2" == Functions.replace("1 1 1 1", "1", 2)
     assert "2 1 1 1" == Functions.replace_first("1 1 1 1", "1", 2)
     assert_template_result("2 1 1 1", "{{ '1 1 1 1' | replace_first: '1', 2 }}")
-  end
-
-  test :date do
-    assert "May" == Functions.date(~N[2006-05-05 10:00:00], "%B")
-    assert "June" == Functions.date(Timex.parse!("2006-06-05 10:00:00", "%F %T", :strftime), "%B")
-    assert "July" == Functions.date(~N[2006-07-05 10:00:00], "%B")
-
-    assert "May" == Functions.date("2006-05-05 10:00:00", "%B")
-    assert "June" == Functions.date("2006-06-05 10:00:00", "%B")
-    assert "July" == Functions.date("2006-07-05 10:00:00", "%B")
-
-    assert "2006-07-05 10:00:00" == Functions.date("2006-07-05 10:00:00", "")
-    assert "2006-07-05 10:00:00" == Functions.date("2006-07-05 10:00:00", "")
-    assert "2006-07-05 10:00:00" == Functions.date("2006-07-05 10:00:00", "")
-    assert "2006-07-05 10:00:00" == Functions.date("2006-07-05 10:00:00", nil)
-
-    assert "07/05/2006" == Functions.date("2006-07-05 10:00:00", "%m/%d/%Y")
-
-    assert "07/16/2004" == Functions.date("Fri Jul 16 01:00:00 2004", "%m/%d/%Y")
-
-    assert "#{Timex.today().year}" == Functions.date("now", "%Y")
-    assert "#{Timex.today().year}" == Functions.date("today", "%Y")
-
-    assert nil == Functions.date(nil, "%B")
-
-    # Timex already uses UTC
-    # with_timezone("UTC") do
-    #   assert "07/05/2006" == Functions.date(1152098955, "%m/%d/%Y")
-    #   assert "07/05/2006" == Functions.date("1152098955", "%m/%d/%Y")
-    # end
   end
 
   test :first_last do
@@ -376,15 +316,6 @@ defmodule Liquid.FilterTest do
     assigns = %{"a" => "bc", "b" => "a"}
     assert_template_result("abc", "{{ a | prepend: 'a'}}", assigns)
     assert_template_result("abc", "{{ a | prepend: b}}", assigns)
-  end
-
-  test :default do
-    assert "foo" == Functions.default("foo", "bar")
-    assert "bar" == Functions.default(nil, "bar")
-    assert "bar" == Functions.default("", "bar")
-    assert "bar" == Functions.default(false, "bar")
-    assert "bar" == Functions.default([], "bar")
-    assert "bar" == Functions.default({}, "bar")
   end
 
   test :pluralize do
