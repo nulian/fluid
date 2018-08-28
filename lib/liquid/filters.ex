@@ -6,6 +6,11 @@ defmodule Liquid.Filters do
   import Liquid.Utils, only: [to_number: 1]
   alias Liquid.HTML
 
+  @filters_modules [
+    Liquid.Filters.Functions,
+    Liquid.Filters.Additionals
+  ]
+
   defmodule Functions do
     @moduledoc """
     Structure that holds all the basic filter functions used in Liquid 3.
@@ -191,18 +196,6 @@ defmodule Liquid.Filters do
     def round(input, precision) do
       input |> round(to_number(precision))
     end
-
-    @doc """
-    Allows you to specify a fallback in case a value doesn’t exist.
-    `default` will show its value if the left side is nil, false, or empty
-    """
-    @spec default(any, any) :: any
-    def default(input, default_val \\ "")
-
-    def default(input, default_val) when input in [nil, false, '', "", [], {}, %{}],
-      do: default_val
-
-    def default(input, _), do: input
 
     @doc """
     Returns a single or plural word depending on input number
@@ -418,32 +411,6 @@ defmodule Liquid.Filters do
 
     def url_encode(nil), do: nil
 
-    def date(input, format \\ "%F %T")
-
-    def date(nil, _), do: nil
-
-    def date(input, format) when is_nil(format) or format == "" do
-      input |> date
-    end
-
-    def date("now", format), do: Timex.now() |> date(format)
-
-    def date("today", format), do: Timex.now() |> date(format)
-
-    def date(input, format) when is_binary(input) do
-      with {:ok, input_date} <- NaiveDateTime.from_iso8601(input) do
-        input_date |> date(format)
-      else
-        {:error, :invalid_format} ->
-          with {:ok, input_date} <- Timex.parse(input, "%a %b %d %T %Y", :strftime),
-               do: input_date |> date(format)
-      end
-    end
-
-    def date(input, format) do
-      with {:ok, date_str} <- Timex.format(input, format, :strftime), do: date_str
-    end
-
     # Helpers
 
     defp to_iterable(input) when is_list(input) do
@@ -478,6 +445,7 @@ defmodule Liquid.Filters do
   @doc """
   Recursively pass through all of the input filters applying them
   """
+  @spec filter(list(), String.t()) :: String.t() | list()
   def filter([], value), do: value
 
   def filter([filter | rest], value) do
@@ -485,28 +453,28 @@ defmodule Liquid.Filters do
 
     args =
       for arg <- args do
-        Liquid.quote_matcher() |> Regex.replace(arg, "")
+        Regex.replace(Liquid.quote_matcher(), arg, "")
       end
 
-    functions = Functions.__info__(:functions)
+    functions = @filters_modules |> Enum.map(&set_module/1) |> List.flatten()
     custom_filters = Application.get_env(:liquid, :custom_filters)
 
     ret =
-      case {name, functions[name], custom_filters[name]} do
+      case {name, custom_filters[name], functions[name]} do
         # pass value in case of no filters
         {nil, _, _} ->
           value
 
-        # pass non-existend filter
+        # pass non-existent filter
         {_, nil, nil} ->
           value
 
-        # Fallback to custom if no standard
+        # Fallback to standard if no custom
         {_, nil, _} ->
-          apply_function(custom_filters[name], name, [value | args])
+          apply_function(functions[name], name, [value | args])
 
         _ ->
-          apply_function(Functions, name, [value | args])
+          apply_function(custom_filters[name], name, [value | args])
       end
 
     filter(rest, ret)
@@ -523,7 +491,7 @@ defmodule Liquid.Filters do
 
   @doc """
   Fetches the current custom filters and extends with the functions from passed module
-  NB: you can't override the standard filters though
+  You can override the standard filters with custom filters
   """
   def add_filters(module) do
     custom_filters = Application.get_env(:liquid, :custom_filters) || %{}
@@ -534,6 +502,10 @@ defmodule Liquid.Filters do
 
     custom_filters = module_functions |> Map.merge(custom_filters)
     Application.put_env(:liquid, :custom_filters, custom_filters)
+  end
+
+  def set_module(module) do
+    Enum.map(module.__info__(:functions), fn {fname, _} -> {fname, module} end)
   end
 
   defp apply_function(module, name, args) do
