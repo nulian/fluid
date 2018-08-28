@@ -25,16 +25,6 @@ defmodule Liquid.FilterTest do
     assert "'barbar'" == Filters.filter(filters, name)
   end
 
-  test :size do
-    assert 3 == Functions.size([1, 2, 3])
-    assert 0 == Functions.size([])
-    assert 0 == Functions.size(nil)
-
-    # for strings
-    assert 3 == Functions.size("foo")
-    assert 0 == Functions.size("")
-  end
-
   test :downcase do
     assert "testing", Functions.downcase("Testing")
     assert "" == Functions.downcase(nil)
@@ -104,21 +94,6 @@ defmodule Liquid.FilterTest do
     assert [] == Functions.split(nil, " ")
   end
 
-  test :escape do
-    assert "&lt;strong&gt;" == Functions.escape("<strong>")
-    assert "&lt;strong&gt;" == Functions.h("<strong>")
-  end
-
-  test :escape_once do
-    assert "&lt;strong&gt;Hulk&lt;/strong&gt;" ==
-             Functions.escape_once("&lt;strong&gt;Hulk</strong>")
-  end
-
-  test :url_encode do
-    assert "foo%2B1%40example.com" == Functions.url_encode("foo+1@example.com")
-    assert nil == Functions.url_encode(nil)
-  end
-
   test :truncatewords do
     assert "one two three" == Functions.truncatewords("one two three", 4)
     assert "one two..." == Functions.truncatewords("one two three", 2)
@@ -134,91 +109,8 @@ defmodule Liquid.FilterTest do
     assert "one two three" == Functions.truncatewords("one two three", "4")
   end
 
-  test :strip_html do
-    assert "test" == Functions.strip_html("<div>test</div>")
-    assert "test" == Functions.strip_html(~s{<div id="test">test</div>})
-
-    assert "" ==
-             Functions.strip_html(
-               ~S{<script type="text/javascript">document.write("some stuff");</script>}
-             )
-
-    assert "" == Functions.strip_html(~S{<style type="text/css">foo bar</style>})
-    assert "test" == Functions.strip_html(~S{<div\nclass="multiline">test</div>})
-    assert "test" == Functions.strip_html(~S{<!-- foo bar \n test -->test})
-    assert "" == Functions.strip_html(nil)
-  end
-
-  test :join do
-    assert "1 2 3 4" == Functions.join([1, 2, 3, 4])
-    assert "1 - 2 - 3 - 4" == Functions.join([1, 2, 3, 4], " - ")
-
-    assert_template_result(
-      "1, 1, 2, 4, 5",
-      ~s({{"1: 2: 1: 4: 5" | split: ": " | sort | join: ", " }})
-    )
-  end
-
-  test :sort do
-    assert [1, 2, 3, 4] == Functions.sort([4, 3, 2, 1])
-
-    assert [%{"a" => 1}, %{"a" => 2}, %{"a" => 3}, %{"a" => 4}] ==
-             Functions.sort([%{"a" => 4}, %{"a" => 3}, %{"a" => 1}, %{"a" => 2}], "a")
-
-    assert [%{"a" => 1, "b" => 1}, %{"a" => 3, "b" => 2}, %{"a" => 2, "b" => 3}] ==
-             Functions.sort(
-               [%{"a" => 3, "b" => 2}, %{"a" => 1, "b" => 1}, %{"a" => 2, "b" => 3}],
-               "b"
-             )
-
-    # Elixir keyword list support
-    assert [a: 1, a: 2, a: 3, a: 4] == Functions.sort([{:a, 4}, {:a, 3}, {:a, 1}, {:a, 2}], "a")
-  end
-
   test :sort_integrity do
     assert_template_result("11245", ~s({{"1: 2: 1: 4: 5" | split: ": " | sort }}))
-  end
-
-  test :legacy_sort_hash do
-    assert Map.to_list(%{a: 1, b: 2}) == Functions.sort(a: 1, b: 2)
-  end
-
-  test :numerical_vs_lexicographical_sort do
-    assert [2, 10] == Functions.sort([10, 2])
-    assert [{"a", 2}, {"a", 10}] == Functions.sort([{"a", 10}, {"a", 2}], "a")
-    assert ["10", "2"] == Functions.sort(["10", "2"])
-    assert [{"a", "10"}, {"a", "2"}] == Functions.sort([{"a", "10"}, {"a", "2"}], "a")
-  end
-
-  test :uniq do
-    assert [1, 3, 2, 4] == Functions.uniq([1, 1, 3, 2, 3, 1, 4, 3, 2, 1])
-
-    assert [{"a", 1}, {"a", 3}, {"a", 2}] ==
-             Functions.uniq([{"a", 1}, {"a", 3}, {"a", 1}, {"a", 2}], "a")
-
-    # testdrop = TestDrop.new
-    # assert [testdrop] == Functions.uniq([testdrop, TestDrop.new], "test")
-  end
-
-  test :reverse do
-    assert [4, 3, 2, 1] == Functions.reverse([1, 2, 3, 4])
-  end
-
-  test :legacy_reverse_hash do
-    assert [Map.to_list(%{a: 1, b: 2})] == Functions.reverse(a: 1, b: 2)
-  end
-
-  test :map do
-    assert [1, 2, 3, 4] ==
-             Functions.map([%{"a" => 1}, %{"a" => 2}, %{"a" => 3}, %{"a" => 4}], "a")
-
-    assert_template_result("abc", "{{ ary | map:'foo' | map:'bar' }}", %{
-      "ary" => [
-        %{"foo" => %{"bar" => "a"}},
-        %{"foo" => %{"bar" => "b"}},
-        %{"foo" => %{"bar" => "c"}}
-      ]
-    })
   end
 
   test :map_doesnt_call_arbitrary_stuff do
@@ -232,43 +124,6 @@ defmodule Liquid.FilterTest do
     assert "2 2 2 2" == Functions.replace("1 1 1 1", "1", 2)
     assert "2 1 1 1" == Functions.replace_first("1 1 1 1", "1", 2)
     assert_template_result("2 1 1 1", "{{ '1 1 1 1' | replace_first: '1', 2 }}")
-  end
-
-  test :date do
-    assert "May" == Functions.date(~N[2006-05-05 10:00:00], "%B")
-    assert "June" == Functions.date(Timex.parse!("2006-06-05 10:00:00", "%F %T", :strftime), "%B")
-    assert "July" == Functions.date(~N[2006-07-05 10:00:00], "%B")
-
-    assert "May" == Functions.date("2006-05-05 10:00:00", "%B")
-    assert "June" == Functions.date("2006-06-05 10:00:00", "%B")
-    assert "July" == Functions.date("2006-07-05 10:00:00", "%B")
-
-    assert "2006-07-05 10:00:00" == Functions.date("2006-07-05 10:00:00", "")
-    assert "2006-07-05 10:00:00" == Functions.date("2006-07-05 10:00:00", "")
-    assert "2006-07-05 10:00:00" == Functions.date("2006-07-05 10:00:00", "")
-    assert "2006-07-05 10:00:00" == Functions.date("2006-07-05 10:00:00", nil)
-
-    assert "07/05/2006" == Functions.date("2006-07-05 10:00:00", "%m/%d/%Y")
-
-    assert "07/16/2004" == Functions.date("Fri Jul 16 01:00:00 2004", "%m/%d/%Y")
-
-    assert "#{Timex.today().year}" == Functions.date("now", "%Y")
-    assert "#{Timex.today().year}" == Functions.date("today", "%Y")
-
-    assert nil == Functions.date(nil, "%B")
-
-    # Timex already uses UTC
-    # with_timezone("UTC") do
-    #   assert "07/05/2006" == Functions.date(1152098955, "%m/%d/%Y")
-    #   assert "07/05/2006" == Functions.date("1152098955", "%m/%d/%Y")
-    # end
-  end
-
-  test :first_last do
-    assert 1 == Functions.first([1, 2, 3])
-    assert 3 == Functions.last([1, 2, 3])
-    assert nil == Functions.first([])
-    assert nil == Functions.last([])
   end
 
   test :remove do
@@ -376,15 +231,6 @@ defmodule Liquid.FilterTest do
     assigns = %{"a" => "bc", "b" => "a"}
     assert_template_result("abc", "{{ a | prepend: 'a'}}", assigns)
     assert_template_result("abc", "{{ a | prepend: b}}", assigns)
-  end
-
-  test :default do
-    assert "foo" == Functions.default("foo", "bar")
-    assert "bar" == Functions.default(nil, "bar")
-    assert "bar" == Functions.default("", "bar")
-    assert "bar" == Functions.default(false, "bar")
-    assert "bar" == Functions.default([], "bar")
-    assert "bar" == Functions.default({}, "bar")
   end
 
   test :pluralize do
