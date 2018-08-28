@@ -4,27 +4,19 @@ defmodule Liquid.Filters do
   """
   import Kernel, except: [round: 1, abs: 1]
   import Liquid.Utils, only: [to_number: 1]
-  alias Liquid.HTML
+
+  @filters_modules [
+    Liquid.Filters.Functions,
+    Liquid.Filters.Additionals,
+    Liquid.Filters.HTML,
+    Liquid.Filters.List
+  ]
 
   defmodule Functions do
     @moduledoc """
     Structure that holds all the basic filter functions used in Liquid 3.
     """
     use Timex
-
-    def size(input) when is_binary(input) do
-      String.length(input)
-    end
-
-    def size(input) when is_list(input) do
-      length(input)
-    end
-
-    def size(input) when is_tuple(input) do
-      tuple_size(input)
-    end
-
-    def size(_), do: 0
 
     @doc """
     Makes each character in a string lowercase.
@@ -42,51 +34,6 @@ defmodule Liquid.Filters do
     def capitalize(input) do
       input |> to_string |> String.capitalize()
     end
-
-    def first(array) when is_list(array), do: array |> List.first()
-
-    def last(array) when is_list(array), do: array |> List.last()
-
-    def reverse(array), do: array |> to_iterable |> Enum.reverse()
-
-    def sort(array), do: array |> Enum.sort()
-
-    def sort(array, key) when is_list(array) and is_map(hd(array)) do
-      array |> Enum.sort_by(& &1[key])
-    end
-
-    def sort(array, _) when is_list(array) do
-      array |> Enum.sort()
-    end
-
-    def uniq(array) when is_list(array), do: array |> Enum.uniq()
-
-    def uniq(_), do: raise("Called `uniq` with non-list parameter.")
-
-    def uniq(array, key) when is_list(array) and is_map(hd(array)) do
-      array |> Enum.uniq_by(& &1[key])
-    end
-
-    def uniq(array, _) when is_list(array) do
-      array |> Enum.uniq()
-    end
-
-    def uniq(_, _), do: raise("Called `uniq` with non-list parameter.")
-
-    def join(array, separator \\ " ") do
-      array |> to_iterable |> Enum.join(separator)
-    end
-
-    def map(array, key) when is_list(array) do
-      with mapped <- array |> Enum.map(fn arg -> arg[key] end) do
-        case Enum.all?(mapped, &is_binary/1) do
-          true -> mapped |> Enum.reduce("", fn el, acc -> acc <> el end)
-          _ -> mapped
-        end
-      end
-    end
-
-    def map(_, _), do: ""
 
     def plus(value, operand) when is_number(value) and is_number(operand) do
       value + operand
@@ -191,18 +138,6 @@ defmodule Liquid.Filters do
     def round(input, precision) do
       input |> round(to_number(precision))
     end
-
-    @doc """
-    Allows you to specify a fallback in case a value doesn’t exist.
-    `default` will show its value if the left side is nil, false, or empty
-    """
-    @spec default(any, any) :: any
-    def default(input, default_val \\ "")
-
-    def default(input, default_val) when input in [nil, false, '', "", [], {}, %{}],
-      do: default_val
-
-    def default(input, _), do: input
 
     @doc """
     Returns a single or plural word depending on input number
@@ -346,14 +281,6 @@ defmodule Liquid.Filters do
       string |> String.trim_trailing()
     end
 
-    def strip_newlines(<<string::binary>>) do
-      string |> String.replace(~r/\r?\n/, "")
-    end
-
-    def newline_to_br(<<string::binary>>) do
-      string |> String.replace("\n", "<br />\n")
-    end
-
     def split(<<string::binary>>, <<separator::binary>>) do
       String.split(string, separator)
     end
@@ -392,73 +319,7 @@ defmodule Liquid.Filters do
 
     def slice(nil, _), do: ""
 
-    def escape(input) when is_binary(input) do
-      input |> HTML.html_escape()
-    end
-
-    defdelegate h(input), to: __MODULE__, as: :escape
-
-    def escape_once(input) when is_binary(input) do
-      input |> HTML.html_escape_once()
-    end
-
-    def strip_html(nil), do: ""
-
-    def strip_html(input) when is_binary(input) do
-      input
-      |> String.replace(~r/<script.*?<\/script>/m, "")
-      |> String.replace(~r/<!--.*?-->/m, "")
-      |> String.replace(~r/<style.*?<\/style>/m, "")
-      |> String.replace(~r/<.*?>/m, "")
-    end
-
-    def url_encode(input) when is_binary(input) do
-      input |> URI.encode_www_form()
-    end
-
-    def url_encode(nil), do: nil
-
-    def date(input, format \\ "%F %T")
-
-    def date(nil, _), do: nil
-
-    def date(input, format) when is_nil(format) or format == "" do
-      input |> date
-    end
-
-    def date("now", format), do: Timex.now() |> date(format)
-
-    def date("today", format), do: Timex.now() |> date(format)
-
-    def date(input, format) when is_binary(input) do
-      with {:ok, input_date} <- NaiveDateTime.from_iso8601(input) do
-        input_date |> date(format)
-      else
-        {:error, :invalid_format} ->
-          with {:ok, input_date} <- Timex.parse(input, "%a %b %d %T %Y", :strftime),
-               do: input_date |> date(format)
-      end
-    end
-
-    def date(input, format) do
-      with {:ok, date_str} <- Timex.format(input, format, :strftime), do: date_str
-    end
-
     # Helpers
-
-    defp to_iterable(input) when is_list(input) do
-      case List.first(input) do
-        first when is_nil(first) -> []
-        first when is_tuple(first) -> [input]
-        _ -> input |> List.flatten()
-      end
-    end
-
-    defp to_iterable(input) do
-      # input when is_map(input) -> [input]
-      # input when is_tuple(input) -> input
-      List.wrap(input)
-    end
 
     defp get_int_and_counter(input) when is_integer(input), do: {input, 0}
 
@@ -478,6 +339,7 @@ defmodule Liquid.Filters do
   @doc """
   Recursively pass through all of the input filters applying them
   """
+  @spec filter(list(), String.t()) :: String.t() | list()
   def filter([], value), do: value
 
   def filter([filter | rest], value) do
@@ -485,28 +347,28 @@ defmodule Liquid.Filters do
 
     args =
       for arg <- args do
-        Liquid.quote_matcher() |> Regex.replace(arg, "")
+        Regex.replace(Liquid.quote_matcher(), arg, "")
       end
 
-    functions = Functions.__info__(:functions)
+    functions = @filters_modules |> Enum.map(&set_module/1) |> List.flatten()
     custom_filters = Application.get_env(:liquid, :custom_filters)
 
     ret =
-      case {name, functions[name], custom_filters[name]} do
+      case {name, custom_filters[name], functions[name]} do
         # pass value in case of no filters
         {nil, _, _} ->
           value
 
-        # pass non-existend filter
+        # pass non-existent filter
         {_, nil, nil} ->
           value
 
-        # Fallback to custom if no standard
+        # Fallback to standard if no custom
         {_, nil, _} ->
-          apply_function(custom_filters[name], name, [value | args])
+          apply_function(functions[name], name, [value | args])
 
         _ ->
-          apply_function(Functions, name, [value | args])
+          apply_function(custom_filters[name], name, [value | args])
       end
 
     filter(rest, ret)
@@ -523,7 +385,7 @@ defmodule Liquid.Filters do
 
   @doc """
   Fetches the current custom filters and extends with the functions from passed module
-  NB: you can't override the standard filters though
+  You can override the standard filters with custom filters
   """
   def add_filters(module) do
     custom_filters = Application.get_env(:liquid, :custom_filters) || %{}
@@ -534,6 +396,10 @@ defmodule Liquid.Filters do
 
     custom_filters = module_functions |> Map.merge(custom_filters)
     Application.put_env(:liquid, :custom_filters, custom_filters)
+  end
+
+  def set_module(module) do
+    Enum.map(module.__info__(:functions), fn {fname, _} -> {fname, module} end)
   end
 
   defp apply_function(module, name, args) do
