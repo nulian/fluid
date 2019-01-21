@@ -72,3 +72,24 @@ defmodule Liquid.Utils do
     end
   end
 end
+
+defmodule Liquid.VersionFilterUtils do
+  @moduledoc """
+  different require code to support Elixir >= 1.8
+  """
+
+  defmacro __using__(_) do
+    version = System.version()
+    cond do
+      Version.compare(version, "1.8.0") in [:gt, :eq] ->
+        quote do
+          import Kernel, except: [round: 1, abs: 1, floor: 1, ceil: 1]
+        end
+      true ->
+        quote do
+          import Kernel, except: [round: 1, abs: 1]
+        end
+    end
+  end
+
+end
