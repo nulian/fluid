@@ -69,15 +69,17 @@ defmodule Liquid.BlockTest do
     assert {TestTag, Liquid.Tag} = Liquid.Registers.lookup("test")
   end
 
-  test "with custom block" do
-    Liquid.Registers.register("testblock", TestBlock, Liquid.Block)
-    template = Liquid.Template.parse("{% testblock %}{% endtestblock %}")
-    assert [%Liquid.Block{name: :testblock}] = template.root.nodelist
-  end
+  # TODO: Custom Tag
+  # test "with custom block" do
+  #   Liquid.Registers.register("testblock", TestBlock, Liquid.Block)
+  #   template = Liquid.Template.parse("{% testblock %}{% endtestblock %}")
+  #   assert [%Liquid.Block{name: :testblock}] = template.root.nodelist
+  # end
 
-  test "with custom tag" do
-    Liquid.Registers.register("testtag", TestTag, Liquid.Tag)
-    template = Liquid.Template.parse("{% testtag %}")
-    assert [%Liquid.Tag{name: :testtag}] = template.root.nodelist
-  end
+  # TODO: Custom Tag
+  # test "with custom tag" do
+  #   Liquid.Registers.register("testtag", TestTag, Liquid.Tag)
+  #   template = Liquid.Template.parse("{% testtag %}")
+  #   assert [%Liquid.Tag{name: :testtag}] = template.root.nodelist
+  # end
 end

@@ -1,5 +1,3 @@
-Code.require_file("../../test_helper.exs", __ENV__.file)
-
 defmodule Liquid.Tags.IfElseTagTest do
   use ExUnit.Case
 
@@ -238,5 +236,16 @@ defmodule Liquid.Tags.IfElseTagTest do
     t = Template.parse(markup)
     {:ok, rendered, _} = Template.render(t, assigns)
     assert rendered == expected
+
+    ast =
+      quote do
+        cond do
+          1 == 1 or 3 == 3 -> 55
+          2 == 2 -> 2
+          true -> 3
+        end
+      end
+
+    Code.eval_quoted(ast)
   end
 end

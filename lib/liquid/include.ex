@@ -9,10 +9,17 @@ defmodule Liquid.Include do
     do: ~r/(#{Liquid.quoted_fragment()}+)(\s+(?:with|for)\s+(#{Liquid.quoted_fragment()}+))?/
 
   def parse(%Tag{markup: markup} = tag, %Template{} = template) do
-    [parts | _] = syntax() |> Regex.scan(markup)
+    [parts | _] = Regex.scan(syntax(), markup)
     tag = parse_tag(tag, parts)
     attributes = parse_attributes(markup)
     {%{tag | attributes: attributes}, template}
+  end
+
+  def parse(%Tag{markup: markup} = tag) do
+    [parts | _] = Regex.scan(syntax(), markup)
+    tag = parse_tag(tag, parts)
+    attributes = parse_attributes(markup)
+    %{tag | attributes: attributes}
   end
 
   defp parse_tag(%Tag{} = tag, parts) do

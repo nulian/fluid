@@ -1,10 +1,8 @@
 defmodule Liquid.ElseIf do
-  def parse(%Liquid.Tag{} = tag, %Liquid.Template{} = t), do: {tag, t}
   def render(_, _, _, _), do: raise("should never get here")
 end
 
 defmodule Liquid.Else do
-  def parse(%Liquid.Tag{} = tag, %Liquid.Template{} = t), do: {tag, t}
   def render(_, _, _, _), do: raise("should never get here")
 end
 
@@ -13,7 +11,6 @@ defmodule Liquid.IfElse do
   alias Liquid.Render
   alias Liquid.Block
   alias Liquid.Tag
-  alias Liquid.Template
 
   def syntax,
     do: ~r/(#{Liquid.quoted_fragment()})\s*([=!<>a-z_]+)?\s*(#{Liquid.quoted_fragment()})?/
@@ -22,33 +19,6 @@ defmodule Liquid.IfElse do
     ~r/(?:\b(?:\s?and\s?|\s?or\s?)\b|(?:\s*(?!\b(?:\s?and\s?|\s?or\s?)\b)(?:#{
       Liquid.quoted_fragment()
     }|\S+)\s*)+)/
-  end
-
-  def parse(%Block{} = block, %Template{} = t) do
-    block = parse_conditions(block)
-
-    case Block.split(block, [:else, :elsif]) do
-      {true_block, [%Tag{name: :elsif, markup: markup} | elsif_block]} ->
-        {elseif, t} =
-          parse(
-            %Block{
-              name: :if,
-              markup: markup,
-              nodelist: elsif_block,
-              blank: Blank.blank?(elsif_block)
-            },
-            t
-          )
-
-        {%{block | nodelist: true_block, elselist: [elseif], blank: Blank.blank?(true_block)}, t}
-
-      {true_block, [%Tag{name: :else} | false_block]} ->
-        blank? = Blank.blank?(true_block) && Blank.blank?(false_block)
-        {%{block | nodelist: true_block, elselist: false_block, blank: blank?}, t}
-
-      {_, []} ->
-        {%{block | blank: Blank.blank?(block.nodelist)}, t}
-    end
   end
 
   def render(output, %Tag{}, context) do
@@ -83,7 +53,7 @@ defmodule Liquid.IfElse do
     end)
   end
 
-  defp parse_conditions(%Block{markup: markup} = block) do
+  def parse_conditions(%Block{markup: markup} = block) do
     expressions = Regex.scan(expressions_and_operators(), markup)
     expressions = expressions |> split_conditions |> Enum.reverse()
     condition = Condition.create(expressions)

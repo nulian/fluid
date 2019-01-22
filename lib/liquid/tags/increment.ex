@@ -1,12 +1,7 @@
 defmodule Liquid.Increment do
   alias Liquid.Tag
-  alias Liquid.Template
   alias Liquid.Context
   alias Liquid.Variable
-
-  def parse(%Tag{} = tag, %Template{} = template) do
-    {tag, template}
-  end
 
   def render(output, %Tag{markup: markup}, %Context{} = context) do
     variable = Variable.create(markup)

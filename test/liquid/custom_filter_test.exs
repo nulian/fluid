@@ -13,8 +13,20 @@ defmodule Liquid.CustomFilterTest do
     def not_meaning_of_life(_), do: 2
   end
 
+  defmodule OverrideStandardFilter do
+    @doc """
+    This method overrides Liquid.Filters.List.size, returning always 0.
+    """
+    def size(_), do: 0
+  end
+
   setup_all do
-    Application.put_env(:liquid, :extra_filter_modules, [MyFilter, MyFilterTwo])
+    Application.put_env(:liquid, :extra_filter_modules, [
+      MyFilter,
+      MyFilterTwo,
+      OverrideStandardFilter
+    ])
+
     Liquid.start()
     on_exit(fn -> Liquid.stop() end)
     :ok
@@ -35,6 +47,13 @@ defmodule Liquid.CustomFilterTest do
     assert_template_result(
       "41",
       "{{ 'text' | upcase | nonexistent | meaning_of_life | minus: 1 }}"
+    )
+  end
+
+  test "overrides standard filter with custom filter" do
+    assert_template_result(
+      "0",
+      "{{ 'text' | size }}"
     )
   end
 

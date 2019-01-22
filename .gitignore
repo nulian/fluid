@@ -5,3 +5,5 @@
 /bench/snapshots
 erl_crash.dump
 /cover
+/bench/results/
+/.elixir_ls

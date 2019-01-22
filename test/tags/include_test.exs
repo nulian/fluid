@@ -1,5 +1,3 @@
-Code.require_file("../../test_helper.exs", __ENV__.file)
-
 defmodule TestFileSystem do
   def read_template_file(_root, template_path, _context) do
     case template_path do

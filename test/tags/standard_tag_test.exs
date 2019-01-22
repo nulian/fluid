@@ -1,5 +1,3 @@
-Code.require_file("../../test_helper.exs", __ENV__.file)
-
 defmodule StandardTagTest do
   use ExUnit.Case
 
@@ -80,7 +78,7 @@ defmodule StandardTagTest do
     assert_template_result("foo  bar", "foo {%comment%} comment {%endcomment%} bar")
 
     assert_template_result("foobar", "foo{%comment%}
-                                     {%endcomment%}bar")
+                                      {%endcomment%}bar")
   end
 
   test :test_hyphenated_assign do

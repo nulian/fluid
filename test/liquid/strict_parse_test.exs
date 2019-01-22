@@ -1,7 +1,7 @@
 defmodule Liquid.StrictParseTest do
   use ExUnit.Case
 
-  alias Liquid.{Template, SyntaxError}
+  alias Liquid.Template
 
   test "error on empty filter" do
     assert_syntax_error("{{|test}}")
@@ -42,20 +42,28 @@ defmodule Liquid.StrictParseTest do
   end
 
   test "missing endtag parse time error" do
-    assert_raise RuntimeError, "No matching end for block {% for %}", fn ->
-      Template.parse("{% for a in b %} ...")
-    end
+    assert_raise RuntimeError,
+                 "Malformed tag, open without close: 'for'",
+                 fn ->
+                   Template.parse("{% for a in b %} ...")
+                 end
   end
 
   test "unrecognized operator" do
-    assert_raise SyntaxError, "Unexpected character in '1 =! 2'", fn ->
-      Template.parse("{% if 1 =! 2 %}ok{% endif %}")
-    end
+    assert_raise RuntimeError,
+                 "Error processing tag 'if'. It is malformed or you are creating a custom 'if' without register it",
+                 fn ->
+                   Template.parse("{% if 1 =! 2 %}ok{% endif %}")
+                 end
 
-    assert_raise SyntaxError, "Invalid variable name", fn -> Template.parse("{{%%%}}") end
+    assert_raise RuntimeError,
+                 "expected utf8 codepoint in the range ?A..?Z or in the range ?a..?z or equal to ?_",
+                 fn ->
+                   Template.parse("{{%%%}}")
+                 end
   end
 
   defp assert_syntax_error(markup) do
-    assert_raise(SyntaxError, fn -> Template.parse(markup) end)
+    assert_raise(RuntimeError, fn -> Template.parse(markup) end)
   end
 end

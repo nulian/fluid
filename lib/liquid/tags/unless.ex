@@ -1,14 +1,8 @@
 defmodule Liquid.Unless do
-  alias Liquid.IfElse
   alias Liquid.Block
-  alias Liquid.Template
   alias Liquid.Condition
   alias Liquid.Tag
   alias Liquid.Render
-
-  def parse(%Block{} = block, %Template{} = t) do
-    IfElse.parse(block, t)
-  end
 
   def render(output, %Tag{}, context) do
     {output, context}

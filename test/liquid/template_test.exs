@@ -4,37 +4,10 @@ defmodule Liquid.TemplateTest do
   use ExUnit.Case
 
   alias Liquid.Template, as: Template
-  alias Liquid.Parse, as: Parse
 
   setup_all do
     Liquid.start()
     :ok
-  end
-
-  test :tokenize_strings do
-    assert [" "] == Parse.tokenize(" ")
-    assert ["hello world"] == Parse.tokenize("hello world")
-  end
-
-  test :tokenize_variables do
-    assert ["{{funk}}"] == Parse.tokenize("{{funk}}")
-    assert [" ", "{{funk}}", " "] == Parse.tokenize(" {{funk}} ")
-
-    assert [" ", "{{funk}}", " ", "{{so}}", " ", "{{brother}}", " "] ==
-             Parse.tokenize(" {{funk}} {{so}} {{brother}} ")
-
-    assert [" ", "{{  funk  }}", " "] == Parse.tokenize(" {{  funk  }} ")
-  end
-
-  test :tokenize_blocks do
-    assert ["{%comment%}"] == Parse.tokenize("{%comment%}")
-    assert [" ", "{%comment%}", " "] == Parse.tokenize(" {%comment%} ")
-
-    assert [" ", "{%comment%}", " ", "{%endcomment%}", " "] ==
-             Parse.tokenize(" {%comment%} {%endcomment%} ")
-
-    assert ["  ", "{% comment %}", " ", "{% endcomment %}", " "] ==
-             Parse.tokenize("  {% comment %} {% endcomment %} ")
   end
 
   test :should_be_able_to_handle_nil_in_parse do

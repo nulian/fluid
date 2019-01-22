@@ -3,19 +3,7 @@ defmodule Liquid.Cycle do
   Implementation of `cycle` tag. Can be named or anonymous, rotates through pre-set values
   Cycle is usually used within a loop to alternate between values, like colors or DOM classes.
   """
-  alias Liquid.{Tag, Template, Context, Variable}
-
-  @colon_parser ~r/\:(?=(?:[^'"]|'[^']*'|"[^"]*")*$)/
-  #  @except_colon_parser ~r/(?:[^:"']|"[^"]*"|'[^']*')+/
-
-  @doc """
-  Sets up the cycle name and variables to cycle through
-  """
-  def parse(%Tag{markup: markup} = tag, %Template{} = template) do
-    {name, values} = markup |> get_name_and_values
-    tag = %{tag | parts: [name | values]}
-    {tag, template}
-  end
+  alias Liquid.{Tag, Context, Variable}
 
   @doc """
   Returns a corresponding cycle value and increments the cycle counter
@@ -41,12 +29,5 @@ defmodule Liquid.Cycle do
 
     variable = %Variable{parts: [], literal: parsed}
     Variable.lookup(variable, context)
-  end
-
-  defp get_name_and_values(markup) do
-    [name | values] = markup |> String.split(@colon_parser, parts: 2, trim: true)
-    values = if values == [], do: [name], else: values
-    values = values |> hd |> String.split(",", trim: true) |> Enum.map(&String.trim(&1))
-    {name, values}
   end
 end

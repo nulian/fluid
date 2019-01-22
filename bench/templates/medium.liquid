@@ -1,0 +1,16 @@
+<ul>
+  {% for collection in collections%}
+    {% for product in collection.products %}
+      <li>
+        <div>
+          <div><a href="{{product.url}}"><img src="oioioi" /></a></div>
+        </div>
+        <div>
+          <h3><a href="{{product.url}}">{{product.title}}</a></h3>
+          <p>{{ product.description | strip_html | truncatewords: 35 }}</p>
+        <p>{% if product.price_varies %} - <p>Varies the price<\p>{% endif %}</p>
+      </div>
+      </li>
+    {% endfor %}
+  {% endfor %}
+</ul>
