@@ -79,7 +79,7 @@ defmodule IncludeTagTest do
   end
 
   test :include_tag_with_local_variables do
-    assert_result("Locale: test123 ", "{% include 'locale_variables' echo1: 'test123' %}")
+    assert_result("Locale: test123 ", "{% include 'locale_variables', echo1: 'test123' %}")
   end
 
   test :include_tag_with_multiple_local_variables do
@@ -113,6 +113,14 @@ defmodule IncludeTagTest do
       "Product: Draft 151cm details Product: Element 155cm details ",
       "{% include 'nested_product_template' for products %}",
       %{"products" => [%{"title" => "Draft 151cm"}, %{"title" => "Element 155cm"}]}
+    )
+  end
+
+  test :dynamic_include do
+    assert_result(
+      "Product: Draft 151cm details ",
+      "{% include template with product %}",
+      %{"product" => %{"title" => "Draft 151cm"}, "template" => "nested_product_template"}
     )
   end
 
