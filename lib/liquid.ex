@@ -10,7 +10,14 @@ defmodule Liquid do
 
   def stop, do: {:ok, "stopped"}
 
-  def filter_arguments, do: ~r/(?::|,)\s*(#{quoted_fragment()})/
+  def argument_separator, do: ","
+  def filter_argument_separator, do: ":"
+  def filter_quoted_string, do: "\"[^\"]*\"|'[^']*'"
+  def filter_quoted_fragment, do: "#{filter_quoted_string()}|(?:[^\s,\|'\":]|#{filter_quoted_string()})+"
+  # (?::|,)\s*((?:\w+\s*\:\s*)?"[^"]*"|'[^']*'|(?:[^ ,|'":]|"[^":]*"|'[^':]*')+):?\s*((?:\w+\s*\:\s*)?"[^"]*"|'[^']*'|(?:[^ ,|'":]|"[^":]*"|'[^':]*')+)?
+  def filter_arguments, do:
+    ~r/(?:#{filter_argument_separator()}|#{argument_separator()})\s*((?:\w+\s*\:\s*)?#{filter_quoted_fragment()}):?\s*(#{filter_quoted_fragment()})?/
+
   def single_quote, do: "'"
   def double_quote, do: "\""
   def quote_matcher, do: ~r/#{single_quote()}|#{double_quote()}/

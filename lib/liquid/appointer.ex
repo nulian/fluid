@@ -48,6 +48,10 @@ defmodule Liquid.Appointer do
   Makes `Variable.parts` or literals from the given markup
   """
   @spec parse_name(String.t()) :: map()
+  def parse_name(%{}=name) do
+    for {k, v} <- name, into: %{}, do: {k, parse_name(v)}
+  end
+
   def parse_name(name) do
     value =
       cond do
@@ -76,11 +80,17 @@ defmodule Liquid.Appointer do
   defp assign_context([head | tail], assigns) do
     [name, args] = head
 
+    is_not_mapdata_key = fn k -> k != :__mapdata__ end
+
     args =
       for arg <- args do
         parsed = parse_name(arg)
 
         cond do
+          Map.has_key?(parsed, :__mapdata__) ->
+            for {k, v} <- parsed, is_not_mapdata_key.(k), into: %{}, do:
+              {k, assign_mapdata_context(assigns, v)}
+
           Map.has_key?(parsed, :parts) ->
             assigns |> Matcher.match(parsed.parts) |> to_string()
 
@@ -92,7 +102,27 @@ defmodule Liquid.Appointer do
             if Map.has_key?(assigns, arg), do: to_string(assigns[arg]), else: arg
         end
       end
+      |> Enum.reject(fn item ->
+        case item do
+          %{} = a when map_size(a) == 0 -> true
+          %{__mapdata__: _} = a when map_size(a) == 1 -> true
+          _ -> false
+        end
+      end)
 
     [[name, args] | assign_context(tail, assigns)]
+  end
+
+  defp assign_mapdata_context(assigns, v) do
+    cond do
+      Map.has_key?(v, :parts) ->
+        assigns |> Matcher.match(v.parts) |> to_string()
+
+      Map.has_key?(v, :literal) ->
+        v |> Map.get(:literal) |> to_string()
+
+      true ->
+        if Map.has_key?(assigns, v), do: to_string(assigns[v]), else: v
+    end
   end
 end

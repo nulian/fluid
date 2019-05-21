@@ -421,6 +421,72 @@ defmodule Liquid.FilterTest do
     )
   end
 
+  test :filter_multiple_params do
+    defmodule MultipleParamsFilters do
+      def transform(_str, one, two, three), do: one <> two <> three
+    end
+    Liquid.Filters.add_filters(MultipleParamsFilters)
+    assert_template_result(
+      "foobarbaz",
+      "{{ 'hello' | transform: 'foo', 'bar', 'baz' }}"
+    )
+  end
+
+  test :filter_named_params do
+    defmodule NamedParamsFilters do
+      def join22(_str, %{"foo" => foo}), do: foo
+      def join22(_str, %{"bar" => bar}), do: join22(bar)
+      def join22(_str, %{"baz" => baz}), do: String.reverse(baz)
+      def join22(str), do: String.upcase(str)
+    end
+    Liquid.Filters.add_filters(NamedParamsFilters)
+
+    assert_template_result(
+      "foobar",
+      "{{ 'hello' | join22: foo: 'foobar' }}"
+    )
+
+    assert_template_result(
+      "BARBAZ",
+      "{{ 'hello' | join22: bar: 'barbaz' }}"
+    )
+
+    assert_template_result(
+      "OOFRAB",
+      "{{ 'hello' | join22: baz: baz | join22 }}",
+      %{"baz" => "barfoo"}
+    )
+  end
+
+  test :multiple_named_params do
+    defmodule MultiParamsFilters do
+      def t2(_translation, %{}=opts) do
+        Jason.encode!(opts)
+      end
+    end
+    Liquid.Filters.add_filters(MultiParamsFilters)
+
+    assert_template_result(
+      "{\"bar\":\"baz\",\"foo\":\"bar\"}",
+      "{{ 'thing' | t2: foo: 'bar', bar: 'baz' }}"
+    )
+  end
+
+  test :mixed_multiple_named_params do
+    defmodule MultiMixedParamsFilters do
+      def t3(_translation, lang, %{}=opts) do
+        Jason.encode!(Map.put(opts, "lang", lang))
+      end
+    end
+    Liquid.Filters.add_filters(MultiMixedParamsFilters)
+
+    assert_template_result(
+      "{\"bar\":\"baz\",\"foo\":\"bar\",\"lang\":\"en\"}",
+      "{{ 'thing' | t3: 'en', foo: 'bar', bar: bar }}",
+      %{"bar" => "baz"}
+    )
+  end
+
   defp assert_template_result(expected, markup, assigns \\ %{})
 
   defp assert_template_result(expected, markup, assigns) do

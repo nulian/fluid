@@ -491,8 +491,18 @@ defmodule Liquid.Filters do
 
     args =
       for arg <- args do
-        Liquid.quote_matcher() |> Regex.replace(arg, "")
+        case arg do
+          %{} -> for {k, v} <- arg, into: %{}, do: {k, Liquid.quote_matcher() |> Regex.replace(v, "")}
+          _ -> Liquid.quote_matcher() |> Regex.replace(arg, "")
+        end
       end
+      |> fn items ->
+        case Enum.at(items, -1) do
+          %{__mapdata__: _} = a when map_size(a) == 1 -> items |> Enum.reverse() |> tl() |> Enum.reverse()
+          %{__mapdata__: _} = a when map_size(a) > 1 -> items |> Enum.reverse() |> tl() |> Enum.reverse() |> Enum.concat([Map.delete(a, :__mapdata__)])
+          _ -> items
+        end
+      end.()
 
     functions = Functions.__info__(:functions)
     custom_filters = Application.get_env(:liquid, :custom_filters)
