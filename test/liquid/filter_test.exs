@@ -3,7 +3,7 @@ Code.require_file("../../test_helper.exs", __ENV__.file)
 defmodule Liquid.FilterTest do
   use ExUnit.Case
   use Timex
-  alias Liquid.{Filters, Template, Variable}
+  alias Liquid.{Context, Filters, Template, Variable}
   alias Liquid.Filters.Functions
 
   setup_all do
@@ -22,7 +22,25 @@ defmodule Liquid.FilterTest do
   test :filter_parsed do
     name = "'foofoo'"
     filters = [[:replace, ["'foo'", "'bar'"]]]
-    assert "'barbar'" == Filters.filter(filters, name)
+    assert "'barbar'" == Filters.filter(filters, %Context{}, name)
+  end
+
+  test :filter_from_registers do
+    name = "'foofoo'"
+    filters = [[:foo, ["'foo'", "'baz'"]]]
+    registers = %{filters: %{
+      foo: &String.replace/3,
+    }}
+    assert "'bazbaz'" == Filters.filter(filters, %Context{registers: registers}, name)
+  end
+
+  test :filter_from_registers_with_wrong_args do
+    name = "'foofoo'"
+    filters = [[:foo, []]]
+    registers = %{filters: %{
+      foo: &String.replace/3,
+    }}
+    assert "Liquid error: wrong number of arguments to foo" == Filters.filter(filters, %Context{registers: registers}, name)
   end
 
   test :size do

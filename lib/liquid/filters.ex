@@ -4,7 +4,7 @@ defmodule Liquid.Filters do
   """
   import Kernel, except: [round: 1, abs: 1, floor: 1, ceil: 1]
   import Liquid.Utils, only: [to_number: 1]
-  alias Liquid.HTML
+  alias Liquid.{Context,HTML}
 
   defmodule Functions do
     @moduledoc """
@@ -484,9 +484,9 @@ defmodule Liquid.Filters do
   @doc """
   Recursively pass through all of the input filters applying them
   """
-  def filter([], value), do: value
+  def filter([], _, value), do: value
 
-  def filter([filter | rest], value) do
+  def filter([filter | rest], context, value) do
     [name, args] = filter
 
     args =
@@ -506,26 +506,29 @@ defmodule Liquid.Filters do
 
     functions = Functions.__info__(:functions)
     custom_filters = Application.get_env(:liquid, :custom_filters)
+    registered_filters = context |> Context.registers(:filters)
 
     ret =
-      case {name, functions[name], custom_filters[name]} do
+      case {name, functions[name], registered_filters[name], custom_filters[name]} do
         # pass value in case of no filters
-        {nil, _, _} ->
+        {nil, _, _, _} ->
           value
 
         # pass non-existend filter
-        {_, nil, nil} ->
+        {_, nil, nil, nil} ->
           value
 
-        # Fallback to custom if no standard
-        {_, nil, _} ->
+        # Fallback to custom if no standard or register
+        {_, nil, nil, _} ->
           apply_function(custom_filters[name], name, [value | args])
+
+        {_, nil, filter, _} -> apply_filter(filter, name, [value | args])
 
         _ ->
           apply_function(Functions, name, [value | args])
       end
 
-    filter(rest, ret)
+    filter(rest, context, ret)
   end
 
   @doc """
@@ -550,6 +553,14 @@ defmodule Liquid.Filters do
 
     custom_filters = module_functions |> Map.merge(custom_filters)
     Application.put_env(:liquid, :custom_filters, custom_filters)
+  end
+
+  defp apply_filter(func, name, args) do
+    try do
+      apply(func, args)
+    rescue
+      _ in BadArityError -> "Liquid error: wrong number of arguments to #{name}"
+    end
   end
 
   defp apply_function(module, name, args) do
