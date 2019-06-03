@@ -549,7 +549,9 @@ defmodule Liquid.Filters do
 
     module_functions =
       module.__info__(:functions)
-      |> Enum.into(%{}, fn {key, _} -> {key, module} end)
+      |> Keyword.keys
+      |> Kernel.++(overridden_filter_names(module))
+      |> Enum.into(%{}, fn filter_name -> {filter_name, module} end)
 
     custom_filters = module_functions |> Map.merge(custom_filters)
     Application.put_env(:liquid, :custom_filters, custom_filters)
@@ -565,7 +567,7 @@ defmodule Liquid.Filters do
 
   defp apply_function(module, name, args) do
     try do
-      apply(module, name, args)
+      apply(module, override_filter_name(module, name), args)
     rescue
       e in UndefinedFunctionError ->
         functions = module.__info__(:functions)
@@ -574,4 +576,19 @@ defmodule Liquid.Filters do
           message: "Liquid error: wrong number of arguments (#{e.arity} for #{functions[name]})"
     end
   end
+
+  defp override_filter_name(module, name), do: filter_name_override_map(module)[name] || name
+
+  defp overridden_filter_names(module), do: Map.keys(filter_name_override_map(module))
+
+  defp filter_name_override_map(module) do
+    if function_exists?(module, :filter_name_override_map) do
+      module.filter_name_override_map
+    else
+      %{}
+    end
+  end
+
+  defp function_exists?(module, func), do:
+    Keyword.has_key?(module.__info__(:functions), func)
 end
