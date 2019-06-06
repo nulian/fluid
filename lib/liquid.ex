@@ -41,7 +41,7 @@ defmodule Liquid do
     do:
       ~r/#{tag_start()}\s*(?<tag>.*?)\s*#{tag_end()}|#{variable_start()}\s*(?<variable>.*?)\s*#{
         variable_end()
-      }/m
+      }/ms
 
   def template_parser, do: ~r/#{partial_template_parser()}|#{any_starting_tag()}/ms
 
