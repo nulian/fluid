@@ -50,7 +50,12 @@ defimpl Liquid.Matcher, for: List do
 
   def match(current, [<<?[, index::binary>> | parts]) do
     index = index |> String.split("]") |> hd |> String.to_integer()
-    current |> Enum.fetch!(index) |> Liquid.Matcher.match(parts)
+    current
+    |> Enum.fetch(index)
+    |> case do
+      :error -> nil
+      {:ok, val} -> val |> Liquid.Matcher.match(parts)
+    end
   end
 end
 

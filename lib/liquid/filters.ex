@@ -4,7 +4,7 @@ defmodule Liquid.Filters do
   """
   import Kernel, except: [round: 1, abs: 1, floor: 1, ceil: 1]
   import Liquid.Utils, only: [to_number: 1]
-  alias Liquid.HTML
+  alias Liquid.{Context,HTML}
 
   defmodule Functions do
     @moduledoc """
@@ -484,38 +484,51 @@ defmodule Liquid.Filters do
   @doc """
   Recursively pass through all of the input filters applying them
   """
-  def filter([], value), do: value
+  def filter([], _, value), do: value
 
-  def filter([filter | rest], value) do
+  def filter([filter | rest], context, value) do
     [name, args] = filter
 
     args =
       for arg <- args do
-        Liquid.quote_matcher() |> Regex.replace(arg, "")
+        case arg do
+          %{} -> for {k, v} <- arg, into: %{}, do: {k, Liquid.quote_matcher() |> Regex.replace(v, "")}
+          _ -> Liquid.quote_matcher() |> Regex.replace(arg, "")
+        end
       end
+      |> fn items ->
+        case Enum.at(items, -1) do
+          %{__mapdata__: _} = a when map_size(a) == 1 -> items |> Enum.reverse() |> tl() |> Enum.reverse()
+          %{__mapdata__: _} = a when map_size(a) > 1 -> items |> Enum.reverse() |> tl() |> Enum.reverse() |> Enum.concat([Map.delete(a, :__mapdata__)])
+          _ -> items
+        end
+      end.()
 
     functions = Functions.__info__(:functions)
     custom_filters = Application.get_env(:liquid, :custom_filters)
+    registered_filters = context |> Context.registers(:filters)
 
     ret =
-      case {name, functions[name], custom_filters[name]} do
+      case {name, functions[name], registered_filters[name], custom_filters[name]} do
         # pass value in case of no filters
-        {nil, _, _} ->
+        {nil, _, _, _} ->
           value
 
         # pass non-existend filter
-        {_, nil, nil} ->
+        {_, nil, nil, nil} ->
           value
 
-        # Fallback to custom if no standard
-        {_, nil, _} ->
+        # Fallback to custom if no standard or register
+        {_, nil, nil, _} ->
           apply_function(custom_filters[name], name, [value | args])
+
+        {_, nil, filter, _} -> apply_filter(filter, name, [value | args])
 
         _ ->
           apply_function(Functions, name, [value | args])
       end
 
-    filter(rest, ret)
+    filter(rest, context, ret)
   end
 
   @doc """
@@ -536,15 +549,25 @@ defmodule Liquid.Filters do
 
     module_functions =
       module.__info__(:functions)
-      |> Enum.into(%{}, fn {key, _} -> {key, module} end)
+      |> Keyword.keys
+      |> Kernel.++(overridden_filter_names(module))
+      |> Enum.into(%{}, fn filter_name -> {filter_name, module} end)
 
     custom_filters = module_functions |> Map.merge(custom_filters)
     Application.put_env(:liquid, :custom_filters, custom_filters)
   end
 
+  defp apply_filter(func, name, args) do
+    try do
+      apply(func, args)
+    rescue
+      _ in BadArityError -> "Liquid error: wrong number of arguments to #{name}"
+    end
+  end
+
   defp apply_function(module, name, args) do
     try do
-      apply(module, name, args)
+      apply(module, override_filter_name(module, name), args)
     rescue
       e in UndefinedFunctionError ->
         functions = module.__info__(:functions)
@@ -553,4 +576,19 @@ defmodule Liquid.Filters do
           message: "Liquid error: wrong number of arguments (#{e.arity} for #{functions[name]})"
     end
   end
+
+  defp override_filter_name(module, name), do: filter_name_override_map(module)[name] || name
+
+  defp overridden_filter_names(module), do: Map.keys(filter_name_override_map(module))
+
+  defp filter_name_override_map(module) do
+    if function_exists?(module, :filter_name_override_map) do
+      module.filter_name_override_map
+    else
+      %{}
+    end
+  end
+
+  defp function_exists?(module, func), do:
+    Keyword.has_key?(module.__info__(:functions), func)
 end

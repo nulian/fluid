@@ -13,8 +13,13 @@ defmodule Liquid.CustomFilterTest do
     def not_meaning_of_life(_), do: 2
   end
 
+  defmodule FilterNameOverride do
+    def filter_name_override_map, do: %{ if: :if_filter }
+    def if_filter(_), do: 43
+  end
+
   setup_all do
-    Application.put_env(:liquid, :extra_filter_modules, [MyFilter, MyFilterTwo])
+    Application.put_env(:liquid, :extra_filter_modules, [MyFilter, MyFilterTwo, FilterNameOverride])
     Liquid.start()
     on_exit(fn -> Liquid.stop() end)
     :ok
@@ -36,6 +41,10 @@ defmodule Liquid.CustomFilterTest do
       "41",
       "{{ 'text' | upcase | nonexistent | meaning_of_life | minus: 1 }}"
     )
+  end
+
+  test "custom filter with name override" do
+    assert_template_result("43", "{{ 'something' | if }}")
   end
 
   defp assert_template_result(expected, markup, assigns \\ %{}) do

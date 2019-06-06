@@ -3,7 +3,7 @@ Code.require_file("../../test_helper.exs", __ENV__.file)
 defmodule Liquid.FilterTest do
   use ExUnit.Case
   use Timex
-  alias Liquid.{Filters, Template, Variable}
+  alias Liquid.{Context, Filters, Template, Variable}
   alias Liquid.Filters.Functions
 
   setup_all do
@@ -22,7 +22,25 @@ defmodule Liquid.FilterTest do
   test :filter_parsed do
     name = "'foofoo'"
     filters = [[:replace, ["'foo'", "'bar'"]]]
-    assert "'barbar'" == Filters.filter(filters, name)
+    assert "'barbar'" == Filters.filter(filters, %Context{}, name)
+  end
+
+  test :filter_from_registers do
+    name = "'foofoo'"
+    filters = [[:foo, ["'foo'", "'baz'"]]]
+    registers = %{filters: %{
+      foo: &String.replace/3,
+    }}
+    assert "'bazbaz'" == Filters.filter(filters, %Context{registers: registers}, name)
+  end
+
+  test :filter_from_registers_with_wrong_args do
+    name = "'foofoo'"
+    filters = [[:foo, []]]
+    registers = %{filters: %{
+      foo: &String.replace/3,
+    }}
+    assert "Liquid error: wrong number of arguments to foo" == Filters.filter(filters, %Context{registers: registers}, name)
   end
 
   test :size do
@@ -418,6 +436,72 @@ defmodule Liquid.FilterTest do
     assert_template_result(
       "V 1: 2: 1: 4: 5: 0 | 011245",
       "V {{ var2 }}{% capture var2 %}{{ '1: 2: 1: 4: 5' }}: 0{% endcapture %}{{ var2 }} | {{ var2 | split: ': ' | sort }}"
+    )
+  end
+
+  test :filter_multiple_params do
+    defmodule MultipleParamsFilters do
+      def transform(_str, one, two, three), do: one <> two <> three
+    end
+    Liquid.Filters.add_filters(MultipleParamsFilters)
+    assert_template_result(
+      "foobarbaz",
+      "{{ 'hello' | transform: 'foo', 'bar', 'baz' }}"
+    )
+  end
+
+  test :filter_named_params do
+    defmodule NamedParamsFilters do
+      def join22(_str, %{"foo" => foo}), do: foo
+      def join22(_str, %{"bar" => bar}), do: join22(bar)
+      def join22(_str, %{"baz" => baz}), do: String.reverse(baz)
+      def join22(str), do: String.upcase(str)
+    end
+    Liquid.Filters.add_filters(NamedParamsFilters)
+
+    assert_template_result(
+      "foobar",
+      "{{ 'hello' | join22: foo: 'foobar' }}"
+    )
+
+    assert_template_result(
+      "BARBAZ",
+      "{{ 'hello' | join22: bar: 'barbaz' }}"
+    )
+
+    assert_template_result(
+      "OOFRAB",
+      "{{ 'hello' | join22: baz: baz | join22 }}",
+      %{"baz" => "barfoo"}
+    )
+  end
+
+  test :multiple_named_params do
+    defmodule MultiParamsFilters do
+      def t2(_translation, %{}=opts) do
+        Jason.encode!(opts)
+      end
+    end
+    Liquid.Filters.add_filters(MultiParamsFilters)
+
+    assert_template_result(
+      "{\"bar\":\"baz\",\"foo\":\"bar\"}",
+      "{{ 'thing' | t2: foo: 'bar', bar: 'baz' }}"
+    )
+  end
+
+  test :mixed_multiple_named_params do
+    defmodule MultiMixedParamsFilters do
+      def t3(_translation, lang, %{}=opts) do
+        Jason.encode!(Map.put(opts, "lang", lang))
+      end
+    end
+    Liquid.Filters.add_filters(MultiMixedParamsFilters)
+
+    assert_template_result(
+      "{\"bar\":\"baz\",\"foo\":\"bar\",\"lang\":\"en\"}",
+      "{{ 'thing' | t3: 'en', foo: 'bar', bar: bar }}",
+      %{"bar" => "baz"}
     )
   end
 

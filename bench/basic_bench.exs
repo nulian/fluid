@@ -48,5 +48,4 @@ defmodule BasicBench do
     t = Template.parse(markup)
     { :ok, _rendered, _ } = Template.render(t, assigns)
   end
-
 end

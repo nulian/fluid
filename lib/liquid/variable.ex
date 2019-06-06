@@ -31,7 +31,7 @@ defmodule Liquid.Variable do
 
     result =
       try do
-        {:ok, filters |> Filters.filter(ret) |> apply_global_filter(context)}
+        {:ok, filters |> Filters.filter(context, ret) |> apply_global_filter(context)}
       rescue
         e in UndefinedFunctionError -> {e, e.reason}
         e in ArgumentError -> {e, e.message}
@@ -93,8 +93,23 @@ defmodule Liquid.Variable do
       args =
         Liquid.filter_arguments()
         |> Regex.scan(markup)
-        |> List.flatten()
-        |> Liquid.List.even_elements()
+        |> Enum.map(fn item ->
+          case item do
+            [_, key, val] -> {key, val}
+            [_, val] -> val
+          end
+        end)
+        |> Enum.split_with(&is_tuple/1)
+        |> fn ({tuples, values}) ->
+          tuples
+            |> Enum.reduce(%{__mapdata__: "true"}, fn ({key, val}, acc) ->
+              acc |> Map.put(key, val)
+            end)
+            |> case do
+              %{__mapdata__: _} = data when map_size(data) == 1 -> values
+              data -> values ++ [data]
+            end
+        end.()
 
       [String.to_atom(filter), args]
     end
