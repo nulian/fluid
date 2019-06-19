@@ -25,7 +25,7 @@ defmodule Liquid.Variable do
   @doc """
   Assigns context to variable and than applies all filters
   """
-  @spec lookup(%Variable{}, %Context{}) :: {String.t(), %Context{}}
+  @spec lookup(%Variable{}, %Context{}) :: {String.t() | nil, %Context{}}
   def lookup(%Variable{} = v, %Context{} = context) do
     {ret, filters} = Appointer.assign(v, context)
 
@@ -100,16 +100,16 @@ defmodule Liquid.Variable do
           end
         end)
         |> Enum.split_with(&is_tuple/1)
-        |> fn ({tuples, values}) ->
-          tuples
-            |> Enum.reduce(%{__mapdata__: "true"}, fn ({key, val}, acc) ->
-              acc |> Map.put(key, val)
-            end)
-            |> case do
-              %{__mapdata__: _} = data when map_size(data) == 1 -> values
-              data -> values ++ [data]
-            end
-        end.()
+        |> (fn {tuples, values} ->
+              tuples
+              |> Enum.reduce(%{__mapdata__: "true"}, fn {key, val}, acc ->
+                acc |> Map.put(key, val)
+              end)
+              |> case do
+                %{__mapdata__: _} = data when map_size(data) == 1 -> values
+                data -> values ++ [data]
+              end
+            end).()
 
       [String.to_atom(filter), args]
     end
