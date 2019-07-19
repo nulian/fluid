@@ -76,12 +76,15 @@ defmodule Liquid.Include do
   end
 
   defp render_item(output, _key, nil, template, %Context{} = context) do
-    {:ok, rendered, _} = Template.render(template, context)
+    assigns = context.assigns |> Map.merge(%{"locals" => template.presets})
+    {:ok, rendered, _} = Template.render(template, %{context | assigns: assigns})
     {[rendered] ++ output, context}
   end
 
   defp render_item(output, key, item, template, %Context{} = context) do
-    assigns = context.assigns |> Map.merge(%{key => item})
+    assigns =
+      context.assigns |> Map.merge(%{"locals" => template.presets}) |> Map.merge(%{key => item})
+
     {:ok, rendered, _} = Template.render(template, %{context | assigns: assigns})
     {[rendered] ++ output, context}
   end

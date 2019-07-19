@@ -27,6 +27,13 @@ defmodule TestFileSystem do
       "pick_a_source" ->
         {:ok, "from TestFileSystem"}
 
+      "price" ->
+        {:ok,
+         "{% assign class_name = 'Price Price_type ' | replace: 'type', locals.price.typename | append: locals.class %}{{ class_name }}"}
+
+      "attr_from_param" ->
+        {:ok, "{{ some_name }} {{ some_name2 }}"}
+
       _ ->
         {:ok, template_path}
     end
@@ -50,6 +57,22 @@ defmodule IncludeTagTest do
     Liquid.FileSystem.register(TestFileSystem)
     on_exit(fn -> Liquid.stop() end)
     :ok
+  end
+
+  test :assignments do
+    assert_result(
+      "Price Price_Fixed some-class",
+      "{% include 'price', price: product.price, class: 'some-class' %}",
+      %{"product" => %{"price" => %{"typename" => "Fixed"}}}
+    )
+  end
+
+  test :attr_from_param do
+    assert_result(
+      "var1 var2",
+      "{% include 'attr_from_param', some_name: 'var1', some_name2: 'var2' %}",
+      %{}
+    )
   end
 
   test :include_tag_looks_for_file_system_in_registers_first do
@@ -121,6 +144,14 @@ defmodule IncludeTagTest do
       "Product: Draft 151cm details ",
       "{% include template with product %}",
       %{"product" => %{"title" => "Draft 151cm"}, "template" => "nested_product_template"}
+    )
+  end
+
+  test :include_with_locals do
+    assert_result(
+      "Product: Octavarium ",
+      "{% include 'product', product: locals.product %}",
+      %{"locals" => %{"product" => %{"title" => "Octavarium"}}}
     )
   end
 
