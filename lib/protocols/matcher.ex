@@ -50,6 +50,7 @@ defimpl Liquid.Matcher, for: List do
 
   def match(current, [<<?[, index::binary>> | parts]) do
     index = index |> String.split("]") |> hd |> String.to_integer()
+
     current
     |> Enum.fetch(index)
     |> case do
@@ -86,6 +87,9 @@ defimpl Liquid.Matcher, for: Any do
 
     current |> Map.get(key)
   end
+
+  def match(val, ["is_nil"]) when is_nil(val), do: true
+  def match(val, ["is_nil"]) when not is_nil(val), do: false
 
   @doc """
   Matches all remaining cases
