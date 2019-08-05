@@ -28,19 +28,28 @@ defmodule Liquid.FilterTest do
   test :filter_from_registers do
     name = "'foofoo'"
     filters = [[:foo, ["'foo'", "'baz'"]]]
-    registers = %{filters: %{
-      foo: &String.replace/3,
-    }}
+
+    registers = %{
+      filters: %{
+        foo: &String.replace/3
+      }
+    }
+
     assert "'bazbaz'" == Filters.filter(filters, %Context{registers: registers}, name)
   end
 
   test :filter_from_registers_with_wrong_args do
     name = "'foofoo'"
     filters = [[:foo, []]]
-    registers = %{filters: %{
-      foo: &String.replace/3,
-    }}
-    assert "Liquid error: wrong number of arguments to foo" == Filters.filter(filters, %Context{registers: registers}, name)
+
+    registers = %{
+      filters: %{
+        foo: &String.replace/3
+      }
+    }
+
+    assert "Liquid error: wrong number of arguments to foo" ==
+             Filters.filter(filters, %Context{registers: registers}, name)
   end
 
   test :size do
@@ -196,6 +205,43 @@ defmodule Liquid.FilterTest do
 
     # Elixir keyword list support
     assert [a: 1, a: 2, a: 3, a: 4] == Functions.sort([{:a, 4}, {:a, 3}, {:a, 1}, {:a, 2}], "a")
+  end
+
+  defmodule TestMod do
+    @fields [:position]
+    defstruct @fields
+  end
+
+  test :sort_structs do
+    assert [
+             %TestMod{
+               position: 9
+             },
+             %TestMod{
+               position: 10
+             }
+           ] ==
+             Functions.sort([
+               %TestMod{
+                 position: 10
+               },
+               %TestMod{
+                 position: 9
+               }
+             ])
+  end
+
+  test :sort_struct do
+    assert [
+             %TestMod{
+               position: 9
+             }
+           ] ==
+             Functions.sort([
+               %TestMod{
+                 position: 9
+               }
+             ])
   end
 
   test :sort_integrity do
@@ -443,7 +489,9 @@ defmodule Liquid.FilterTest do
     defmodule MultipleParamsFilters do
       def transform(_str, one, two, three), do: one <> two <> three
     end
+
     Liquid.Filters.add_filters(MultipleParamsFilters)
+
     assert_template_result(
       "foobarbaz",
       "{{ 'hello' | transform: 'foo', 'bar', 'baz' }}"
@@ -457,6 +505,7 @@ defmodule Liquid.FilterTest do
       def join22(_str, %{"baz" => baz}), do: String.reverse(baz)
       def join22(str), do: String.upcase(str)
     end
+
     Liquid.Filters.add_filters(NamedParamsFilters)
 
     assert_template_result(
@@ -478,10 +527,11 @@ defmodule Liquid.FilterTest do
 
   test :multiple_named_params do
     defmodule MultiParamsFilters do
-      def t2(_translation, %{}=opts) do
+      def t2(_translation, %{} = opts) do
         Jason.encode!(opts)
       end
     end
+
     Liquid.Filters.add_filters(MultiParamsFilters)
 
     assert_template_result(
@@ -492,10 +542,11 @@ defmodule Liquid.FilterTest do
 
   test :mixed_multiple_named_params do
     defmodule MultiMixedParamsFilters do
-      def t3(_translation, lang, %{}=opts) do
+      def t3(_translation, lang, %{} = opts) do
         Jason.encode!(Map.put(opts, "lang", lang))
       end
     end
+
     Liquid.Filters.add_filters(MultiMixedParamsFilters)
 
     assert_template_result(

@@ -4,7 +4,7 @@ defmodule Liquid.Filters do
   """
   import Kernel, except: [round: 1, abs: 1, floor: 1, ceil: 1]
   import Liquid.Utils, only: [to_number: 1]
-  alias Liquid.{Context,HTML}
+  alias Liquid.{Context, HTML}
 
   defmodule Functions do
     @moduledoc """
@@ -50,6 +50,10 @@ defmodule Liquid.Filters do
     def reverse(array), do: array |> to_iterable |> Enum.reverse()
 
     def sort(array), do: array |> Enum.sort()
+
+    def sort([%_{} | _] = array, key) when is_list(array) and is_map(hd(array)) do
+      array |> Enum.sort_by(fn element -> Map.get(element, convert_to_symbol_if_needed(key)) end)
+    end
 
     def sort(array, key) when is_list(array) and is_map(hd(array)) do
       array |> Enum.sort_by(& &1[key])
@@ -479,6 +483,9 @@ defmodule Liquid.Filters do
     defp get_int_and_counter(input) do
       input |> to_number |> get_int_and_counter
     end
+
+    defp convert_to_symbol_if_needed(key) when is_atom(key), do: key
+    defp convert_to_symbol_if_needed(key) when is_binary(key), do: String.to_atom(key)
   end
 
   @doc """
@@ -492,17 +499,29 @@ defmodule Liquid.Filters do
     args =
       for arg <- args do
         case arg do
-          %{} -> for {k, v} <- arg, into: %{}, do: {k, Liquid.quote_matcher() |> Regex.replace(v, "")}
-          _ -> Liquid.quote_matcher() |> Regex.replace(arg, "")
+          %{} ->
+            for {k, v} <- arg, into: %{}, do: {k, Liquid.quote_matcher() |> Regex.replace(v, "")}
+
+          _ ->
+            Liquid.quote_matcher() |> Regex.replace(arg, "")
         end
       end
-      |> fn items ->
-        case Enum.at(items, -1) do
-          %{__mapdata__: _} = a when map_size(a) == 1 -> items |> Enum.reverse() |> tl() |> Enum.reverse()
-          %{__mapdata__: _} = a when map_size(a) > 1 -> items |> Enum.reverse() |> tl() |> Enum.reverse() |> Enum.concat([Map.delete(a, :__mapdata__)])
-          _ -> items
-        end
-      end.()
+      |> (fn items ->
+            case Enum.at(items, -1) do
+              %{__mapdata__: _} = a when map_size(a) == 1 ->
+                items |> Enum.reverse() |> tl() |> Enum.reverse()
+
+              %{__mapdata__: _} = a when map_size(a) > 1 ->
+                items
+                |> Enum.reverse()
+                |> tl()
+                |> Enum.reverse()
+                |> Enum.concat([Map.delete(a, :__mapdata__)])
+
+              _ ->
+                items
+            end
+          end).()
 
     functions = Functions.__info__(:functions)
     custom_filters = Application.get_env(:liquid, :custom_filters)
@@ -522,7 +541,8 @@ defmodule Liquid.Filters do
         {_, nil, nil, _} ->
           apply_function(custom_filters[name], name, [value | args])
 
-        {_, nil, filter, _} -> apply_filter(filter, name, [value | args])
+        {_, nil, filter, _} ->
+          apply_filter(filter, name, [value | args])
 
         _ ->
           apply_function(Functions, name, [value | args])
@@ -549,7 +569,7 @@ defmodule Liquid.Filters do
 
     module_functions =
       module.__info__(:functions)
-      |> Keyword.keys
+      |> Keyword.keys()
       |> Kernel.++(overridden_filter_names(module))
       |> Enum.into(%{}, fn filter_name -> {filter_name, module} end)
 
@@ -589,6 +609,5 @@ defmodule Liquid.Filters do
     end
   end
 
-  defp function_exists?(module, func), do:
-    Keyword.has_key?(module.__info__(:functions), func)
+  defp function_exists?(module, func), do: Keyword.has_key?(module.__info__(:functions), func)
 end
