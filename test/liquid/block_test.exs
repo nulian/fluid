@@ -82,13 +82,15 @@ defmodule Liquid.BlockTest do
   end
 
   test "with multiline block" do
-    template = Liquid.Template.parse("""
+    template =
+      Liquid.Template.parse("""
       {% include 'foo',
         foo: bar,
         bar: 'baz',
         baz: foo
       %}\
       """)
-      assert 1 == Enum.count(template.root.nodelist)
+
+    assert 1 == Enum.count(template.root.nodelist)
   end
 end

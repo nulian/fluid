@@ -48,7 +48,7 @@ defmodule Liquid.Appointer do
   Makes `Variable.parts` or literals from the given markup
   """
   @spec parse_name(String.t()) :: map()
-  def parse_name(%{}=name) do
+  def parse_name(%{} = name) do
     for {k, v} <- name, into: %{}, do: {k, parse_name(v)}
   end
 
@@ -88,8 +88,10 @@ defmodule Liquid.Appointer do
 
         cond do
           Map.has_key?(parsed, :__mapdata__) ->
-            for {k, v} <- parsed, is_not_mapdata_key.(k), into: %{}, do:
-              {k, assign_mapdata_context(assigns, v)}
+            for {k, v} <- parsed,
+                is_not_mapdata_key.(k),
+                into: %{},
+                do: {k, assign_mapdata_context(assigns, v)}
 
           Map.has_key?(parsed, :parts) ->
             assigns |> Matcher.match(parsed.parts) |> to_string()

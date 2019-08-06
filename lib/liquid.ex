@@ -13,10 +13,16 @@ defmodule Liquid do
   def argument_separator, do: ","
   def filter_argument_separator, do: ":"
   def filter_quoted_string, do: "\"[^\"]*\"|'[^']*'"
-  def filter_quoted_fragment, do: "#{filter_quoted_string()}|(?:[^\s,\|'\":]|#{filter_quoted_string()})+"
+
+  def filter_quoted_fragment,
+    do: "#{filter_quoted_string()}|(?:[^\s,\|'\":]|#{filter_quoted_string()})+"
+
   # (?::|,)\s*((?:\w+\s*\:\s*)?"[^"]*"|'[^']*'|(?:[^ ,|'":]|"[^":]*"|'[^':]*')+):?\s*((?:\w+\s*\:\s*)?"[^"]*"|'[^']*'|(?:[^ ,|'":]|"[^":]*"|'[^':]*')+)?
-  def filter_arguments, do:
-    ~r/(?:#{filter_argument_separator()}|#{argument_separator()})\s*((?:\w+\s*\:\s*)?#{filter_quoted_fragment()}):?\s*(#{filter_quoted_fragment()})?/
+  def filter_arguments,
+    do:
+      ~r/(?:#{filter_argument_separator()}|#{argument_separator()})\s*((?:\w+\s*\:\s*)?#{
+        filter_quoted_fragment()
+      }):?\s*(#{filter_quoted_fragment()})?/
 
   def single_quote, do: "'"
   def double_quote, do: "\""

@@ -14,12 +14,17 @@ defmodule Liquid.CustomFilterTest do
   end
 
   defmodule FilterNameOverride do
-    def filter_name_override_map, do: %{ if: :if_filter }
+    def filter_name_override_map, do: %{if: :if_filter}
     def if_filter(_), do: 43
   end
 
   setup_all do
-    Application.put_env(:liquid, :extra_filter_modules, [MyFilter, MyFilterTwo, FilterNameOverride])
+    Application.put_env(:liquid, :extra_filter_modules, [
+      MyFilter,
+      MyFilterTwo,
+      FilterNameOverride
+    ])
+
     Liquid.start()
     on_exit(fn -> Liquid.stop() end)
     :ok
