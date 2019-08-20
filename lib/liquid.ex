@@ -10,6 +10,31 @@ defmodule Liquid do
 
   def stop, do: {:ok, "stopped"}
 
+  @compile {:inline, argument_separator: 0}
+  @compile {:inline, filter_argument_separator: 0}
+  @compile {:inline, filter_quoted_string: 0}
+  @compile {:inline, filter_quoted_fragment: 0}
+  @compile {:inline, filter_arguments: 0}
+  @compile {:inline, single_quote: 0}
+  @compile {:inline, double_quote: 0}
+  @compile {:inline, quote_matcher: 0}
+  @compile {:inline, variable_start: 0}
+  @compile {:inline, variable_end: 0}
+  @compile {:inline, variable_incomplete_end: 0}
+  @compile {:inline, tag_start: 0}
+  @compile {:inline, tag_end: 0}
+  @compile {:inline, any_starting_tag: 0}
+  @compile {:inline, invalid_expression: 0}
+  @compile {:inline, tokenizer: 0}
+  @compile {:inline, parser: 0}
+  @compile {:inline, template_parser: 0}
+  @compile {:inline, partial_template_parser: 0}
+  @compile {:inline, quoted_string: 0}
+  @compile {:inline, quoted_fragment: 0}
+  @compile {:inline, tag_attributes: 0}
+  @compile {:inline, variable_parser: 0}
+  @compile {:inline, filter_parser: 0}
+
   def argument_separator, do: ","
   def filter_argument_separator, do: ":"
   def filter_quoted_string, do: "\"[^\"]*\"|'[^']*'"

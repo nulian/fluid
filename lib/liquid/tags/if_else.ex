@@ -15,9 +15,11 @@ defmodule Liquid.IfElse do
   alias Liquid.Tag
   alias Liquid.Template
 
+  @compile {:inline, syntax: 0}
   def syntax,
     do: ~r/(#{Liquid.quoted_fragment()})\s*([=!<>a-z_]+)?\s*(#{Liquid.quoted_fragment()})?/
 
+  @compile {:inline, expressions_and_operators: 0}
   def expressions_and_operators do
     ~r/(?:\b(?:\s?and\s?|\s?or\s?)\b|(?:\s*(?!\b(?:\s?and\s?|\s?or\s?)\b)(?:#{
       Liquid.quoted_fragment()

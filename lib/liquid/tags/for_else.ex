@@ -62,6 +62,7 @@ defmodule Liquid.ForElse do
               forloop: %{}
   end
 
+  @compile {:inline, syntax: 0}
   def syntax, do: ~r/(\w+)\s+in\s+(#{Liquid.quoted_fragment()}+)\s*(reversed)?/
 
   def parse(%Block{nodelist: nodelist} = block, %Liquid.Template{} = t) do

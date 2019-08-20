@@ -3,6 +3,7 @@ defmodule Liquid.Raw do
   alias Liquid.Render
   alias Liquid.Block
 
+  @compile {:inline, full_token_possibly_invalid: 0}
   def full_token_possibly_invalid,
     do: ~r/\A(.*)#{Liquid.tag_start()}\s*(\w+)\s*(.*)?#{Liquid.tag_end()}\z/m
 

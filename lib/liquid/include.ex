@@ -5,6 +5,7 @@ defmodule Liquid.Include do
   alias Liquid.Variable, as: Variable
   alias Liquid.FileSystem, as: FileSystem
 
+  @compile {:inline, syntax: 0}
   def syntax,
     do: ~r/(#{Liquid.quoted_fragment()}+)(\s+(?:with|for)\s+(#{Liquid.quoted_fragment()}+))?/
 

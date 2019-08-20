@@ -5,8 +5,10 @@ defmodule Liquid.Case do
   alias Liquid.Variable
   alias Liquid.Condition
 
+  @compile {:inline, syntax: 0}
   def syntax, do: ~r/(#{Liquid.quoted_fragment()})/
 
+  @compile {:inline, when_syntax: 0}
   def when_syntax,
     do: ~r/(#{Liquid.quoted_fragment()})(?:(?:\s+or\s+|\s*\,\s*)(#{Liquid.quoted_fragment()}.*))?/
 

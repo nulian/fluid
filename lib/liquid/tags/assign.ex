@@ -3,6 +3,7 @@ defmodule Liquid.Assign do
   alias Liquid.Tag
   alias Liquid.Context
 
+  @compile {:inline, syntax: 0}
   def syntax, do: ~r/([\w\-]+)\s*=\s*(.*)\s*/
 
   def parse(%Tag{} = tag, %Liquid.Template{} = template), do: {%{tag | blank: true}, template}

@@ -21,6 +21,7 @@ defmodule Liquid.TableRow do
               forloop: %{}
   end
 
+  @compile {:inline, syntax: 0}
   def syntax, do: ~r/(\w+)\s+in\s+(#{Liquid.quoted_fragment()}+)/
 
   @doc """
