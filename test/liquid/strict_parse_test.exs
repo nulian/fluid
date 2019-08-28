@@ -14,7 +14,7 @@ defmodule Liquid.StrictParseTest do
   end
 
   test "unexpected characters syntax error" do
-    markup = "true && false"
+    markup = "true ^& false"
     assert_syntax_error("{% if #{markup} %} YES {% endif %}")
   end
 

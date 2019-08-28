@@ -86,11 +86,22 @@ defmodule Liquid.IfElse do
   end
 
   defp parse_conditions(%Block{markup: markup} = block) do
+    markup = change_wrong_markup(markup)
     expressions = Regex.scan(expressions_and_operators(), markup)
     expressions = expressions |> split_conditions |> Enum.reverse()
     condition = Condition.create(expressions)
     # Check condition syntax
     Condition.evaluate(condition)
     %{block | condition: condition}
+  end
+
+  defp change_wrong_markup(markup) do
+    markup
+    |> String.replace("| lt:", "<")
+    |> String.replace("| gt:", ">")
+    |> String.replace("| gte:", ">=")
+    |> String.replace("| lte:", "<=")
+    |> String.replace("&&", "and")
+    |> String.replace("||", "or")
   end
 end

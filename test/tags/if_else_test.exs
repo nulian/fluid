@@ -234,6 +234,55 @@ defmodule Liquid.Tags.IfElseTagTest do
     )
   end
 
+  test :if_with_filter do
+    assert_result("yes", "{% if var | lt: varx %}yes{% endif %}", %{
+      "var" => 10,
+      "varx" => 20
+    })
+  end
+
+  test :if_with_less_sign do
+    assert_result("yes", "{% if var < varx %}yes{% endif %}", %{
+      "var" => 10,
+      "varx" => 20
+    })
+  end
+
+  test :if_with_gt do
+    assert_result("yes", "{% if var | gt: varx %}yes{% endif %}", %{
+      "var" => 20,
+      "varx" => 10
+    })
+  end
+
+  test :if_with_lte do
+    assert_result("yes", "{% if var | lte: varx %}yes{% endif %}", %{
+      "var" => 10,
+      "varx" => 10
+    })
+  end
+
+  test :if_with_gte do
+    assert_result("yes", "{% if var | gte: varx %}yes{% endif %}", %{
+      "var" => 20,
+      "varx" => 20
+    })
+  end
+
+  test :if_with_ampersands do
+    assert_result("yes", "{% if var && varx %}yes{% endif %}", %{
+      "var" => true,
+      "varx" => true
+    })
+  end
+
+  test :if_with_pipes do
+    assert_result("yes", "{% if var || varx %}yes{% endif %}", %{
+      "var" => true,
+      "varx" => false
+    })
+  end
+
   defp assert_result(expected, markup, assigns \\ %{}) do
     t = Template.parse(markup)
     {:ok, rendered, _} = Template.render(t, assigns)
