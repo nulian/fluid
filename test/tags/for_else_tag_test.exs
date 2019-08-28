@@ -384,6 +384,28 @@ defmodule ForElseTagTest do
     })
   end
 
+  test :for_block_with_map do
+    assert_result(" yo  yo  yo  yo ", "{%for item in map%} yo {%endfor%}", %{
+      "map" => %{
+        "array" => [1, 2, 3, 4]
+      }
+    })
+
+    assert_result(" yo  yo  yo  yo ", "{%for item in map%} yo {%endfor%}", %{
+      "map" => %{
+        "array" => [1, 2, 3, 4],
+        "array2" => [1, 2, 3]
+      }
+    })
+
+    assert_result(" yo  yo  yo ", "{%for item in map%} yo {%endfor%}", %{
+      "map" => %{
+        "somethingels" => "something else",
+        "array2" => [1, 2, 3]
+      }
+    })
+  end
+
   defp assert_template_result(expected, markup, assigns) do
     assert_result(expected, markup, assigns)
   end

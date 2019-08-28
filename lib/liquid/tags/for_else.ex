@@ -109,7 +109,10 @@ defmodule Liquid.ForElse do
 
   def render(output, %Block{iterator: it} = block, %Context{} = context) do
     {list, context} = parse_collection(it.collection, context)
+
     list = if is_binary(list) and list != "", do: [list], else: list
+
+    list = convert_to_list(list)
 
     if is_list(list) and !is_empty_list(list) do
       list = if it.reversed, do: Enum.reverse(list), else: list
@@ -120,6 +123,23 @@ defmodule Liquid.ForElse do
       Render.render(output, block.elselist, context)
     end
   end
+
+  defp convert_to_list(map) when is_map(map) do
+    find_list_in_map(map)
+  end
+
+  defp convert_to_list(sth), do: sth
+
+  defp find_list_in_map(map) when is_map(map) do
+    key =
+      map
+      |> Map.keys()
+      |> Enum.find(fn key -> is_list(Map.get(map, key)) end)
+
+    Map.get(map, key, nil)
+  end
+
+  defp find_list_in_map(sth), do: sth
 
   defp is_empty_list([]), do: true
   defp is_empty_list(value) when is_list(value), do: false
