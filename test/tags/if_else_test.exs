@@ -31,6 +31,13 @@ defmodule Liquid.Tags.IfElseTagTest do
     assert_result(" YES ", "{% if \"foo\" %} YES {% else %} NO {% endif %}")
   end
 
+  test :if_else_new_line do
+    assert_result(" YES ", "{% if
+      false %} NO {% else %} YES {% endif %}")
+    assert_result(" YES ", "{% if
+      true %} YES {% else %} NO {% endif %}")
+  end
+
   test :if_boolean do
     assert_result(" YES ", "{% if var %} YES {% endif %}", %{"var" => true})
   end

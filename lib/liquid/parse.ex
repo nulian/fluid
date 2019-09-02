@@ -124,7 +124,7 @@ defmodule Liquid.Parse do
   end
 
   defp parse_markup(markup, rest, template) do
-    name = markup |> String.split(" ") |> hd
+    name = markup |> String.split(" ") |> hd |> String.trim()
 
     case Registers.lookup(name) do
       {mod, Liquid.Block} ->

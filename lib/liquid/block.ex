@@ -14,7 +14,7 @@ defmodule Liquid.Block do
 
   def create(markup) do
     destructure [name, rest], String.split(markup, " ", parts: 2)
-    %Block{name: name |> String.to_atom(), markup: rest}
+    %Block{name: name |> String.trim() |> String.to_atom(), markup: rest}
   end
 
   def split(nodes), do: split(nodes, [:else])
