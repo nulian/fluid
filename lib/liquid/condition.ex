@@ -87,6 +87,10 @@ defmodule Liquid.Condition do
   defp eval_operator([] = left, :<>, :empty?), do: eval_operator(left, :!==, :empty?)
   defp eval_operator([] = left, :!=, :empty?), do: !Enum.empty?(left)
 
+  defp eval_operator(left, :==, :blank?), do: Blankable.blank?(left)
+
+  defp eval_operator(left, :!=, :blank?), do: !Blankable.blank?(left)
+
   defp eval_operator(left, operator, right) do
     case operator do
       :== ->
