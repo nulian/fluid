@@ -39,9 +39,13 @@ defmodule Liquid.Include do
 
   def render(output, %Tag{parts: parts} = tag, %Context{} = context) do
     {file_system, root} = context |> Context.registers(:file_system) || FileSystem.lookup()
+
     {name, context} = parts[:name] |> Variable.lookup(context)
-    {:ok, source} = file_system.read_template_file(root, name, context)
+
+    source = load_template(root, name, context, file_system)
+
     presets = build_presets(tag, context)
+
     t = Template.parse(source, presets)
     t = %{t | blocks: context.template.blocks ++ t.blocks}
 
@@ -56,6 +60,17 @@ defmodule Liquid.Include do
 
       true ->
         render_item(output, name, nil, t, context)
+    end
+  end
+
+  defp load_template(root, name, context, file_system) do
+    case file_system.read_template_file(root, name, context) do
+      {:ok, source} ->
+        source
+
+      {:error, error_value} ->
+        raise Liquid.FileSystemError,
+          message: ~s(Errored while including template "#{name}", error: "#{error_value}")
     end
   end
 

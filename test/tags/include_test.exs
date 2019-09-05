@@ -34,6 +34,9 @@ defmodule TestFileSystem do
       "attr_from_param" ->
         {:ok, "{{ some_name }} {{ some_name2 }}"}
 
+      "missing" ->
+        {:error, "not found"}
+
       _ ->
         {:ok, template_path}
     end
@@ -153,6 +156,16 @@ defmodule IncludeTagTest do
       "{% include 'product', product: locals.product %}",
       %{"locals" => %{"product" => %{"title" => "Octavarium"}}}
     )
+  end
+
+  test :not_found do
+    exception =
+      assert_raise(Liquid.FileSystemError, fn ->
+        t = Template.parse("{% include 'missing' %}")
+        Template.render(t, %Liquid.Context{})
+      end)
+
+    assert ~s(Errored while including template "missing", error: "not found") == exception.message
   end
 
   # test :recursively_included_template_does_not_produce_endless_loop do
