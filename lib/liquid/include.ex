@@ -46,7 +46,13 @@ defmodule Liquid.Include do
 
     presets = build_presets(tag, context)
 
-    t = Template.parse(source, presets)
+    source_hash = :crypto.hash(:md5, source) |> Base.encode16()
+
+    {_, t} =
+      Cachex.fetch(:parsed_template, "parsed_template|#{source_hash}", fn _ ->
+        Template.parse(source, presets)
+      end)
+
     t = %{t | blocks: context.template.blocks ++ t.blocks}
 
     cond do
