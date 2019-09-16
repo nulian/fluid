@@ -25,8 +25,8 @@ defmodule Liquid.CustomFilterTest do
       FilterNameOverride
     ])
 
-    Liquid.start()
-    on_exit(fn -> Liquid.stop() end)
+    Liquid.add_filter_modules()
+
     :ok
   end
 

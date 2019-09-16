@@ -3,11 +3,6 @@ Code.require_file("../../test_helper.exs", __ENV__.file)
 defmodule Liquid.CaseTest do
   use ExUnit.Case
 
-  setup_all do
-    Liquid.start()
-    :ok
-  end
-
   test "render first block with a matching {% when %} argument" do
     assert_result(
       " its 1 ",

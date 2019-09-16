@@ -5,12 +5,6 @@ defmodule FileSystemTest do
 
   alias Liquid.FileSystem, as: FileSystem
 
-  setup_all do
-    Liquid.start()
-    on_exit(fn -> Liquid.stop() end)
-    :ok
-  end
-
   test :default do
     FileSystem.register(Liquid.BlankFileSystem, "/")
     {:error, _reason} = FileSystem.read_template_file("dummy", dummy: "smarty")

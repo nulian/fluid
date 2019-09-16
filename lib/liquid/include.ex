@@ -44,28 +44,30 @@ defmodule Liquid.Include do
 
     source = load_template(root, name, context, file_system)
 
-    presets = build_presets(tag, context)
-
     source_hash = :crypto.hash(:md5, source) |> Base.encode16()
 
     {_, t} =
       Cachex.fetch(:parsed_template, "parsed_template|#{source_hash}", fn _ ->
-        Template.parse(source, presets)
+        Template.parse(source, %{})
       end)
 
     t = %{t | blocks: context.template.blocks ++ t.blocks}
 
+    presets = build_presets(tag, context)
+
+    assigns = context.assigns |> Map.merge(presets)
+
     cond do
       !is_nil(parts[:variable]) ->
-        {item, context} = Variable.lookup(parts[:variable], context)
+        {item, context} = Variable.lookup(parts[:variable], %{context | assigns: assigns})
         render_item(output, name, item, t, context)
 
       !is_nil(parts[:foreach]) ->
-        {items, context} = Variable.lookup(parts[:foreach], context)
+        {items, context} = Variable.lookup(parts[:foreach], %{context | assigns: assigns})
         render_list(output, name, items, t, context)
 
       true ->
-        render_item(output, name, nil, t, context)
+        render_item(output, name, nil, t, %{context | assigns: assigns})
     end
   end
 
@@ -98,14 +100,12 @@ defmodule Liquid.Include do
   end
 
   defp render_item(output, _key, nil, template, %Context{} = context) do
-    assigns = context.assigns |> Map.merge(%{"locals" => template.presets})
-    {:ok, rendered, _} = Template.render(template, %{context | assigns: assigns})
+    {:ok, rendered, _} = Template.render(template, context)
     {[rendered] ++ output, context}
   end
 
   defp render_item(output, key, item, template, %Context{} = context) do
-    assigns =
-      context.assigns |> Map.merge(%{"locals" => template.presets}) |> Map.merge(%{key => item})
+    assigns = context.assigns |> Map.merge(%{key => item})
 
     {:ok, rendered, _} = Template.render(template, %{context | assigns: assigns})
     {[rendered] ++ output, context}

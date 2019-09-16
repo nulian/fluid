@@ -17,11 +17,6 @@ defmodule FetchAttributeTest do
     defstruct input: 0, operand: 0
   end
 
-  setup_all do
-    Liquid.start()
-    :ok
-  end
-
   test 'empty test' do
     assert_template_result("", "{{}}")
   end

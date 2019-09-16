@@ -29,7 +29,7 @@ defmodule TestFileSystem do
 
       "price" ->
         {:ok,
-         "{% assign class_name = 'Price Price_type ' | replace: 'type', locals.price.typename | append: locals.class %}{{ class_name }}"}
+         "{% assign class_name = 'Price Price_type ' | replace: 'type', price.typename | append: class %}{{ class_name }}"}
 
       "attr_from_param" ->
         {:ok, "{{ some_name }} {{ some_name2 }}"}
@@ -56,9 +56,7 @@ defmodule IncludeTagTest do
   alias Liquid.Context, as: Context
 
   setup_all do
-    Liquid.start()
     Liquid.FileSystem.register(TestFileSystem)
-    on_exit(fn -> Liquid.stop() end)
     :ok
   end
 

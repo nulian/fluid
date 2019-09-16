@@ -3,12 +3,6 @@ Code.require_file("../../test_helper.exs", __ENV__.file)
 defmodule Liquid.AssignTest do
   use ExUnit.Case
 
-  setup_all do
-    Liquid.start()
-    on_exit(fn -> Liquid.stop() end)
-    :ok
-  end
-
   test :assigned_variable do
     assert_result(".foo.", "{% assign foo = values %}.{{ foo[0] }}.", %{
       "values" => ["foo", "bar", "baz"]

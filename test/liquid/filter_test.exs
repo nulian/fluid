@@ -7,8 +7,7 @@ defmodule Liquid.FilterTest do
   alias Liquid.Filters.Functions
 
   setup_all do
-    Liquid.start()
-    on_exit(fn -> Liquid.stop() end)
+    on_exit(fn -> Application.put_env(:liquid, :custom_filters, %{}) end)
     :ok
   end
 
@@ -402,7 +401,7 @@ defmodule Liquid.FilterTest do
     assert_template_result("4", "{{ 14 | divided_by:3 }}")
     assert_template_result("5", "{{ 15 | divided_by:3 }}")
 
-    assert_template_result("Liquid error: divided by 0", "{{ 5 | divided_by:0 }}")
+    assert_template_result("variable: 5, Liquid error: divided by 0", "{{ 5 | divided_by:0 }}")
 
     assert_template_result("0.5", "{{ 2.0 | divided_by:4 }}")
   end
@@ -469,7 +468,7 @@ defmodule Liquid.FilterTest do
 
   test :filters_error_wrong_in_chain do
     assert_template_result(
-      "Liquid error: wrong number of arguments (2 for 1)",
+      "variable: 'text', error: Liquid error: wrong number of arguments (2 for 1)",
       "{{ 'text' | upcase:1 | nonexisting | capitalize }}"
     )
   end

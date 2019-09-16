@@ -4,11 +4,15 @@ defmodule Liquid do
   def start(_type, _args), do: start()
 
   def start do
-    Liquid.Filters.add_filter_modules()
+    add_filter_modules()
     Liquid.Supervisor.start_link()
   end
 
   def stop, do: {:ok, "stopped"}
+
+  def add_filter_modules() do
+    Liquid.Filters.add_filter_modules()
+  end
 
   @compile {:inline, argument_separator: 0}
   @compile {:inline, filter_argument_separator: 0}

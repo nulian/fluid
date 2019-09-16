@@ -5,11 +5,6 @@ defmodule Liquid.RawTest do
 
   alias Liquid.Template, as: Template
 
-  setup_all do
-    Liquid.start()
-    :ok
-  end
-
   test :test_tag_in_raw do
     assert_template_result(
       "{% comment %} test {% endcomment %}",

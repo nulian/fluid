@@ -11,11 +11,6 @@ defmodule Liquid.BlockTest do
     def parse(b, p), do: {b, p}
   end
 
-  setup_all do
-    Liquid.start()
-    :ok
-  end
-
   test "blankspace" do
     template = Liquid.Template.parse("  ")
     assert template.root.nodelist == ["  "]

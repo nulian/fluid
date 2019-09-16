@@ -5,11 +5,6 @@ defmodule Liquid.BlankTest do
 
   def n, do: "10"
 
-  setup_all do
-    Liquid.start()
-    :ok
-  end
-
   def wrap_in_for(body) do
     "{% for i  in (1.." <> n() <> ") %}" <> body <> "{% endfor %}"
   end

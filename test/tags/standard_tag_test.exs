@@ -5,11 +5,6 @@ defmodule StandardTagTest do
 
   alias Liquid.Template
 
-  setup_all do
-    Liquid.start()
-    :ok
-  end
-
   test :test_no_transform do
     assert_template_result(
       "this text should come out of the template without change...",

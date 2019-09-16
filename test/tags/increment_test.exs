@@ -4,11 +4,6 @@ defmodule Liquid.IncrementTest do
   use ExUnit.Case
   alias Liquid.Template
 
-  setup_all do
-    Liquid.start()
-    :ok
-  end
-
   test :test_inc do
     assert_template_result("0", "{%increment port %}", %{})
     assert_template_result("0 1", "{%increment port %} {%increment port%}", %{})

@@ -5,11 +5,6 @@ defmodule ForElseTagTest do
 
   alias Liquid.Template, as: Template
 
-  setup_all do
-    Liquid.start()
-    :ok
-  end
-
   test :for_block do
     assert_result(" yo  yo  yo  yo ", "{%for item in array%} yo {%endfor%}", %{
       "array" => [1, 2, 3, 4]

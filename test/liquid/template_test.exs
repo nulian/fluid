@@ -6,11 +6,6 @@ defmodule Liquid.TemplateTest do
   alias Liquid.Template, as: Template
   alias Liquid.Parse, as: Parse
 
-  setup_all do
-    Liquid.start()
-    :ok
-  end
-
   test :tokenize_strings do
     assert [" "] == Parse.tokenize(" ")
     assert ["hello world"] == Parse.tokenize("hello world")

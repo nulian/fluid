@@ -5,8 +5,7 @@ defmodule Liquid.CaptureTest do
   alias Liquid.Template
 
   setup_all do
-    Liquid.start()
-    on_exit(fn -> Liquid.stop() end)
+    on_exit(fn -> Application.put_env(:liquid, :custom_filters, %{}) end)
     :ok
   end
 

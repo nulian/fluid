@@ -3,6 +3,7 @@ defmodule Liquid.Variable do
     Module to create and lookup for Variables
 
   """
+  # , file: nil, line: nil
   defstruct name: nil, literal: nil, filters: [], parts: []
   alias Liquid.{Appointer, Filters, Variable, Context}
 
@@ -33,9 +34,9 @@ defmodule Liquid.Variable do
       try do
         {:ok, filters |> Filters.filter(context, ret) |> apply_global_filter(context)}
       rescue
-        e in UndefinedFunctionError -> {e, e.reason}
-        e in ArgumentError -> {e, e.message}
-        e in ArithmeticError -> {e, "Liquid error: #{e.message}"}
+        e in UndefinedFunctionError -> {e, "variable: #{v.name}, error: #{e.reason}"}
+        e in ArgumentError -> {e, "variable: #{v.name}, error: #{e.message}"}
+        e in ArithmeticError -> {e, "variable: #{v.name}, Liquid error: #{e.message}"}
       end
 
     case result do

@@ -5,12 +5,6 @@ defmodule Liquid.Tags.IfElseTagTest do
 
   alias Liquid.Template, as: Template
 
-  setup_all do
-    Liquid.start()
-    on_exit(fn -> Liquid.stop() end)
-    :ok
-  end
-
   test :if_block do
     assert_result("  ", " {% if false %} this text should not go into the output {% endif %} ")
 
