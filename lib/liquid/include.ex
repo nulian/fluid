@@ -48,8 +48,12 @@ defmodule Liquid.Include do
 
     {_, t} =
       Cachex.fetch(:parsed_template, "parsed_template|#{source_hash}", fn _ ->
-        Template.parse(source, %{})
+        Template.parse(source, %{}, name)
       end)
+
+    if is_binary(t) do
+      raise t
+    end
 
     t = %{t | blocks: context.template.blocks ++ t.blocks}
 

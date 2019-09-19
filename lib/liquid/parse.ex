@@ -11,6 +11,9 @@ defmodule Liquid.Parse do
     |> Enum.filter(&(&1 != ""))
   end
 
+  def parse(_, _)
+  def parse(_, _, _, _)
+
   def parse("", %Template{} = template) do
     %{template | root: %Liquid.Block{name: :document}}
   end
@@ -28,7 +31,12 @@ defmodule Liquid.Parse do
     unless nodelist_invalid?(block, accum), do: {%{block | nodelist: accum}, template}
   end
 
-  def parse(%Block{name: :comment} = block, [h | t], accum, %Template{} = template) do
+  def parse(
+        %Block{name: :comment} = block,
+        [h | t],
+        accum,
+        %Template{} = template
+      ) do
     cond do
       Regex.match?(~r/{%\s*endcomment\s*%}/, h) ->
         {%{block | nodelist: accum}, t, template}
@@ -50,11 +58,11 @@ defmodule Liquid.Parse do
     end
   end
 
-  def parse(%Block{name: name}, [], _, _) do
-    raise "No matching end for block {% #{to_string(name)} %}"
+  def parse(%Block{name: name}, [], _, %Template{filename: filename}) do
+    raise "No matching end for block {% #{to_string(name)} %} in file: #{filename}"
   end
 
-  def parse(%Block{name: name} = block, [h | t], accum, %Template{} = template) do
+  def parse(%Block{name: name} = block, [h | t], accum, %Template{filename: filename} = template) do
     endblock = "end" <> to_string(name)
 
     cond do
@@ -62,7 +70,7 @@ defmodule Liquid.Parse do
         unless nodelist_invalid?(block, accum), do: {%{block | nodelist: accum}, t, template}
 
       Regex.match?(~r/{%\send.*?\s*$}/, h) ->
-        raise "Unmatched block close: #{h}"
+        raise "Unmatched block close: #{h} in file #{filename}"
 
       true ->
         {result, rest, template} = parse_node(h, t, template)
@@ -123,7 +131,7 @@ defmodule Liquid.Parse do
     end
   end
 
-  defp parse_markup(markup, rest, template) do
+  defp parse_markup(markup, rest, %Template{filename: filename} = template) do
     name = markup |> String.split(" ") |> hd |> String.trim()
 
     case Registers.lookup(name) do
@@ -136,11 +144,11 @@ defmodule Liquid.Parse do
         {tag, rest, template}
 
       nil ->
-        raise "unregistered tag: #{name}"
+        raise "unregistered tag: #{name} in file: #{filename}"
     end
   end
 
-  defp parse_block(mod, markup, rest, template) do
+  defp parse_block(mod, markup, rest, %Template{} = template) do
     block = Liquid.Block.create(markup)
 
     {block, rest, template} =

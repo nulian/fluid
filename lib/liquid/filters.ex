@@ -496,6 +496,8 @@ defmodule Liquid.Filters do
   def filter([filter | rest], context, value) do
     [name, args] = filter
 
+    filename = extract_filename_from_context(context)
+
     args =
       for arg <- args do
         case arg do
@@ -539,17 +541,20 @@ defmodule Liquid.Filters do
 
         # Fallback to custom if no standard or register
         {_, nil, nil, _} ->
-          apply_function(custom_filters[name], name, [value | args])
+          apply_function(custom_filters[name], name, [value | args], filename)
 
         {_, nil, filter, _} ->
-          apply_filter(filter, name, [value | args])
+          apply_filter(filter, name, [value | args], filename)
 
         _ ->
-          apply_function(Functions, name, [value | args])
+          apply_function(Functions, name, [value | args], filename)
       end
 
     filter(rest, context, ret)
   end
+
+  defp extract_filename_from_context(%{template: %{filename: filename}}), do: filename
+  defp extract_filename_from_context(_), do: :root
 
   @doc """
   Add filter modules mentioned in extra_filter_modules env variable
@@ -577,15 +582,16 @@ defmodule Liquid.Filters do
     Application.put_env(:liquid, :custom_filters, custom_filters)
   end
 
-  defp apply_filter(func, name, args) do
+  defp apply_filter(func, name, args, filename) do
     try do
       apply(func, args)
     rescue
-      _ in BadArityError -> "Liquid error: wrong number of arguments to #{name}"
+      _ in BadArityError ->
+        "Liquid error: wrong number of arguments to #{name}, filename: #{filename}"
     end
   end
 
-  defp apply_function(module, name, args) do
+  defp apply_function(module, name, args, filename) do
     try do
       apply(module, override_filter_name(module, name), args)
     rescue
@@ -593,7 +599,10 @@ defmodule Liquid.Filters do
         functions = module.__info__(:functions)
 
         raise ArgumentError,
-          message: "Liquid error: wrong number of arguments (#{e.arity} for #{functions[name]})"
+          message:
+            "Liquid error: wrong number of arguments (#{e.arity} for #{functions[name]}), filename: #{
+              filename
+            }"
     end
   end
 

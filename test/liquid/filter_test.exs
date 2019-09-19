@@ -47,7 +47,7 @@ defmodule Liquid.FilterTest do
       }
     }
 
-    assert "Liquid error: wrong number of arguments to foo" ==
+    assert "Liquid error: wrong number of arguments to foo, filename: root" ==
              Filters.filter(filters, %Context{registers: registers}, name)
   end
 
@@ -401,7 +401,10 @@ defmodule Liquid.FilterTest do
     assert_template_result("4", "{{ 14 | divided_by:3 }}")
     assert_template_result("5", "{{ 15 | divided_by:3 }}")
 
-    assert_template_result("variable: 5, Liquid error: divided by 0", "{{ 5 | divided_by:0 }}")
+    assert_template_result(
+      "variable: 5, Liquid error: divided by 0, filename: root",
+      "{{ 5 | divided_by:0 }}"
+    )
 
     assert_template_result("0.5", "{{ 2.0 | divided_by:4 }}")
   end
@@ -468,7 +471,7 @@ defmodule Liquid.FilterTest do
 
   test :filters_error_wrong_in_chain do
     assert_template_result(
-      "variable: 'text', error: Liquid error: wrong number of arguments (2 for 1)",
+      "variable: 'text', error: Liquid error: wrong number of arguments (2 for 1), filename: root",
       "{{ 'text' | upcase:1 | nonexisting | capitalize }}"
     )
   end

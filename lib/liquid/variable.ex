@@ -30,13 +30,20 @@ defmodule Liquid.Variable do
   def lookup(%Variable{} = v, %Context{} = context) do
     {ret, filters} = Appointer.assign(v, context)
 
+    filename = extract_filename_from_context(context)
+
     result =
       try do
         {:ok, filters |> Filters.filter(context, ret) |> apply_global_filter(context)}
       rescue
-        e in UndefinedFunctionError -> {e, "variable: #{v.name}, error: #{e.reason}"}
-        e in ArgumentError -> {e, "variable: #{v.name}, error: #{e.message}"}
-        e in ArithmeticError -> {e, "variable: #{v.name}, Liquid error: #{e.message}"}
+        e in UndefinedFunctionError ->
+          {e, "variable: #{v.name}, error: #{e.reason}"}
+
+        e in ArgumentError ->
+          {e, "variable: #{v.name}, error: #{e.message}"}
+
+        e in ArithmeticError ->
+          {e, "variable: #{v.name}, Liquid error: #{e.message}, filename: #{filename}"}
       end
 
     case result do
@@ -44,6 +51,9 @@ defmodule Liquid.Variable do
       {error, message} -> process_error(context, error, message)
     end
   end
+
+  defp extract_filename_from_context(%{template: %{filename: filename}}), do: filename
+  defp extract_filename_from_context(_), do: :root
 
   defp process_error(%Context{template: template} = context, error, message) do
     error_mode = Application.get_env(:liquid, :error_mode, :lax)

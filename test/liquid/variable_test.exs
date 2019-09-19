@@ -62,7 +62,7 @@ defmodule Liquid.VariableTest do
   test "render error mode strict/lax" do
     template = "{{ 16 | divided_by: 0 }}"
     result = template |> Template.parse() |> Template.render() |> elem(1)
-    assert result == "variable: 16, Liquid error: divided by 0"
+    assert result == "variable: 16, Liquid error: divided by 0, filename: root"
 
     Application.put_env(:liquid, :error_mode, :strict)
     {:ok, result, context} = template |> Template.parse() |> Template.render()

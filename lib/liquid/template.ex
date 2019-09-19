@@ -3,7 +3,7 @@ defmodule Liquid.Template do
   Main Liquid module, all further render and parse processing passes through it
   """
 
-  defstruct root: nil, presets: %{}, blocks: [], errors: []
+  defstruct root: nil, presets: %{}, blocks: [], errors: [], filename: :root
   alias Liquid.{Template, Render, Context}
 
   @doc """
@@ -58,14 +58,14 @@ defmodule Liquid.Template do
   Function to parse markup with given presets (if any)
   """
   @spec parse(String.t(), map) :: Liquid.Template
-  def parse(value, presets \\ %{})
+  def parse(value, presets \\ %{}, filename \\ :root)
 
-  def parse(<<markup::binary>>, presets) do
-    Liquid.Parse.parse(markup, %Template{presets: presets})
+  def parse(<<markup::binary>>, presets, filename) do
+    Liquid.Parse.parse(markup, %Template{presets: presets, filename: filename})
   end
 
   @spec parse(nil, map) :: Liquid.Template
-  def parse(nil, presets) do
-    Liquid.Parse.parse("", %Template{presets: presets})
+  def parse(nil, presets, filename) do
+    Liquid.Parse.parse("", %Template{presets: presets, filename: filename})
   end
 end

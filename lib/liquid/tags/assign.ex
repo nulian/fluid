@@ -6,7 +6,8 @@ defmodule Liquid.Assign do
   @compile {:inline, syntax: 0}
   def syntax, do: ~r/([\w\-]+)\s*=\s*(.*)\s*/
 
-  def parse(%Tag{} = tag, %Liquid.Template{} = template), do: {%{tag | blank: true}, template}
+  def parse(%Tag{} = tag, %Liquid.Template{} = template),
+    do: {%{tag | blank: true}, template}
 
   def render(output, %Tag{markup: markup}, %Context{} = context) do
     [[_, to, from]] = syntax() |> Regex.scan(markup)
