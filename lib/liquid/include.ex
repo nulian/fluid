@@ -75,14 +75,15 @@ defmodule Liquid.Include do
     end
   end
 
+  @error_handler Application.get_env(:liquid, :error_handler, Liquid.Prod.ErrorHandler)
+
   defp load_template(root, name, context, file_system) do
     case file_system.read_template_file(root, name, context) do
       {:ok, source} ->
         source
 
       {:error, error_value} ->
-        raise Liquid.FileSystemError,
-          message: ~s(Errored while including template "#{name}", error: "#{error_value}")
+        @error_handler.handle(error_value, name: name)
     end
   end
 

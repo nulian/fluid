@@ -157,13 +157,7 @@ defmodule IncludeTagTest do
   end
 
   test :not_found do
-    exception =
-      assert_raise(Liquid.FileSystemError, fn ->
-        t = Template.parse("{% include 'missing' %}")
-        Template.render(t, %Liquid.Context{})
-      end)
-
-    assert ~s(Errored while including template "missing", error: "not found") == exception.message
+    assert_result("", "{% include 'missing' %}")
   end
 
   # test :recursively_included_template_does_not_produce_endless_loop do
