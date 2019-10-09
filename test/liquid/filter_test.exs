@@ -477,7 +477,10 @@ defmodule Liquid.FilterTest do
   end
 
   test :filters_nonexistent_in_chain do
-    assert_template_result("Text", "{{ 'text' | upcase | nonexistent | capitalize }}")
+    assert_template_result(
+      "Liquid error: non-existing filter used: nonexistent",
+      "{{ 'text' | upcase | nonexistent | capitalize }}"
+    )
   end
 
   test :filter_and_tag do

@@ -18,7 +18,7 @@
             <h2>Product Options:</h2>
             <select name="id">
               {% for variant in product.variants %}
-                <option value="{{ variant.id }}">{{ variant.title }} - {{ variant.price | money }}</option>
+                <option value="{{ variant.id }}">{{ variant.title }} - {{ variant.price }}</option>
               {% endfor %}
             </select>
             <div>

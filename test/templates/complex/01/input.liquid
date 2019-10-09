@@ -45,7 +45,7 @@
         </ul>
         <p>
           {{ product.price | plus: 1000}}
-          {{ product.price | divide_by: 1000}}
+          {{ product.price }}
           {{ product.price | minus: 1000}}
           {% assign all_products = collection.products | map: "price" %}
           {% for item in all_products  %}

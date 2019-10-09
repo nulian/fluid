@@ -36,7 +36,7 @@ defmodule Liquid.CustomFilterTest do
 
   test :nonexistent_in_custom_chain do
     assert_template_result(
-      "2",
+      "Liquid error: Non-existing filter used: minus_nonexistent",
       "{{ 'text' | capitalize | not_meaning_of_life | minus_nonexistent: 1 }}"
     )
   end

@@ -536,8 +536,8 @@ defmodule Liquid.Filters do
           value
 
         # pass non-existend filter
-        {_, nil, nil, nil} ->
-          value
+        {name, nil, nil, nil} ->
+          "Liquid error: Non-existing filter used: #{name}"
 
         # Fallback to custom if no standard or register
         {_, nil, nil, _} ->
