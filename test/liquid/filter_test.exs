@@ -58,6 +58,9 @@ defmodule Liquid.FilterTest do
 
   test :slice do
     assert "oob" == Functions.slice("foobar", 1, 3)
+    assert "oob" == Functions.slice("foobar", "1", "3")
+    assert "oob" == Functions.slice("foobar", "1", 3)
+    assert "oob" == Functions.slice("foobar", 1, "3")
     assert "oobar" == Functions.slice("foobar", 1, 1000)
     assert "" == Functions.slice("foobar", 1, 0)
     assert "o" == Functions.slice("foobar", 1, 1)
