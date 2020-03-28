@@ -365,7 +365,9 @@ defmodule Liquid.Filters do
     end
 
     def slice(<<string::binary>>, from, to) do
-      string |> String.slice(from, to)
+      {from_int, _from_len} = from |> get_int_and_counter
+      {to_int, _to_len} = to |> get_int_and_counter
+      string |> String.slice(from_int, to_int)
     end
 
     def slice(list, 0) when is_list(list), do: list
