@@ -365,7 +365,9 @@ defmodule Liquid.Filters do
     end
 
     def slice(<<string::binary>>, from, to) do
-      string |> String.slice(from, to)
+      {from_int, _from_len} = from |> get_int_and_counter
+      {to_int, _to_len} = to |> get_int_and_counter
+      string |> String.slice(from_int, to_int)
     end
 
     def slice(list, 0) when is_list(list), do: list
@@ -432,6 +434,10 @@ defmodule Liquid.Filters do
       input |> date
     end
 
+    def date(input, format) when is_integer(input) do
+      input |> Timex.from_unix() |> date(format)
+    end
+
     def date("now", format), do: Timex.now() |> date(format)
 
     def date("today", format), do: Timex.now() |> date(format)
@@ -441,8 +447,13 @@ defmodule Liquid.Filters do
         input_date |> date(format)
       else
         {:error, :invalid_format} ->
-          with {:ok, input_date} <- Timex.parse(input, "%a %b %d %T %Y", :strftime),
-               do: input_date |> date(format)
+          with {:ok, input_date} <- Timex.parse(input, "%a %b %d %T %Y", :strftime) do
+            input_date |> date(format)
+          else
+            _ ->
+              with {integer, _rem} <- Integer.parse(input),
+                do: integer |> Timex.from_unix() |> date(format)
+          end
       end
     end
 

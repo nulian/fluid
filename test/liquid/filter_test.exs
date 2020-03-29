@@ -58,6 +58,9 @@ defmodule Liquid.FilterTest do
 
   test :slice do
     assert "oob" == Functions.slice("foobar", 1, 3)
+    assert "oob" == Functions.slice("foobar", "1", "3")
+    assert "oob" == Functions.slice("foobar", "1", 3)
+    assert "oob" == Functions.slice("foobar", 1, "3")
     assert "oobar" == Functions.slice("foobar", 1, 1000)
     assert "" == Functions.slice("foobar", 1, 0)
     assert "o" == Functions.slice("foobar", 1, 1)
@@ -243,6 +246,11 @@ defmodule Liquid.FilterTest do
     assert "May" == Functions.date(~N[2006-05-05 10:00:00], "%B")
     assert "June" == Functions.date(Timex.parse!("2006-06-05 10:00:00", "%F %T", :strftime), "%B")
     assert "July" == Functions.date(~N[2006-07-05 10:00:00], "%B")
+
+    assert "July" == Functions.date(1152093600, "%B")
+    assert "July" == Functions.date("1152093600", "%B")
+    assert "2006-07-05 10:00:00" == Functions.date(1152093600, "")
+    assert "2006-07-05 10:00:00" == Functions.date("1152093600", "")
 
     assert "May" == Functions.date("2006-05-05 10:00:00", "%B")
     assert "June" == Functions.date("2006-06-05 10:00:00", "%B")
