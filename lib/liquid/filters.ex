@@ -434,6 +434,10 @@ defmodule Liquid.Filters do
       input |> date
     end
 
+    def date(input, format) when is_integer(input) do
+      input |> Timex.from_unix() |> date(format)
+    end
+
     def date("now", format), do: Timex.now() |> date(format)
 
     def date("today", format), do: Timex.now() |> date(format)
@@ -443,8 +447,13 @@ defmodule Liquid.Filters do
         input_date |> date(format)
       else
         {:error, :invalid_format} ->
-          with {:ok, input_date} <- Timex.parse(input, "%a %b %d %T %Y", :strftime),
-               do: input_date |> date(format)
+          with {:ok, input_date} <- Timex.parse(input, "%a %b %d %T %Y", :strftime) do
+            input_date |> date(format)
+          else
+            _ ->
+              with {integer, _rem} <- Integer.parse(input),
+                do: integer |> Timex.from_unix() |> date(format)
+          end
       end
     end
 
