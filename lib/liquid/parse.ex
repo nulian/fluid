@@ -11,23 +11,23 @@ defmodule Liquid.Parse do
     |> Enum.filter(&(&1 != ""))
   end
 
-  def parse(_, _)
-  def parse(_, _, _, _)
+  def parse(_, _, _)
+  def parse(_, _, _, _, _)
 
-  def parse("", %Template{} = template) do
+  def parse("", %Template{} = template, options) do
     %{template | root: %Liquid.Block{name: :document}}
   end
 
-  def parse(<<string::binary>>, %Template{} = template) do
+  def parse(<<string::binary>>, %Template{} = template, options) do
     tokens = string |> tokenize
     name = tokens |> hd
     tag_name = parse_tag_name(name)
-    tokens = parse_tokens(string, tag_name) || tokens
-    {root, template} = parse(%Liquid.Block{name: :document}, tokens, [], template)
+    tokens = parse_tokens(string, tag_name, options) || tokens
+    {root, template} = parse(%Liquid.Block{name: :document}, tokens, [], template, options)
     %{template | root: root}
   end
 
-  def parse(%Block{name: :document} = block, [], accum, %Template{} = template) do
+  def parse(%Block{name: :document} = block, [], accum, %Template{} = template, _options) do
     unless nodelist_invalid?(block, accum), do: {%{block | nodelist: accum}, template}
   end
 
@@ -35,7 +35,8 @@ defmodule Liquid.Parse do
         %Block{name: :comment} = block,
         [h | t],
         accum,
-        %Template{} = template
+        %Template{} = template,
+        options
       ) do
     cond do
       Regex.match?(~r/{%\s*endcomment\s*%}/, h) ->
@@ -47,22 +48,22 @@ defmodule Liquid.Parse do
       true ->
         {result, rest, template} =
           try do
-            parse_node(h, t, template)
+            parse_node(h, t, template, options)
           rescue
             # Ignore undefined tags inside comments
             RuntimeError ->
               {h, t, template}
           end
 
-        parse(block, rest, accum ++ [result], template)
+        parse(block, rest, accum ++ [result], template, options)
     end
   end
 
-  def parse(%Block{name: name}, [], _, %Template{filename: filename}) do
+  def parse(%Block{name: name}, [], _, %Template{filename: filename}, _options) do
     raise "No matching end for block {% #{to_string(name)} %} in file: #{filename}"
   end
 
-  def parse(%Block{name: name} = block, [h | t], accum, %Template{filename: filename} = template) do
+  def parse(%Block{name: name} = block, [h | t], accum, %Template{filename: filename} = template, options) do
     endblock = "end" <> to_string(name)
 
     cond do
@@ -73,8 +74,8 @@ defmodule Liquid.Parse do
         raise "Unmatched block close: #{h} in file #{filename}"
 
       true ->
-        {result, rest, template} = parse_node(h, t, template)
-        parse(block, rest, accum ++ [result], template)
+        {result, rest, template} = parse_node(h, t, template, options)
+        parse(block, rest, accum ++ [result], template, options)
     end
   end
 
@@ -97,8 +98,8 @@ defmodule Liquid.Parse do
     end
   end
 
-  defp parse_tokens(<<string::binary>>, tag_name) do
-    case Registers.lookup(tag_name) do
+  defp parse_tokens(<<string::binary>>, tag_name, options) do
+    case Registers.lookup(tag_name, options) do
       {mod, Liquid.Block} ->
         try do
           mod.tokenize(string)
@@ -118,29 +119,29 @@ defmodule Liquid.Parse do
     end
   end
 
-  defp parse_node(<<name::binary>>, rest, %Template{} = template) do
+  defp parse_node(<<name::binary>>, rest, %Template{} = template, options) do
     case Regex.named_captures(Liquid.parser(), name) do
       %{"tag" => "", "variable" => markup} when is_binary(markup) ->
         {Variable.create(markup), rest, template}
 
       %{"tag" => markup, "variable" => ""} when is_binary(markup) ->
-        parse_markup(markup, rest, template)
+        parse_markup(markup, rest, template, options)
 
       nil ->
         {name, rest, template}
     end
   end
 
-  defp parse_markup(markup, rest, %Template{filename: filename} = template) do
+  defp parse_markup(markup, rest, %Template{filename: filename} = template, options) do
     name = markup |> String.split(" ") |> hd |> String.trim()
 
-    case Registers.lookup(name) do
+    case Registers.lookup(name, options) do
       {mod, Liquid.Block} ->
-        parse_block(mod, markup, rest, template)
+        parse_block(mod, markup, rest, template, options)
 
       {mod, Liquid.Tag} ->
         tag = Liquid.Tag.create(markup)
-        {tag, template} = mod.parse(tag, template)
+        {tag, template} = mod.parse(tag, template, options)
         {tag, rest, template}
 
       nil ->
@@ -148,17 +149,17 @@ defmodule Liquid.Parse do
     end
   end
 
-  defp parse_block(mod, markup, rest, %Template{} = template) do
+  defp parse_block(mod, markup, rest, %Template{} = template, options) do
     block = Liquid.Block.create(markup)
 
     {block, rest, template} =
       try do
         mod.parse(block, rest, [], template)
       rescue
-        UndefinedFunctionError -> parse(block, rest, [], template)
+        UndefinedFunctionError -> parse(block, rest, [], template, options)
       end
 
-    {block, template} = mod.parse(block, template)
+    {block, template} = mod.parse(block, template, options)
     {block, rest, template}
   end
 end

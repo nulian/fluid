@@ -7,7 +7,7 @@ defmodule Liquid.Raw do
   def full_token_possibly_invalid,
     do: ~r/\A(.*)#{Liquid.tag_start()}\s*(\w+)\s*(.*)?#{Liquid.tag_end()}\z/m
 
-  def parse(%Block{name: name} = block, [h | t], accum, %Template{} = template) do
+  def parse(%Block{name: name} = block, [h | t], accum, %Template{} = template, options) do
     if Regex.match?(Liquid.Raw.full_token_possibly_invalid(), h) do
       block_delimiter = "end" <> to_string(name)
 
@@ -22,21 +22,21 @@ defmodule Liquid.Raw do
         {block, t, template}
       else
         if length(t) > 0 do
-          parse(block, t, accum ++ [h], template)
+          parse(block, t, accum ++ [h], template, options)
         else
           raise "No matching end for block {% #{to_string(name)} %}"
         end
       end
     else
-      parse(block, t, accum ++ [h], template)
+      parse(block, t, accum ++ [h], template, options)
     end
   end
 
-  def parse(%Block{} = block, %Template{} = t) do
+  def parse(%Block{} = block, %Template{} = t, _options) do
     {block, t}
   end
 
-  def render(output, %Block{} = block, context) do
-    Render.render(output, block.nodelist, context)
+  def render(output, %Block{} = block, context, options) do
+    Render.render(output, block.nodelist, context, options)
   end
 end

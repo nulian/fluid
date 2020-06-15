@@ -493,7 +493,7 @@ defmodule Liquid.Filters do
   """
   def filter([], _, value), do: value
 
-  def filter([filter | rest], context, value) do
+  def filter([filter | rest], context, value, options) do
     [name, args] = filter
 
     filename = extract_filename_from_context(context)
@@ -526,7 +526,7 @@ defmodule Liquid.Filters do
           end).()
 
     functions = Functions.__info__(:functions)
-    custom_filters = Application.get_env(:liquid, :custom_filters)
+    custom_filters = Keyword.get(options, :custom_filters)
     registered_filters = context |> Context.registers(:filters)
 
     ret =
@@ -556,32 +556,6 @@ defmodule Liquid.Filters do
   defp extract_filename_from_context(%{template: %{filename: filename}}), do: filename
   defp extract_filename_from_context(_), do: :root
 
-  @doc """
-  Add filter modules mentioned in extra_filter_modules env variable
-  """
-  def add_filter_modules do
-    for filter_module <- Application.get_env(:liquid, :extra_filter_modules) || [] do
-      filter_module |> add_filters
-    end
-  end
-
-  @doc """
-  Fetches the current custom filters and extends with the functions from passed module
-  NB: you can't override the standard filters though
-  """
-  def add_filters(module) do
-    custom_filters = Application.get_env(:liquid, :custom_filters) || %{}
-
-    module_functions =
-      module.__info__(:functions)
-      |> Keyword.keys()
-      |> Kernel.++(overridden_filter_names(module))
-      |> Enum.into(%{}, fn filter_name -> {filter_name, module} end)
-
-    custom_filters = module_functions |> Map.merge(custom_filters)
-    Application.put_env(:liquid, :custom_filters, custom_filters)
-  end
-
   defp apply_filter(func, name, args, filename) do
     try do
       apply(func, args)
@@ -607,8 +581,6 @@ defmodule Liquid.Filters do
   end
 
   defp override_filter_name(module, name), do: filter_name_override_map(module)[name] || name
-
-  defp overridden_filter_names(module), do: Map.keys(filter_name_override_map(module))
 
   defp filter_name_override_map(module) do
     if function_exists?(module, :filter_name_override_map) do

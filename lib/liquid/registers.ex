@@ -22,23 +22,19 @@ defmodule Liquid.Registers do
     capture: {Liquid.Capture, Liquid.Block}
   }
 
-  def clear do
-    Application.put_env(:liquid, :extra_tags, %{})
-  end
-
-  def lookup(name) when is_binary(name) do
+  def lookup(name, options) when is_binary(name) do
     try do
       name
       |> String.to_existing_atom()
-      |> lookup()
+      |> lookup(options)
     rescue
       ArgumentError -> nil
     end
   end
 
-  def lookup(name) when is_atom(name) do
+  def lookup(name, options) when is_atom(name) do
     custom_tag =
-      case Application.get_env(:liquid, :extra_tags) do
+      case Keyword.get(options, :extra_tags) do
         %{^name => value} -> value
         _ -> nil
       end
@@ -51,13 +47,13 @@ defmodule Liquid.Registers do
     end
   end
 
-  def lookup(_), do: nil
+  def lookup(_, options), do: nil
 
-  def lookup(name, context) when is_binary(name) do
+  def lookup(name, context, options) when is_binary(name) do
     name |> String.to_atom() |> lookup(context)
   end
 
-  def lookup(name, %{extra_tags: extra_tags}) do
+  def lookup(name, %{extra_tags: extra_tags}, options) do
     custom_tag = Map.get(extra_tags, name)
 
     case {name, Map.get(@default_tags, name), custom_tag} do
@@ -69,14 +65,4 @@ defmodule Liquid.Registers do
   end
 
   def lookup(_, _), do: nil
-
-  def register(name, module, type) do
-    custom_tags = Application.get_env(:liquid, :extra_tags) || %{}
-
-    custom_tags =
-      %{(name |> String.to_atom()) => {module, type}}
-      |> Map.merge(custom_tags)
-
-    Application.put_env(:liquid, :extra_tags, custom_tags)
-  end
 end

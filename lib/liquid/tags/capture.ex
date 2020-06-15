@@ -3,11 +3,11 @@ defmodule Liquid.Capture do
   alias Liquid.Context
   alias Liquid.Template
 
-  def parse(%Block{} = block, %Template{} = template) do
+  def parse(%Block{} = block, %Template{} = template, _options) do
     {%{block | blank: true}, template}
   end
 
-  def render(output, %Block{markup: markup, nodelist: content}, %Context{} = context) do
+  def render(output, %Block{markup: markup, nodelist: content}, %Context{} = context, _options) do
     variable_name = Liquid.variable_parser() |> Regex.run(markup) |> hd
     {block_output, context} = Liquid.Render.render([], content, context)
 

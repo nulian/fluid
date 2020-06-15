@@ -26,8 +26,8 @@ defmodule Liquid.Variable do
   @doc """
   Assigns context to variable and than applies all filters
   """
-  @spec lookup(%Variable{}, %Context{}) :: {String.t() | nil, %Context{}}
-  def lookup(%Variable{} = v, %Context{} = context) do
+  @spec lookup(%Variable{}, %Context{}, Keyword.t()) :: {String.t() | nil, %Context{}}
+  def lookup(%Variable{} = v, %Context{} = context, options) do
     {ret, filters} = Appointer.assign(v, context)
 
     filename = extract_filename_from_context(context)
@@ -48,15 +48,15 @@ defmodule Liquid.Variable do
 
     case result do
       {:ok, text} -> {text, context}
-      {error, message} -> process_error(context, error, message)
+      {error, message} -> process_error(context, error, message, options)
     end
   end
 
   defp extract_filename_from_context(%{template: %{filename: filename}}), do: filename
   defp extract_filename_from_context(_), do: :root
 
-  defp process_error(%Context{template: template} = context, error, message) do
-    error_mode = Application.get_env(:liquid, :error_mode, :lax)
+  defp process_error(%Context{template: template} = context, error, message, options) do
+    error_mode = Keyword.get(options, :error_mode, :lax)
 
     case error_mode do
       :lax ->

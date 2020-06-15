@@ -12,7 +12,7 @@ defmodule Liquid.Case do
   def when_syntax,
     do: ~r/(#{Liquid.quoted_fragment()})(?:(?:\s+or\s+|\s*\,\s*)(#{Liquid.quoted_fragment()}.*))?/
 
-  def parse(%Block{markup: markup} = b, %Template{} = t) do
+  def parse(%Block{markup: markup} = b, %Template{} = t, _options) do
     [[_, name]] = syntax() |> Regex.scan(markup)
     {split(name |> Variable.create(), b.nodelist), t}
   end

@@ -65,7 +65,7 @@ defmodule Liquid.ForElse do
   @compile {:inline, syntax: 0}
   def syntax, do: ~r/(\w+)\s+in\s+(#{Liquid.quoted_fragment()}+)\s*(reversed)?/
 
-  def parse(%Block{nodelist: nodelist} = block, %Liquid.Template{} = t) do
+  def parse(%Block{nodelist: nodelist} = block, %Liquid.Template{} = t, _options) do
     block = %{block | iterator: parse_iterator(block)}
 
     case Block.split(block) do
@@ -107,8 +107,8 @@ defmodule Liquid.ForElse do
     end)
   end
 
-  def render(output, %Block{iterator: it} = block, %Context{} = context) do
-    {list, context} = parse_collection(it.collection, context)
+  def render(output, %Block{iterator: it} = block, %Context{} = context, options) do
+    {list, context} = parse_collection(it.collection, context, options)
 
     list = if is_binary(list) and list != "", do: [list], else: list
 
@@ -116,11 +116,11 @@ defmodule Liquid.ForElse do
 
     if is_list(list) and !is_empty_list(list) do
       list = if it.reversed, do: Enum.reverse(list), else: list
-      {limit, context} = lookup_limit(it, context)
-      {offset, context} = lookup_offset(it, context)
+      {limit, context} = lookup_limit(it, context, options)
+      {offset, context} = lookup_offset(it, context, options)
       each(output, [make_ref(), limit, offset], list, block, context)
     else
-      Render.render(output, block.elselist, context)
+      Render.render(output, block.elselist, context, options)
     end
   end
 
@@ -145,18 +145,18 @@ defmodule Liquid.ForElse do
   defp is_empty_list(value) when is_list(value), do: false
   defp is_empty_list(_value), do: false
 
-  defp parse_collection(list, context) when is_list(list), do: {list, context}
+  defp parse_collection(list, context, _options) when is_list(list), do: {list, context}
 
-  defp parse_collection(%Variable{} = variable, context) do
-    Variable.lookup(variable, context)
+  defp parse_collection(%Variable{} = variable, context, options) do
+    Variable.lookup(variable, context, options)
   end
 
-  defp parse_collection(%RangeLookup{} = range, context) do
-    {RangeLookup.parse(range, context), context}
+  defp parse_collection(%RangeLookup{} = range, context, options) do
+    {RangeLookup.parse(range, context, options), context}
   end
 
-  def each(output, _, [], %Block{} = block, %Context{} = context),
-    do: {output, remember_limit(block, context)}
+  def each(output, _, [], %Block{} = block, %Context{} = context, options),
+    do: {output, remember_limit(block, context, options)}
 
   def each(output, [prev, limit, offset], [h | t] = list, %Block{} = block, %Context{} = context) do
     forloop = next_forloop(block.iterator, list)
@@ -203,8 +203,8 @@ defmodule Liquid.ForElse do
     end
   end
 
-  defp remember_limit(%Block{iterator: %{name: name} = it}, %{offsets: offsets} = context) do
-    {rendered, context} = lookup_limit(it, context)
+  defp remember_limit(%Block{iterator: %{name: name} = it}, %{offsets: offsets} = context, options) do
+    {rendered, context} = lookup_limit(it, context, options)
     limit = rendered || 0
     remembered = Map.get(offsets, name, 0)
     %{context | offsets: offsets |> Map.put(name, remembered + limit)}
@@ -215,18 +215,18 @@ defmodule Liquid.ForElse do
   defp should_render?(limit, offset, index) when index > limit + offset, do: false
   defp should_render?(_limit, _offset, _index), do: true
 
-  defp lookup_limit(%Iterator{limit: limit}, %Context{} = context),
-    do: Variable.lookup(limit, context)
+  defp lookup_limit(%Iterator{limit: limit}, %Context{} = context, options),
+    do: Variable.lookup(limit, context, options)
 
   defp lookup_offset(
          %Iterator{offset: %Variable{name: "continue"}, name: name},
-         %Context{offsets: offsets} = context
+         %Context{offsets: offsets} = context, _options
        ) do
     {Map.get(offsets, name, 0), context}
   end
 
-  defp lookup_offset(%Iterator{offset: offset}, %Context{} = context),
-    do: Variable.lookup(offset, context)
+  defp lookup_offset(%Iterator{offset: offset}, %Context{} = context, options),
+    do: Variable.lookup(offset, context, options)
 
   defp next_forloop(%Iterator{forloop: loop, item: item, name: name}, count)
        when map_size(loop) < 1 do

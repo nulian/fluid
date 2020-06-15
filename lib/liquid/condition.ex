@@ -51,31 +51,32 @@ defmodule Liquid.Condition do
     %{right | child_condition: condition, child_operator: operator}
   end
 
-  def evaluate(%Cond{} = condition), do: evaluate(condition, %Context{})
+  def evaluate(%Cond{} = condition, options), do: evaluate(condition, %Context{}, options)
 
-  def evaluate(%Cond{left: left, right: nil} = condition, %Context{} = context) do
-    {current, context} = Vars.lookup(left, context)
-    eval_child(!!current, condition.child_operator, condition.child_condition, context)
+  def evaluate(%Cond{left: left, right: nil} = condition, %Context{} = context, options) do
+    {current, context} = Vars.lookup(left, context, options)
+    eval_child(!!current, condition.child_operator, condition.child_condition, context, options)
   end
 
   def evaluate(
         %Cond{left: left, right: right, operator: operator} = condition,
-        %Context{} = context
+        %Context{} = context,
+        options
       ) do
-    {left, _} = Variable.lookup(left, context)
-    {right, _} = Variable.lookup(right, context)
+    {left, _} = Variable.lookup(left, context, options)
+    {right, _} = Variable.lookup(right, context, options)
     current = eval_operator(left, operator, right)
-    eval_child(current, condition.child_operator, condition.child_condition, context)
+    eval_child(current, condition.child_operator, condition.child_condition, context, options)
   end
 
-  defp eval_child(current, nil, nil, _), do: current
+  defp eval_child(current, nil, nil, _, _options), do: current
 
-  defp eval_child(current, :and, condition, context) do
-    current and evaluate(condition, context)
+  defp eval_child(current, :and, condition, context, options) do
+    current and evaluate(condition, context, options)
   end
 
-  defp eval_child(current, :or, condition, context) do
-    current or evaluate(condition, context)
+  defp eval_child(current, :or, condition, context, options) do
+    current or evaluate(condition, context, options)
   end
 
   defp eval_operator(left, operator, right)

@@ -26,8 +26,8 @@ defmodule Liquid.IfElse do
     }|\S+)\s*)+)/
   end
 
-  def parse(%Block{} = block, %Template{} = t) do
-    block = parse_conditions(block)
+  def parse(%Block{} = block, %Template{} = t, options) do
+    block = parse_conditions(block, options)
 
     case Block.split(block, [:else, :elsif]) do
       {true_block, [%Tag{name: :elsif, markup: markup} | elsif_block]} ->
@@ -39,7 +39,8 @@ defmodule Liquid.IfElse do
               nodelist: elsif_block,
               blank: Blank.blank?(elsif_block)
             },
-            t
+            t,
+            options
           )
 
         {%{block | nodelist: true_block, elselist: [elseif], blank: Blank.blank?(true_block)}, t}
@@ -53,21 +54,21 @@ defmodule Liquid.IfElse do
     end
   end
 
-  def render(output, %Tag{}, context) do
+  def render(output, %Tag{}, context, options) do
     {output, context}
   end
 
-  def render(output, %Block{blank: true} = block, context) do
-    {_, context} = render(output, %{block | blank: false}, context)
+  def render(output, %Block{blank: true} = block, context, options) do
+    {_, context} = render(output, %{block | blank: false}, context, options)
     {output, context}
   end
 
   def render(
         output,
         %Block{condition: condition, nodelist: nodelist, elselist: elselist, blank: false},
-        context
+        context, options
       ) do
-    condition = Condition.evaluate(condition, context)
+    condition = Condition.evaluate(condition, context, options)
     conditionlist = if condition, do: nodelist, else: elselist
     Render.render(output, conditionlist, context)
   end
@@ -85,13 +86,13 @@ defmodule Liquid.IfElse do
     end)
   end
 
-  defp parse_conditions(%Block{markup: markup} = block) do
+  defp parse_conditions(%Block{markup: markup} = block, options) do
     markup = change_wrong_markup(markup)
     expressions = Regex.scan(expressions_and_operators(), markup)
     expressions = expressions |> split_conditions |> Enum.reverse()
     condition = Condition.create(expressions)
     # Check condition syntax
-    Condition.evaluate(condition)
+    Condition.evaluate(condition, options)
     %{block | condition: condition}
   end
 

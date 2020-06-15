@@ -9,7 +9,7 @@ defmodule Liquid.Include do
   def syntax,
     do: ~r/(#{Liquid.quoted_fragment()}+)(\s+(?:with|for)\s+(#{Liquid.quoted_fragment()}+))?/
 
-  def parse(%Tag{markup: markup} = tag, %Template{} = template) do
+  def parse(%Tag{markup: markup} = tag, %Template{} = template, _options) do
     [parts | _] = syntax() |> Regex.scan(markup)
     tag = parse_tag(tag, parts)
     attributes = parse_attributes(markup)
@@ -37,12 +37,12 @@ defmodule Liquid.Include do
     end)
   end
 
-  def render(output, %Tag{parts: parts} = tag, %Context{} = context) do
-    {file_system, root} = context |> Context.registers(:file_system) || FileSystem.lookup()
+  def render(output, %Tag{parts: parts} = tag, %Context{} = context, options) do
+    {file_system, root} = context |> Context.registers(:file_system) || FileSystem.lookup(options)
 
-    {name, context} = parts[:name] |> Variable.lookup(context)
+    {name, context} = parts[:name] |> Variable.lookup(context, options)
 
-    source = load_template(root, name, context, file_system)
+    source = load_template(root, name, context, file_system, options)
 
     source_hash = :crypto.hash(:md5, source) |> Base.encode16()
 
@@ -57,17 +57,17 @@ defmodule Liquid.Include do
 
     t = %{t | blocks: context.template.blocks ++ t.blocks}
 
-    presets = build_presets(tag, context)
+    presets = build_presets(tag, context, options)
 
     assigns = context.assigns |> Map.merge(presets)
 
     cond do
       !is_nil(parts[:variable]) ->
-        {item, context} = Variable.lookup(parts[:variable], %{context | assigns: assigns})
+        {item, context} = Variable.lookup(parts[:variable], %{context | assigns: assigns}, options)
         render_item(output, name, item, t, context)
 
       !is_nil(parts[:foreach]) ->
-        {items, context} = Variable.lookup(parts[:foreach], %{context | assigns: assigns})
+        {items, context} = Variable.lookup(parts[:foreach], %{context | assigns: assigns}, options)
         render_list(output, name, items, t, context)
 
       true ->
@@ -75,22 +75,20 @@ defmodule Liquid.Include do
     end
   end
 
-  @error_handler Application.get_env(:liquid, :error_handler, Liquid.Prod.ErrorHandler)
-
-  defp load_template(root, name, context, file_system) do
+  defp load_template(root, name, context, file_system, options) do
     case file_system.read_template_file(root, name, context) do
       {:ok, source} ->
         source
 
       {:error, error_value} ->
-        @error_handler.handle(error_value, name: name)
+        Keyword.get(options, :error_handler, Liquid.Prod.ErrorHandler).handle(error_value, name: name)
     end
   end
 
-  defp build_presets(%Tag{} = tag, context) do
+  defp build_presets(%Tag{} = tag, context, options) do
     tag.attributes
     |> Enum.reduce(%{}, fn {key, value}, coll ->
-      {value, _} = Variable.lookup(value, context)
+      {value, _} = Variable.lookup(value, context, options)
       Map.put(coll, key, value)
     end)
   end
