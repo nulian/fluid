@@ -43,6 +43,13 @@ defmodule Liquid do
     {:noreply, new_options}
   end
 
+  def handle_call({:registers}, options), do:
+    {:reply, Keyword.get(options, :extra_tags), options}
+
+    def handle_call({:registers_lookup, name}, _from, options) do
+      {:reply, Liquid.Registers.lookup(name, options), options}
+    end
+
   def handle_cast({:register_tags, tag_name, module, type}, options) do
     custom_tags = Keyword.get(options, :extra_tags, %{})
 
@@ -86,6 +93,11 @@ defmodule Liquid do
 
   def register_tags(name, tag_name, module, type), do:
     GenServer.cast(name, {:register_tags, tag_name, module, type})
+
+  def registers(name, tag_name, module, type), do:
+    GenServer.call(name, {:registers}, @timeout)
+
+  def registers_lookup(name, tag_name), do: GenServer.call(name, {:registers_lookup, tag_name}, @timeout)
 
   def add_filters(name, filter_module), do:
     GenServer.cast(name, {:add_filter_modules, filter_module})

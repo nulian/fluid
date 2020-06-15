@@ -65,8 +65,8 @@ defmodule Liquid.BlockTest do
   end
 
   test "registering custom tags/blocks" do
-    Liquid.Registers.register("test", TestTag, Liquid.Tag)
-    assert {TestTag, Liquid.Tag} = Liquid.Registers.lookup("test")
+    Liquid.register_tags(:liquid, "test", TestTag, Liquid.Tag)
+    assert {TestTag, Liquid.Tag} = Liquid.registers_lookup(:liquid, "test")
   end
 
   test "with custom block" do
