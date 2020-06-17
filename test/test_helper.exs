@@ -1,7 +1,8 @@
 ExUnit.start(exclude: [:skip])
 
 defmodule Liquid.Helpers do
-  def render(text, data \\ %{}) do
-    text |> Liquid.Template.parse() |> Liquid.Template.render(data) |> elem(1)
+  def render(name, text, data \\ %{}) do
+    parsed_template = Liquid.parse_template(name, text)
+    name |> Liquid.render_template(parsed_template, data) |> elem(1)
   end
 end

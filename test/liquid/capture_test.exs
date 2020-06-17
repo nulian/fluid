@@ -2,10 +2,9 @@ Code.require_file("../../test_helper.exs", __ENV__.file)
 
 defmodule Liquid.CaptureTest do
   use ExUnit.Case
-  alias Liquid.Template
 
-  setup_all do
-    on_exit(fn -> Application.put_env(:liquid, :custom_filters, %{}) end)
+  setup do
+    start_supervised!({Liquid.Process, [name: :liquid]})
     :ok
   end
 
@@ -23,8 +22,8 @@ defmodule Liquid.CaptureTest do
     {{ this-thing }}
     """
 
-    template = Template.parse(template_source)
-    {:ok, result, _} = Template.render(template)
+    template = Liquid.parse_template(:liquid, template_source)
+    {:ok, result, _} = Liquid.render_template(:liquid, template)
     assert "Print this-thing" == result |> String.trim()
   end
 
@@ -40,8 +39,8 @@ defmodule Liquid.CaptureTest do
     {{var}}
     """
 
-    template = Template.parse(template_source)
-    {:ok, result, _} = Template.render(template)
+    template = Liquid.parse_template(:liquid, template_source)
+    {:ok, result, _} = Liquid.render_template(:liquid, template)
     assert "test-string" == Regex.replace(~r/\s/, result, "")
   end
 
@@ -56,8 +55,8 @@ defmodule Liquid.CaptureTest do
     {{ first }}-{{ second }}
     """
 
-    template = Template.parse(template_source)
-    {:ok, result, _} = Template.render(template)
+    template = Liquid.parse_template(:liquid, template_source)
+    {:ok, result, _} = Liquid.render_template(:liquid, template)
     assert "3-3" == Regex.replace(~r/\n/, result, "")
   end
 
@@ -66,8 +65,8 @@ defmodule Liquid.CaptureTest do
   end
 
   defp assert_result(expected, markup, assigns) do
-    template = Liquid.Template.parse(markup)
-    {:ok, result, _} = Liquid.Template.render(template, assigns)
+    template = Liquid.parse_template(:liquid, markup)
+    {:ok, result, _} = Liquid.render_template(:liquid, template, assigns)
     assert result == expected
   end
 end

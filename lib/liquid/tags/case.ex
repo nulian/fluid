@@ -6,13 +6,13 @@ defmodule Liquid.Case do
   alias Liquid.Condition
 
   @compile {:inline, syntax: 0}
-  def syntax, do: ~r/(#{Liquid.quoted_fragment()})/
+  def syntax, do: ~r/(#{Liquid.Parse.quoted_fragment()})/
 
   @compile {:inline, when_syntax: 0}
   def when_syntax,
-    do: ~r/(#{Liquid.quoted_fragment()})(?:(?:\s+or\s+|\s*\,\s*)(#{Liquid.quoted_fragment()}.*))?/
+    do: ~r/(#{Liquid.Parse.quoted_fragment()})(?:(?:\s+or\s+|\s*\,\s*)(#{Liquid.Parse.quoted_fragment()}.*))?/
 
-  def parse(%Block{markup: markup} = b, %Template{} = t) do
+  def parse(%Block{markup: markup} = b, %Template{} = t, _options) do
     [[_, name]] = syntax() |> Regex.scan(markup)
     {split(name |> Variable.create(), b.nodelist), t}
   end
@@ -52,5 +52,5 @@ defmodule Liquid.When do
   alias Liquid.Tag, as: Tag
   alias Liquid.Template, as: Template
 
-  def parse(%Tag{} = tag, %Template{} = t), do: {tag, t}
+  def parse(%Tag{} = tag, %Template{} = t, _options), do: {tag, t}
 end

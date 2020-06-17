@@ -3,6 +3,11 @@ Code.require_file("../../test_helper.exs", __ENV__.file)
 defmodule Liquid.AssignTest do
   use ExUnit.Case
 
+  setup do
+    start_supervised!({Liquid.Process, [name: :liquid]})
+    :ok
+  end
+
   test :assigned_variable do
     assert_result(".foo.", "{% assign foo = values %}.{{ foo[0] }}.", %{
       "values" => ["foo", "bar", "baz"]
@@ -70,8 +75,8 @@ defmodule Liquid.AssignTest do
   end
 
   defp assert_result(expected, markup, assigns) do
-    template = Liquid.Template.parse(markup)
-    {:ok, result, _} = Liquid.Template.render(template, assigns)
+    template = Liquid.parse_template(:liquid, markup)
+    {:ok, result, _} = Liquid.render_template(:liquid, template, assigns)
     assert result == expected
   end
 end

@@ -2,21 +2,16 @@ Code.require_file("../../test_helper.exs", __ENV__.file)
 
 defmodule Liquid.GlobalFilterTest do
   use ExUnit.Case, async: false
-  alias Liquid.Template
 
   defmodule MyFilter do
     def counting_sheeps(input) when is_binary(input), do: input <> " One, two, thr.. z-zz.."
     def counting_bees(input) when is_binary(input), do: input <> " One, tw.. Ouch!"
   end
 
-  setup_all do
-    Application.put_env(:liquid, :global_filter, &MyFilter.counting_sheeps/1)
-    Liquid.add_filter_modules()
-
-    on_exit(fn ->
-      Application.put_env(:liquid, :global_filter, nil)
-      Application.put_env(:liquid, :custom_filters, %{})
-    end)
+  setup do
+    start_supervised!(
+      {Liquid.Process, [name: :liquid, global_filter: &MyFilter.counting_sheeps/1]}
+    )
 
     :ok
   end
@@ -36,9 +31,9 @@ defmodule Liquid.GlobalFilterTest do
   end
 
   defp assert_result(expected, markup, assigns) do
-    template = Template.parse(markup)
+    template = Liquid.parse_template(:liquid, markup)
 
-    with {:ok, result, _} <- Template.render(template, assigns) do
+    with {:ok, result, _} <- Liquid.render_template(:liquid, template, assigns) do
       assert result == expected
     else
       {:error, message, _} ->

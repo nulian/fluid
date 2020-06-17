@@ -6,42 +6,45 @@ defmodule Liquid.Render do
   alias Liquid.Block
   alias Liquid.Tag
 
-  def render(%Template{root: root}, %Context{} = context) do
-    {output, context} = render([], root, context)
+  def render(%Template{root: root}, %Context{} = context, options) do
+    {output, context} = render([], root, context, options)
     {:ok, output |> to_text, context}
   end
 
-  def render(output, [], %Context{} = context) do
+  def render(output, [], %Context{} = context, _options) do
     {output, context}
   end
 
-  def render(output, [h | t], %Context{} = context) do
-    {output, context} = render(output, h, context)
+  def render(output, [h | t], %Context{} = context, options) do
+    {output, context} = render(output, h, context, options)
 
     case context do
-      %Context{extended: false, break: false, continue: false} -> render(output, t, context)
-      _ -> render(output, [], context)
+      %Context{extended: false, break: false, continue: false} ->
+        render(output, t, context, options)
+
+      _ ->
+        render(output, [], context, options)
     end
   end
 
-  def render(output, text, %Context{} = context) when is_binary(text) do
+  def render(output, text, %Context{} = context, _options) when is_binary(text) do
     {[text | output], context}
   end
 
-  def render(output, %Variable{} = variable, %Context{} = context) do
-    {rendered, context} = Variable.lookup(variable, context)
+  def render(output, %Variable{} = variable, %Context{} = context, options) do
+    {rendered, context} = Variable.lookup(variable, context, options)
     {[join_list(rendered) | output], context}
   end
 
-  def render(output, %Tag{name: name} = tag, %Context{} = context) do
-    {mod, Tag} = Registers.lookup(name)
-    mod.render(output, tag, context)
+  def render(output, %Tag{name: name} = tag, %Context{} = context, options) do
+    {mod, Tag} = Registers.lookup(name, options)
+    mod.render(output, tag, context, options)
   end
 
-  def render(output, %Block{name: name} = block, %Context{} = context) do
-    case Registers.lookup(name) do
-      {mod, Block} -> mod.render(output, block, context)
-      nil -> render(output, block.nodelist, context)
+  def render(output, %Block{name: name} = block, %Context{} = context, options) do
+    case Registers.lookup(name, options) do
+      {mod, Block} -> mod.render(output, block, context, options)
+      nil -> render(output, block.nodelist, context, options)
     end
   end
 

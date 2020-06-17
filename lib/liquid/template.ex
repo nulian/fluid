@@ -10,26 +10,21 @@ defmodule Liquid.Template do
   Function that renders passed template and context to string
   """
   @file "render.ex"
-  @spec render(Liquid.Template, map) :: String.t()
-  def render(t, c \\ %{})
+  @spec render(Liquid.Template, map, Keyword.t()) :: String.t()
+  def render(t, c \\ %{}, options)
 
-  def render(%Template{} = t, %Context{} = c) do
+  def render(%Template{} = t, %Context{} = c, options) do
+    registers = Keyword.get(options, :registers, %{})
+    new_registers =
+      c
+      |> Map.get(:registers, %{})
+      |> Map.merge(registers)
+
+    c = %{c | registers: new_registers}
     c = %{c | blocks: t.blocks}
     c = %{c | presets: t.presets}
     c = %{c | template: t}
-    Render.render(t, c)
-  end
-
-  def render(%Template{} = t, assigns), do: render(t, assigns, [])
-
-  def render(_, _) do
-    raise Liquid.SyntaxError, message: "You can use only maps/structs to hold context data"
-  end
-
-  def render(%Template{} = t, %Context{global_filter: _global_filter} = context, options) do
-    registers = Keyword.get(options, :registers, %{})
-    context = %{context | registers: registers}
-    render(t, context)
+    Render.render(t, c, options)
   end
 
   def render(%Template{} = t, assigns, options) when is_map(assigns) do
@@ -46,26 +41,30 @@ defmodule Liquid.Template do
         _ ->
           %{
             context
-            | global_filter: Application.get_env(:liquid, :global_filter),
-              extra_tags: Application.get_env(:liquid, :extra_tags, %{})
+            | global_filter: Keyword.get(options, :global_filter, nil),
+              extra_tags: Keyword.get(options, :extra_tags, %{})
           }
       end
 
     render(t, context, options)
   end
 
+  def render(_, _, _) do
+    raise Liquid.SyntaxError, message: "You can use only maps/structs to hold context data"
+  end
+
   @doc """
   Function to parse markup with given presets (if any)
   """
   @spec parse(String.t(), map) :: Liquid.Template
-  def parse(value, presets \\ %{}, filename \\ :root)
+  def parse(value, presets \\ %{}, filename \\ :root, options)
 
-  def parse(<<markup::binary>>, presets, filename) do
-    Liquid.Parse.parse(markup, %Template{presets: presets, filename: filename})
+  def parse(<<markup::binary>>, presets, filename, options) do
+    Liquid.Parse.parse(markup, %Template{presets: presets, filename: filename}, options)
   end
 
   @spec parse(nil, map) :: Liquid.Template
-  def parse(nil, presets, filename) do
-    Liquid.Parse.parse("", %Template{presets: presets, filename: filename})
+  def parse(nil, presets, filename, options) do
+    Liquid.Parse.parse("", %Template{presets: presets, filename: filename}, options)
   end
 end

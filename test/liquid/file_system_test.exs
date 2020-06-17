@@ -3,26 +3,27 @@ Code.require_file("../../test_helper.exs", __ENV__.file)
 defmodule FileSystemTest do
   use ExUnit.Case
 
-  alias Liquid.FileSystem, as: FileSystem
-
   test :default do
-    FileSystem.register(Liquid.BlankFileSystem, "/")
-    {:error, _reason} = FileSystem.read_template_file("dummy", dummy: "smarty")
+    start_supervised!({Liquid.Process, [name: :default]})
+    Liquid.register_file_system(:default, Liquid.BlankFileSystem, "/")
+
+    {:error, _reason} = Liquid.read_template_file(:default, "dummy", dummy: "smarty")
   end
 
   test :local do
-    FileSystem.register(Liquid.LocalFileSystem, "/some/path")
+    start_supervised!({Liquid.Process, [name: :local]})
+    Liquid.register_file_system(:local, Liquid.LocalFileSystem, "/some/path")
 
-    {:ok, path} = FileSystem.full_path("mypartial")
+    {:ok, path} = Liquid.full_path(:local, "mypartial")
     assert "/some/path/_mypartial.liquid" == path
 
-    {:ok, path} = FileSystem.full_path("dir/mypartial")
+    {:ok, path} = Liquid.full_path(:local, "dir/mypartial")
     assert "/some/path/dir/_mypartial.liquid" == path
 
-    {:error, _reason} = FileSystem.full_path("../dir/mypartial")
+    {:error, _reason} = Liquid.full_path(:local, "../dir/mypartial")
 
-    {:error, _reason} = FileSystem.full_path("/dir/../../dir/mypartial")
+    {:error, _reason} = Liquid.full_path(:local, "/dir/../../dir/mypartial")
 
-    {:error, _reason} = FileSystem.full_path("/etc/passwd")
+    {:error, _reason} = Liquid.full_path(:local, "/etc/passwd")
   end
 end

@@ -11,7 +11,7 @@ defmodule Liquid.Cycle do
   @doc """
   Sets up the cycle name and variables to cycle through
   """
-  def parse(%Tag{markup: markup} = tag, %Template{} = template) do
+  def parse(%Tag{markup: markup} = tag, %Template{} = template, _options) do
     {name, values} = markup |> get_name_and_values
     tag = %{tag | parts: [name | values]}
     {tag, template}
@@ -20,18 +20,21 @@ defmodule Liquid.Cycle do
   @doc """
   Returns a corresponding cycle value and increments the cycle counter
   """
-  def render(output, %Tag{parts: [name | values]}, %Context{} = context) do
-    {name, context} = Variable.lookup(%Variable{parts: [], literal: name}, context)
+  def render(output, %Tag{parts: [name | values]}, %Context{} = context, options) do
+    {name, context} = Variable.lookup(%Variable{parts: [], literal: name}, context, options)
     name = to_string(name) <> "_liquid_cycle"
-    {rendered, context} = Variable.lookup(%Variable{parts: [name], literal: nil}, context)
+
+    {rendered, context} =
+      Variable.lookup(%Variable{parts: [name], literal: nil}, context, options)
+
     index = rendered || 0
-    {value, context} = values |> Enum.fetch!(index) |> get_value_from_context(context)
+    {value, context} = values |> Enum.fetch!(index) |> get_value_from_context(context, options)
     new_index = rem(index + 1, Enum.count(values))
     result_assign = Map.put(context.assigns, name, new_index)
     {[value | output], %{context | assigns: result_assign}}
   end
 
-  defp get_value_from_context(name, context) do
+  defp get_value_from_context(name, context, options) do
     custom_value = Liquid.Appointer.parse_name(name)
 
     parsed =
@@ -40,7 +43,7 @@ defmodule Liquid.Cycle do
         else: custom_value.literal
 
     variable = %Variable{parts: [], literal: parsed}
-    Variable.lookup(variable, context)
+    Variable.lookup(variable, context, options)
   end
 
   defp get_name_and_values(markup) do

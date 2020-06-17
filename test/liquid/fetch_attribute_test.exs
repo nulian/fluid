@@ -3,7 +3,10 @@ Code.require_file("../../test_helper.exs", __ENV__.file)
 defmodule FetchAttributeTest do
   use ExUnit.Case
 
-  alias Liquid.Template
+  setup_all do
+    start_supervised!({Liquid.Process, [name: :liquid]})
+    :ok
+  end
 
   defmodule User do
     defstruct name: "John", age: 27, about: [], data: %{}
@@ -61,8 +64,8 @@ defmodule FetchAttributeTest do
   end
 
   defp assert_result(expected, markup, assigns) do
-    t = Template.parse(markup)
-    {:ok, rendered, _} = Template.render(t, assigns)
+    t = Liquid.parse_template(:liquid, markup)
+    {:ok, rendered, _} = Liquid.render_template(:liquid, t, assigns)
     assert rendered == expected
   end
 end

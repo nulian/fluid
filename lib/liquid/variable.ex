@@ -26,15 +26,15 @@ defmodule Liquid.Variable do
   @doc """
   Assigns context to variable and than applies all filters
   """
-  @spec lookup(%Variable{}, %Context{}) :: {String.t() | nil, %Context{}}
-  def lookup(%Variable{} = v, %Context{} = context) do
+  @spec lookup(%Variable{}, %Context{}, Keyword.t()) :: {String.t() | nil, %Context{}}
+  def lookup(%Variable{} = v, %Context{} = context, options) do
     {ret, filters} = Appointer.assign(v, context)
 
     filename = extract_filename_from_context(context)
 
     result =
       try do
-        {:ok, filters |> Filters.filter(context, ret) |> apply_global_filter(context)}
+        {:ok, filters |> Filters.filter(context, ret, options) |> apply_global_filter(context)}
       rescue
         e in UndefinedFunctionError ->
           {e, "variable: #{v.name}, error: #{e.reason}"}
@@ -48,15 +48,15 @@ defmodule Liquid.Variable do
 
     case result do
       {:ok, text} -> {text, context}
-      {error, message} -> process_error(context, error, message)
+      {error, message} -> process_error(context, error, message, options)
     end
   end
 
   defp extract_filename_from_context(%{template: %{filename: filename}}), do: filename
   defp extract_filename_from_context(_), do: :root
 
-  defp process_error(%Context{template: template} = context, error, message) do
-    error_mode = Application.get_env(:liquid, :error_mode, :lax)
+  defp process_error(%Context{template: template} = context, error, message, options) do
+    error_mode = Keyword.get(options, :error_mode, :lax)
 
     case error_mode do
       :lax ->
@@ -79,7 +79,7 @@ defmodule Liquid.Variable do
   def parse(markup) when is_binary(markup) do
     parsed_variable =
       if markup != "" do
-        Liquid.filter_parser()
+        Liquid.Parse.filter_parser()
         |> Regex.scan(markup)
         |> List.flatten()
         |> Enum.map(&String.trim/1)
@@ -102,7 +102,7 @@ defmodule Liquid.Variable do
       [_, filter] = ~r/\s*(\w+)/ |> Regex.scan(markup) |> hd()
 
       args =
-        Liquid.filter_arguments()
+        Liquid.Parse.filter_arguments()
         |> Regex.scan(markup)
         |> Enum.map(fn item ->
           case item do

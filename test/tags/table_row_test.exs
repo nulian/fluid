@@ -3,6 +3,11 @@ Code.require_file("../../test_helper.exs", __ENV__.file)
 defmodule Liquid.TableRowTest do
   use ExUnit.Case
 
+  setup do
+    start_supervised!({Liquid.Process, [name: :liquid]})
+    :ok
+  end
+
   test :test_table_row do
     assert_template_result(
       "a<tr class=\"row1\">\n<td class=\"col1\"> 1 </td><td class=\"col2\"> 2 </td><td class=\"col3\"> 3 </td></tr>\n<tr class=\"row2\"><td class=\"col1\"> 4 </td><td class=\"col2\"> 5 </td><td class=\"col3\"> 6 </td></tr>\n",
@@ -88,8 +93,8 @@ defmodule Liquid.TableRowTest do
   end
 
   defp assert_result(expected, markup, assigns) do
-    template = Liquid.Template.parse(markup)
-    {:ok, result, _} = Liquid.Template.render(template, assigns)
-    assert result == expected
+    t = Liquid.parse_template(:liquid, markup)
+    {:ok, rendered, _} = Liquid.render_template(:liquid, t, assigns)
+    assert rendered == expected
   end
 end

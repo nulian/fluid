@@ -2,7 +2,6 @@ Code.require_file("../../test_helper.exs", __ENV__.file)
 
 defmodule Liquid.CustomFilterTest do
   use ExUnit.Case
-  alias Liquid.Template
 
   defmodule MyFilter do
     def meaning_of_life(_), do: 42
@@ -19,14 +18,10 @@ defmodule Liquid.CustomFilterTest do
   end
 
   setup_all do
-    Application.put_env(:liquid, :extra_filter_modules, [
-      MyFilter,
-      MyFilterTwo,
-      FilterNameOverride
-    ])
-
-    Liquid.add_filter_modules()
-
+    start_supervised!({Liquid.Process, [name: :liquid]})
+    Liquid.add_filters(:liquid, MyFilter)
+    Liquid.add_filters(:liquid, MyFilterTwo)
+    Liquid.add_filters(:liquid, FilterNameOverride)
     :ok
   end
 
@@ -57,9 +52,9 @@ defmodule Liquid.CustomFilterTest do
   end
 
   defp assert_result(expected, markup, assigns) do
-    template = Template.parse(markup)
+    template = Liquid.parse_template(:liquid, markup)
 
-    with {:ok, result, _} <- Template.render(template, assigns) do
+    with {:ok, result, _} <- Liquid.render_template(:liquid, template, assigns) do
       assert result == expected
     else
       {:error, message, _} ->

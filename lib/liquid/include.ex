@@ -7,9 +7,9 @@ defmodule Liquid.Include do
 
   @compile {:inline, syntax: 0}
   def syntax,
-    do: ~r/(#{Liquid.quoted_fragment()}+)(\s+(?:with|for)\s+(#{Liquid.quoted_fragment()}+))?/
+    do: ~r/(#{Liquid.Parse.quoted_fragment()}+)(\s+(?:with|for)\s+(#{Liquid.Parse.quoted_fragment()}+))?/
 
-  def parse(%Tag{markup: markup} = tag, %Template{} = template) do
+  def parse(%Tag{markup: markup} = tag, %Template{} = template, _options) do
     [parts | _] = syntax() |> Regex.scan(markup)
     tag = parse_tag(tag, parts)
     attributes = parse_attributes(markup)
@@ -30,25 +30,28 @@ defmodule Liquid.Include do
   end
 
   defp parse_attributes(markup) do
-    Liquid.tag_attributes()
+    Liquid.Parse.tag_attributes()
     |> Regex.scan(markup)
     |> Enum.reduce(%{}, fn [_, key, val], coll ->
       Map.put(coll, key, val |> Variable.create())
     end)
   end
 
-  def render(output, %Tag{parts: parts} = tag, %Context{} = context) do
-    {file_system, root} = context |> Context.registers(:file_system) || FileSystem.lookup()
+  def render(output, %Tag{parts: parts} = tag, %Context{} = context, options) do
+    {file_system, root} = context |> Context.registers(:file_system) || FileSystem.lookup(options)
 
-    {name, context} = parts[:name] |> Variable.lookup(context)
+    {name, context} = parts[:name] |> Variable.lookup(context, options)
 
-    source = load_template(root, name, context, file_system)
+    source = load_template(root, name, context, file_system, options)
 
     source_hash = :crypto.hash(:md5, source) |> Base.encode16()
 
+    cache_adapter = Keyword.get(options, :cache_adapter, Liquid.NoCacheAdapter)
+
+    # todo: probably use options as a cache keys also?
     {_, t} =
-      Cachex.fetch(:parsed_template, "parsed_template|#{source_hash}", fn _ ->
-        Template.parse(source, %{}, name)
+      cache_adapter.fetch(:parsed_template, "parsed_template|#{source_hash}", fn _ ->
+        Template.parse(source, %{}, name, options)
       end)
 
     if is_binary(t) do
@@ -57,62 +60,66 @@ defmodule Liquid.Include do
 
     t = %{t | blocks: context.template.blocks ++ t.blocks}
 
-    presets = build_presets(tag, context)
+    presets = build_presets(tag, context, options)
 
     assigns = context.assigns |> Map.merge(presets)
 
     cond do
       !is_nil(parts[:variable]) ->
-        {item, context} = Variable.lookup(parts[:variable], %{context | assigns: assigns})
-        render_item(output, name, item, t, context)
+        {item, context} =
+          Variable.lookup(parts[:variable], %{context | assigns: assigns}, options)
+
+        render_item(output, name, item, t, context, options)
 
       !is_nil(parts[:foreach]) ->
-        {items, context} = Variable.lookup(parts[:foreach], %{context | assigns: assigns})
-        render_list(output, name, items, t, context)
+        {items, context} =
+          Variable.lookup(parts[:foreach], %{context | assigns: assigns}, options)
+
+        render_list(output, name, items, t, context, options)
 
       true ->
-        render_item(output, name, nil, t, %{context | assigns: assigns})
+        render_item(output, name, nil, t, %{context | assigns: assigns}, options)
     end
   end
 
-  @error_handler Application.get_env(:liquid, :error_handler, Liquid.Prod.ErrorHandler)
-
-  defp load_template(root, name, context, file_system) do
+  defp load_template(root, name, context, file_system, options) do
     case file_system.read_template_file(root, name, context) do
       {:ok, source} ->
         source
 
       {:error, error_value} ->
-        @error_handler.handle(error_value, name: name)
+        Keyword.get(options, :error_handler, Liquid.Prod.ErrorHandler).handle(error_value,
+          name: name
+        )
     end
   end
 
-  defp build_presets(%Tag{} = tag, context) do
+  defp build_presets(%Tag{} = tag, context, options) do
     tag.attributes
     |> Enum.reduce(%{}, fn {key, value}, coll ->
-      {value, _} = Variable.lookup(value, context)
+      {value, _} = Variable.lookup(value, context, options)
       Map.put(coll, key, value)
     end)
   end
 
-  defp render_list(output, _, [], _, context) do
+  defp render_list(output, _, [], _, context, _options) do
     {output, context}
   end
 
-  defp render_list(output, key, [item | rest], template, %Context{} = context) do
-    {output, context} = render_item(output, key, item, template, context)
-    render_list(output, key, rest, template, context)
+  defp render_list(output, key, [item | rest], template, %Context{} = context, options) do
+    {output, context} = render_item(output, key, item, template, context, options)
+    render_list(output, key, rest, template, context, options)
   end
 
-  defp render_item(output, _key, nil, template, %Context{} = context) do
-    {:ok, rendered, _} = Template.render(template, context)
+  defp render_item(output, _key, nil, template, %Context{} = context, options) do
+    {:ok, rendered, _} = Template.render(template, context, options)
     {[rendered] ++ output, context}
   end
 
-  defp render_item(output, key, item, template, %Context{} = context) do
+  defp render_item(output, key, item, template, %Context{} = context, options) do
     assigns = context.assigns |> Map.merge(%{key => item})
 
-    {:ok, rendered, _} = Template.render(template, %{context | assigns: assigns})
+    {:ok, rendered, _} = Template.render(template, %{context | assigns: assigns}, options)
     {[rendered] ++ output, context}
   end
 end

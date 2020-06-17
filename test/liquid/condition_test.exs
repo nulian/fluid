@@ -71,23 +71,23 @@ defmodule ConditionTest do
 
   test :or_condition do
     condition = Condition.create({"1", "==", "2"})
-    assert false == Condition.evaluate(condition)
+    assert false == Condition.evaluate(condition, [])
     condition = Condition.join(:or, condition, {"2", "==", "2"})
-    assert true == Condition.evaluate(condition)
+    assert true == Condition.evaluate(condition, [])
     condition = Condition.join(:or, condition, {"2", "==", "1"})
-    assert true == Condition.evaluate(condition)
+    assert true == Condition.evaluate(condition, [])
   end
 
   test :and_condition do
     condition = Condition.create({"2", "==", "1"})
-    assert false == Condition.evaluate(condition)
+    assert false == Condition.evaluate(condition, [])
     condition = Condition.join(:and, condition, {"2", "==", "2"})
-    assert false == Condition.evaluate(condition)
+    assert false == Condition.evaluate(condition, [])
 
     condition = Condition.create({"2", "==", "2"})
-    assert true == Condition.evaluate(condition)
+    assert true == Condition.evaluate(condition, [])
     condition = Condition.join(:and, condition, {"2", "==", "1"})
-    assert false == Condition.evaluate(condition)
+    assert false == Condition.evaluate(condition, [])
   end
 
   # # test :should_allow_custom_proc_operator do
@@ -109,7 +109,7 @@ defmodule ConditionTest do
   defp assert_evaluates_true(left, op, right, assigns \\ %{}) do
     condition = Condition.create({left, op, right})
     context = %Liquid.Context{assigns: assigns, presets: %{}}
-    evaled = Condition.evaluate(condition, context)
+    evaled = Condition.evaluate(condition, context, [])
     unless evaled, do: IO.puts("Evaluated false: #{left} #{op} #{right}")
     assert evaled
   end
@@ -117,7 +117,7 @@ defmodule ConditionTest do
   defp assert_evaluates_false(left, op, right, assigns \\ %{}) do
     condition = Condition.create({left, op, right})
     context = %Liquid.Context{assigns: assigns, presets: %{}}
-    evaled = Condition.evaluate(condition, context)
+    evaled = Condition.evaluate(condition, context, [])
     unless !evaled, do: IO.puts("Evaluated true: #{left} #{op} #{right}")
     assert !evaled
   end

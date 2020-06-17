@@ -16,10 +16,10 @@ end
 defmodule Liquid.StrictParseTest do
   use ExUnit.Case
 
-  alias Liquid.{Template, SyntaxError}
+  alias Liquid.SyntaxError
 
-  setup_all do
-    Liquid.FileSystem.register(TestFileSystemStrict)
+  setup do
+    start_supervised!({Liquid.Process, [name: :liquid, file_system: {TestFileSystemStrict, "/"}]})
     :ok
   end
 
@@ -57,40 +57,43 @@ defmodule Liquid.StrictParseTest do
   test "syntax error" do
     template = "{{ 16  | divided_by: 0 }}"
 
+    parsed_template = Liquid.parse_template(:liquid, template)
+
     assert "variable: 16, Liquid error: divided by 0, filename: root" ==
-             template |> Template.parse() |> Template.render() |> elem(1)
+             :liquid |> Liquid.render_template(parsed_template) |> elem(1)
   end
 
   test "missing endtag parse time error" do
     assert_raise RuntimeError, "No matching end for block {% for %} in file: root", fn ->
-      Template.parse("{% for a in b %} ...")
+      Liquid.parse_template(:liquid, "{% for a in b %} ...")
     end
   end
 
   test "missing endtag parse time error within included file" do
     assert_raise RuntimeError, "No matching end for block {% for %} in file: bad_template", fn ->
-      "{% include 'bad_template' %}"
-      |> Template.parse()
-      |> Template.render()
+      parsed_template = Liquid.parse_template(:liquid, "{% include 'bad_template' %}")
+      Liquid.render_template(:liquid, parsed_template)
     end
   end
 
   test "bad filter in included file" do
-    template = "{% include 'bad_division' %}"
+    parsed_template = Liquid.parse_template(:liquid, "{% include 'bad_division' %}")
 
     assert "variable: 16, Liquid error: divided by 0, filename: bad_division" ==
-             template |> Template.parse() |> Template.render() |> elem(1)
+             :liquid |> Liquid.render_template(parsed_template) |> elem(1)
   end
 
   test "unrecognized operator" do
     assert_raise SyntaxError, "Unexpected character in '1 =! 2'", fn ->
-      Template.parse("{% if 1 =! 2 %}ok{% endif %}")
+      Liquid.parse_template(:liquid, "{% if 1 =! 2 %}ok{% endif %}")
     end
 
-    assert_raise SyntaxError, "Invalid variable name", fn -> Template.parse("{{%%%}}") end
+    assert_raise SyntaxError, "Invalid variable name", fn ->
+      Liquid.parse_template(:liquid, "{{%%%}}")
+    end
   end
 
   defp assert_syntax_error(markup) do
-    assert_raise(SyntaxError, fn -> Template.parse(markup) end)
+    assert_raise(SyntaxError, fn -> Liquid.parse_template(:liquid, markup) end)
   end
 end

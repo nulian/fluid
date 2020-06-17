@@ -2,7 +2,11 @@ Code.require_file("../../test_helper.exs", __ENV__.file)
 
 defmodule Liquid.IncrementTest do
   use ExUnit.Case
-  alias Liquid.Template
+
+  setup do
+    start_supervised!({Liquid.Process, [name: :liquid]})
+    :ok
+  end
 
   test :test_inc do
     assert_template_result("0", "{%increment port %}", %{})
@@ -31,8 +35,8 @@ defmodule Liquid.IncrementTest do
   end
 
   defp assert_result(expected, markup, assigns) do
-    template = Template.parse(markup)
-    {:ok, result, _} = Template.render(template, assigns)
-    assert result == expected
+    t = Liquid.parse_template(:liquid, markup)
+    {:ok, rendered, _} = Liquid.render_template(:liquid, t, assigns)
+    assert rendered == expected
   end
 end

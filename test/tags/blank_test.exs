@@ -3,6 +3,11 @@ Code.require_file("../../test_helper.exs", __ENV__.file)
 defmodule Liquid.BlankTest do
   use ExUnit.Case
 
+  setup do
+    start_supervised!({Liquid.Process, [name: :liquid]})
+    :ok
+  end
+
   def n, do: "10"
 
   def wrap_in_for(body) do
@@ -68,8 +73,8 @@ defmodule Liquid.BlankTest do
   end
 
   defp assert_result(expected, markup, assigns) do
-    template = Liquid.Template.parse(markup)
-    {:ok, result, _} = Liquid.Template.render(template, assigns)
+    template = Liquid.parse_template(:liquid, markup)
+    {:ok, result, _} = Liquid.render_template(:liquid, template, assigns)
     assert result == expected
   end
 end

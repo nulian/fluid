@@ -3,7 +3,10 @@ Code.require_file("../../test_helper.exs", __ENV__.file)
 defmodule Liquid.Tags.IfElseTagTest do
   use ExUnit.Case
 
-  alias Liquid.Template, as: Template
+  setup do
+    start_supervised!({Liquid.Process, [name: :liquid]})
+    :ok
+  end
 
   test :if_block do
     assert_result("  ", " {% if false %} this text should not go into the output {% endif %} ")
@@ -300,8 +303,8 @@ defmodule Liquid.Tags.IfElseTagTest do
   end
 
   defp assert_result(expected, markup, assigns \\ %{}) do
-    t = Template.parse(markup)
-    {:ok, rendered, _} = Template.render(t, assigns)
+    t = Liquid.parse_template(:liquid, markup)
+    {:ok, rendered, _} = Liquid.render_template(:liquid, t, assigns)
     assert rendered == expected
   end
 end

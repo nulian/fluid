@@ -22,13 +22,13 @@ defmodule Liquid.TableRow do
   end
 
   @compile {:inline, syntax: 0}
-  def syntax, do: ~r/(\w+)\s+in\s+(#{Liquid.quoted_fragment()}+)/
+  def syntax, do: ~r/(\w+)\s+in\s+(#{Liquid.Parse.quoted_fragment()}+)/
 
   @doc """
   Parses and organises markup to set up iterator
   """
-  @spec parse(Liquid.Block, Liquid.Template) :: {Liquid.Block, Liquid.Template}
-  def parse(%Block{nodelist: nodelist} = block, %Liquid.Template{} = t) do
+  @spec parse(Liquid.Block, Liquid.Template, Keyword.t()) :: {Liquid.Block, Liquid.Template}
+  def parse(%Block{nodelist: nodelist} = block, %Liquid.Template{} = t, _options) do
     block = %{block | iterator: parse_iterator(block)}
 
     case Block.split(block) do
@@ -45,7 +45,7 @@ defmodule Liquid.TableRow do
   defp parse_iterator(%Block{markup: markup}) do
     [[_, item | [orig_collection]]] = Regex.scan(syntax(), markup)
     collection = Expression.parse(orig_collection)
-    attributes = Liquid.tag_attributes() |> Regex.scan(markup)
+    attributes = Liquid.Parse.tag_attributes() |> Regex.scan(markup)
     limit = attributes |> parse_attribute("limit") |> Variable.create()
     offset = attributes |> parse_attribute("offset", "0") |> Variable.create()
 
@@ -75,15 +75,15 @@ defmodule Liquid.TableRow do
   Iterates through pre-set data and appends it to rendered output list
   Adds the HTML table rows and cols depending on the initial `cols` parameter
   """
-  @spec render(list(), %Block{}, %Context{}) :: {list(), %Context{}}
-  def render(output, %Block{iterator: it} = block, %Context{} = context) do
-    {list, context} = parse_collection(it.collection, context)
+  @spec render(list(), %Block{}, %Context{}, Keyword.t()) :: {list(), %Context{}}
+  def render(output, %Block{iterator: it} = block, %Context{} = context, options) do
+    {list, context} = parse_collection(it.collection, context, options)
     list = if is_binary(list) and list != "", do: [list], else: list
 
     if is_list(list) do
-      {limit, context} = lookup_limit(it, context)
-      {offset, context} = lookup_offset(it, context)
-      {new_output, context} = each([], [make_ref(), limit, offset], list, block, context)
+      {limit, context} = lookup_limit(it, context, options)
+      {offset, context} = lookup_offset(it, context, options)
+      {new_output, context} = each([], [make_ref(), limit, offset], list, block, context, options)
       {["</tr>\n" | [new_output | ["<tr class=\"row1\">\n"]]] ++ output, context}
     else
       if list == "" do
@@ -94,22 +94,24 @@ defmodule Liquid.TableRow do
     end
   end
 
-  defp parse_collection(list, context) when is_list(list), do: {list, context}
+  defp parse_collection(list, context, _options) when is_list(list), do: {list, context}
 
-  defp parse_collection(%Variable{} = variable, context), do: Variable.lookup(variable, context)
+  defp parse_collection(%Variable{} = variable, context, options),
+    do: Variable.lookup(variable, context, options)
 
-  defp parse_collection(%RangeLookup{} = range, context),
-    do: {RangeLookup.parse(range, context), context}
+  defp parse_collection(%RangeLookup{} = range, context, options),
+    do: {RangeLookup.parse(range, context, options), context}
 
-  defp each(output, _, [], %Block{} = block, %Context{} = context),
-    do: {output, remember_limit(block, context)}
+  defp each(output, _, [], %Block{} = block, %Context{} = context, options),
+    do: {output, remember_limit(block, context, options)}
 
   defp each(
          output,
          [prev, limit, offset],
          [h | t] = list,
          %Block{iterator: it} = block,
-         %Context{assigns: assigns} = context
+         %Context{assigns: assigns} = context,
+         options
        ) do
     forloop = next_forloop(it, list, offset, limit)
     block = %{block | iterator: %{it | forloop: forloop}}
@@ -120,21 +122,34 @@ defmodule Liquid.TableRow do
       |> Map.put(it.item, h)
       |> Map.put("changed", {prev, h})
 
-    {output_addition, block_context} = render_content(block, context, assigns, limit, offset)
+    {output_addition, block_context} =
+      render_content(block, context, assigns, limit, offset, options)
 
     output = output_addition ++ output
     t = if block_context.break == true, do: [], else: t
-    each(output, [h, limit, offset], t, block, %{context | assigns: block_context.assigns})
+
+    each(
+      output,
+      [h, limit, offset],
+      t,
+      block,
+      %{context | assigns: block_context.assigns},
+      options
+    )
   end
 
-  defp render_content(%Block{iterator: it} = block, context, assigns, limit, offset) do
+  defp render_content(%Block{iterator: it} = block, context, assigns, limit, offset, options) do
     case {should_render?(limit, offset, it.forloop["index"]), block.blank} do
       {true, true} ->
-        {_, new_context} = Render.render([], block.nodelist, %{context | assigns: assigns})
+        {_, new_context} =
+          Render.render([], block.nodelist, %{context | assigns: assigns}, options)
+
         {[], new_context}
 
       {true, _} ->
-        {rendered, new_context} = Render.render([], block.nodelist, %{context | assigns: assigns})
+        {rendered, new_context} =
+          Render.render([], block.nodelist, %{context | assigns: assigns}, options)
+
         {rendered |> add_rows_data(it.forloop), new_context}
 
       _ ->
@@ -150,8 +165,8 @@ defmodule Liquid.TableRow do
       else: output
   end
 
-  defp remember_limit(%Block{iterator: it}, context) do
-    {rendered, context} = lookup_limit(it, context)
+  defp remember_limit(%Block{iterator: it}, context, options) do
+    {rendered, context} = lookup_limit(it, context, options)
     limit = rendered || 0
     remembered = context.offsets[it.name] || 0
     %{context | offsets: context.offsets |> Map.put(it.name, remembered + limit)}
@@ -162,14 +177,18 @@ defmodule Liquid.TableRow do
   defp should_render?(limit, offset, index) when index > limit + offset, do: false
   defp should_render?(_limit, _offset, _index), do: true
 
-  defp lookup_limit(%Iterator{limit: limit}, %Context{} = context),
-    do: Variable.lookup(limit, context)
+  defp lookup_limit(%Iterator{limit: limit}, %Context{} = context, options),
+    do: Variable.lookup(limit, context, options)
 
-  defp lookup_offset(%Iterator{offset: %Variable{name: "continue"}} = it, %Context{} = context),
-    do: {context.offsets[it.name] || 0, context}
+  defp lookup_offset(
+         %Iterator{offset: %Variable{name: "continue"}} = it,
+         %Context{} = context,
+         options
+       ),
+       do: {context.offsets[it.name] || 0, context}
 
-  defp lookup_offset(%Iterator{offset: offset}, %Context{} = context),
-    do: Variable.lookup(offset, context)
+  defp lookup_offset(%Iterator{offset: offset}, %Context{} = context, options),
+    do: Variable.lookup(offset, context, options)
 
   defp next_forloop(%Iterator{forloop: loop} = it, count, _, _) when map_size(loop) < 1 do
     count = count |> Enum.count()

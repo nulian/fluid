@@ -5,19 +5,19 @@ defmodule Liquid.CustomTagTest do
   alias Liquid.{Template, Tag}
 
   defmodule MinusOneTag do
-    def parse(%Tag{} = tag, %Template{} = context) do
+    def parse(%Tag{} = tag, %Template{} = context, _options) do
       {tag, context}
     end
 
-    def render(output, tag, context) do
+    def render(output, tag, context, _options) do
       number = tag.markup |> Integer.parse() |> elem(0)
       {["#{number - 1}"] ++ output, context}
     end
   end
 
   setup_all do
-    Liquid.Registers.register("minus_one", MinusOneTag, Tag)
-    Liquid.add_filter_modules()
+    start_supervised!({Liquid.Process, [name: :liquid]})
+    Liquid.register_tags(:liquid, "minus_one", MinusOneTag, Tag)
     :ok
   end
 
@@ -32,9 +32,9 @@ defmodule Liquid.CustomTagTest do
   end
 
   defp assert_result(expected, markup, assigns) do
-    template = Template.parse(markup)
+    template = Liquid.parse_template(:liquid, markup)
 
-    with {:ok, result, _} <- Template.render(template, assigns) do
+    with {:ok, result, _} <- Liquid.render_template(:liquid, template, assigns) do
       assert result == expected
     else
       {:error, message, _} ->

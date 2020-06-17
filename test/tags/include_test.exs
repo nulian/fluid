@@ -52,11 +52,11 @@ end
 defmodule IncludeTagTest do
   use ExUnit.Case
 
-  alias Liquid.Template, as: Template
   alias Liquid.Context, as: Context
 
-  setup_all do
-    Liquid.FileSystem.register(TestFileSystem)
+  setup do
+    start_supervised!({Liquid.Process, [name: :liquid]})
+    Liquid.register_file_system(:liquid, TestFileSystem)
     :ok
   end
 
@@ -194,8 +194,8 @@ defmodule IncludeTagTest do
   defp assert_result(expected, markup), do: assert_result(expected, markup, %Liquid.Context{})
 
   defp assert_result(expected, markup, %Liquid.Context{} = context) do
-    t = Template.parse(markup)
-    {:ok, rendered, _context} = Template.render(t, context)
+    t = Liquid.parse_template(:liquid, markup)
+    {:ok, rendered, _context} = Liquid.render_template(:liquid, t, context)
     assert expected == rendered
   end
 

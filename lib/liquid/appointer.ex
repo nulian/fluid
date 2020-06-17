@@ -14,7 +14,7 @@ defmodule Liquid.Appointer do
 
   @integer ~r/^(-?\d+)$/
   @float ~r/^(-?\d[\d\.]+)$/
-  @start_quoted_string ~r/^#{Liquid.quoted_string()}/
+  @start_quoted_string ~r/^#{Liquid.Parse.quoted_string()}/
 
   @doc "Assigns context for Variable and filters"
   def assign(%Variable{literal: literal, parts: [], filters: filters}, context) do
@@ -65,10 +65,10 @@ defmodule Liquid.Appointer do
           String.to_float(name)
 
         Regex.match?(@start_quoted_string, name) ->
-          Regex.replace(Liquid.quote_matcher(), name, "")
+          Regex.replace(Liquid.Parse.quote_matcher(), name, "")
 
         true ->
-          Liquid.variable_parser() |> Regex.scan(name) |> List.flatten()
+          Liquid.Parse.variable_parser() |> Regex.scan(name) |> List.flatten()
       end
 
     if is_list(value), do: %{parts: value}, else: %{literal: value}

@@ -7,10 +7,11 @@ defmodule Liquid.RangeLookup do
 
   def parse(
         %RangeLookup{range_start: %Variable{} = range_start, range_end: %Variable{} = range_end},
-        %Context{} = context
+        %Context{} = context,
+        options
       ) do
-    {rendered_left, _} = Variable.lookup(range_start, context)
-    {rendered_right, _} = Variable.lookup(range_end, context)
+    {rendered_left, _} = Variable.lookup(range_start, context, options)
+    {rendered_right, _} = Variable.lookup(range_end, context, options)
     left = valid_range_value(rendered_left)
     right = valid_range_value(rendered_right, left)
 
@@ -19,9 +20,10 @@ defmodule Liquid.RangeLookup do
 
   def parse(
         %RangeLookup{range_start: range_start, range_end: %Variable{} = range_end},
-        %Context{} = context
+        %Context{} = context,
+        options
       ) do
-    {rendered_right, _} = Variable.lookup(range_end, context)
+    {rendered_right, _} = Variable.lookup(range_end, context, options)
     right = valid_range_value(rendered_right, range_start)
 
     Enum.to_list(range_start..right)
@@ -29,9 +31,10 @@ defmodule Liquid.RangeLookup do
 
   def parse(
         %RangeLookup{range_start: %Variable{} = range_start, range_end: range_end},
-        %Context{} = context
+        %Context{} = context,
+        options
       ) do
-    {rendered_left, _} = Variable.lookup(range_start, context)
+    {rendered_left, _} = Variable.lookup(range_start, context, options)
     left = valid_range_value(rendered_left)
 
     Enum.to_list(left..range_end)
@@ -47,11 +50,9 @@ defmodule Liquid.RangeLookup do
   defp valid_range_value(value, fallback \\ 0)
 
   defp valid_range_value(value, fallback) when is_binary(value) do
-    if is_binary(value) do
-      case Integer.parse(value) do
-        :error -> fallback
-        {value, _} -> value
-      end
+    case Integer.parse(value) do
+      :error -> fallback
+      {value, _} -> value
     end
   end
 

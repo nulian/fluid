@@ -3,7 +3,10 @@ Code.require_file("../../test_helper.exs", __ENV__.file)
 defmodule ForElseTagTest do
   use ExUnit.Case
 
-  alias Liquid.Template, as: Template
+  setup do
+    start_supervised!({Liquid.Process, [name: :liquid]})
+    :ok
+  end
 
   test :for_block do
     assert_result(" yo  yo  yo  yo ", "{%for item in array%} yo {%endfor%}", %{
@@ -43,8 +46,8 @@ defmodule ForElseTagTest do
 
     assert_raise(ArgumentError, fn ->
       markup = "{% for i in (a..2) %}{% endfor %}'"
-      t = Template.parse(markup)
-      Template.render(t, %{"a" => [1, 2]})
+      t = Liquid.parse_template(:liquid, markup)
+      Liquid.render_template(:liquid, t, %{"a" => [1, 2]})
     end)
 
     assert_template_result(" 0  1  2  3 ", "{% for item in (a..3) %} {{item}} {% endfor %}", %{
@@ -406,8 +409,8 @@ defmodule ForElseTagTest do
   end
 
   defp assert_result(expected, markup, assigns) do
-    t = Template.parse(markup)
-    {:ok, rendered, _} = Template.render(t, assigns)
+    t = Liquid.parse_template(:liquid, markup)
+    {:ok, rendered, _} = Liquid.render_template(:liquid, t, assigns)
     assert rendered == expected
   end
 end

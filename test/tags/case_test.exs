@@ -3,6 +3,11 @@ Code.require_file("../../test_helper.exs", __ENV__.file)
 defmodule Liquid.CaseTest do
   use ExUnit.Case
 
+  setup do
+    start_supervised!({Liquid.Process, [name: :liquid]})
+    :ok
+  end
+
   test "render first block with a matching {% when %} argument" do
     assert_result(
       " its 1 ",
@@ -213,8 +218,8 @@ defmodule Liquid.CaseTest do
   defp assert_result(expected, markup), do: assert_result(expected, markup, %Liquid.Context{})
 
   defp assert_result(expected, markup, %Liquid.Context{} = context) do
-    t = Liquid.Template.parse(markup)
-    {:ok, rendered, _context} = Liquid.Template.render(t, context)
+    t = Liquid.parse_template(:liquid, markup)
+    {:ok, rendered, _context} = Liquid.render_template(:liquid, t, context)
     assert expected == rendered
   end
 

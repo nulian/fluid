@@ -15,29 +15,7 @@ defmodule Liquid.Supervisor do
   Actual supervisor init with no child processes to supervise yet
   """
   def init(:ok) do
-    import Cachex.Spec, warn: false
-
-    children = [
-      worker(Cachex, [
-        :parsed_template,
-        [
-          expiration:
-            expiration(
-              default: :timer.hours(12),
-              interval: :timer.minutes(60),
-              lazy: true
-            ),
-          limit:
-            limit(
-              size: 5000,
-              policy: Cachex.Policy.LRW,
-              reclaim: 0.1
-            )
-        ]
-      ])
-    ]
-
-    opts = [strategy: :one_for_one, name: Liquid.Supervisor]
-    supervise(children, opts)
+    children = []
+    supervise(children, strategy: :one_for_one)
   end
 end

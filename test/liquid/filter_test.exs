@@ -3,11 +3,11 @@ Code.require_file("../../test_helper.exs", __ENV__.file)
 defmodule Liquid.FilterTest do
   use ExUnit.Case
   use Timex
-  alias Liquid.{Context, Filters, Template, Variable}
+  alias Liquid.{Context, Filters, Variable}
   alias Liquid.Filters.Functions
 
-  setup_all do
-    on_exit(fn -> Application.put_env(:liquid, :custom_filters, %{}) end)
+  setup do
+    start_supervised!({Liquid.Process, [name: :liquid]})
     :ok
   end
 
@@ -21,7 +21,7 @@ defmodule Liquid.FilterTest do
   test :filter_parsed do
     name = "'foofoo'"
     filters = [[:replace, ["'foo'", "'bar'"]]]
-    assert "'barbar'" == Filters.filter(filters, %Context{}, name)
+    assert "'barbar'" == Filters.filter(filters, %Context{}, name, [])
   end
 
   test :filter_from_registers do
@@ -34,7 +34,7 @@ defmodule Liquid.FilterTest do
       }
     }
 
-    assert "'bazbaz'" == Filters.filter(filters, %Context{registers: registers}, name)
+    assert "'bazbaz'" == Filters.filter(filters, %Context{registers: registers}, name, [])
   end
 
   test :filter_from_registers_with_wrong_args do
@@ -48,7 +48,7 @@ defmodule Liquid.FilterTest do
     }
 
     assert "Liquid error: wrong number of arguments to foo, filename: root" ==
-             Filters.filter(filters, %Context{registers: registers}, name)
+             Filters.filter(filters, %Context{registers: registers}, name, [])
   end
 
   test :size do
@@ -495,7 +495,7 @@ defmodule Liquid.FilterTest do
       def transform(_str, one, two, three), do: one <> two <> three
     end
 
-    Liquid.Filters.add_filters(MultipleParamsFilters)
+    Liquid.add_filters(:liquid, MultipleParamsFilters)
 
     assert_template_result(
       "foobarbaz",
@@ -511,7 +511,7 @@ defmodule Liquid.FilterTest do
       def join22(str), do: String.upcase(str)
     end
 
-    Liquid.Filters.add_filters(NamedParamsFilters)
+    Liquid.add_filters(:liquid, NamedParamsFilters)
 
     assert_template_result(
       "foobar",
@@ -537,7 +537,7 @@ defmodule Liquid.FilterTest do
       end
     end
 
-    Liquid.Filters.add_filters(MultiParamsFilters)
+    Liquid.add_filters(:liquid, MultiParamsFilters)
 
     assert_template_result(
       "{\"bar\":\"baz\",\"foo\":\"bar\"}",
@@ -552,7 +552,7 @@ defmodule Liquid.FilterTest do
       end
     end
 
-    Liquid.Filters.add_filters(MultiMixedParamsFilters)
+    Liquid.add_filters(:liquid, MultiMixedParamsFilters)
 
     assert_template_result(
       "{\"bar\":\"baz\",\"foo\":\"bar\",\"lang\":\"en\"}",
@@ -568,9 +568,9 @@ defmodule Liquid.FilterTest do
   end
 
   defp assert_result(expected, markup, assigns) do
-    template = Template.parse(markup)
+    template = Liquid.parse_template(:liquid, markup)
 
-    with {:ok, result, _} <- Template.render(template, assigns) do
+    with {:ok, result, _} <- Liquid.render_template(:liquid, template, assigns) do
       assert result == expected
     else
       {:error, message, _} ->
