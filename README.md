@@ -85,7 +85,7 @@ Another option is to set up the tag using:
 and for filters you should use
 `Liquid.Filters.add_filters(MyFilters)`
 
-#### Global Filters 
+#### Global Filters
 It's also possible to apply global filter to all rendered variables setting up the config:
 ``` elixir
 # config.exs
@@ -93,16 +93,16 @@ config :liquid,
   global_filter: &MyFilter.counting_sheeps/1
 ```
 or adding a `"global_filter"` value to context for `Liquid.Template.render` function:
-`Liquid.Template.render(tpl, %{global_filter: &MyFilter.counting_sheeps/1})` (you need to define filter function first) 
+`Liquid.Template.render(tpl, %{global_filter: &MyFilter.counting_sheeps/1})` (you need to define filter function first)
 
 ## File systems
-You can also set up the desired default file system for your project using the `config.exs` file 
+You can also set up the desired default file system for your project using the `config.exs` file
 ``` elixir
 # config.exs
 config :liquid,
   file_system: {Liquid.LocalFileSystem, "/your/path"}
 ```
- 
+
 
 ## Context assignment
 
@@ -116,7 +116,7 @@ end
 You can describe how to get the data from it:
 ``` elixir
 defimpl Liquid.Matcher, for: User do
-  def match(current, ["info"|_]=parts) do
+  def match(current, ["info"|_]=parts, _full_liquid_context) do
     "His name is: "<> current.name
   end
 end

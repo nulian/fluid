@@ -18,31 +18,31 @@ defmodule Liquid.Appointer do
 
   @doc "Assigns context for Variable and filters"
   def assign(%Variable{literal: literal, parts: [], filters: filters}, context) do
-    {literal, filters |> assign_context(context.assigns)}
+    {literal, filters |> assign_context(context.assigns, context)}
   end
 
   def assign(
         %Variable{literal: nil, parts: parts, filters: filters},
         %{assigns: assigns} = context
       ) do
-    {match(context, parts), filters |> assign_context(assigns)}
+    {match(context, parts, context), filters |> assign_context(assigns, context)}
   end
 
   @doc "Verifies matches between Variable and filters, data types and parts"
-  def match(%{assigns: assigns} = context, [key | _] = parts) when is_binary(key) do
+  def match(%{assigns: assigns} = context, [key | _] = parts, full_context) when is_binary(key) do
     case assigns do
-      %{^key => _value} -> match(assigns, parts)
-      _ -> Matcher.match(context, parts)
+      %{^key => _value} -> match(assigns, parts, full_context)
+      _ -> Matcher.match(context, parts, full_context)
     end
   end
 
-  def match(current, []), do: current
+  def match(current, [], _full_context), do: current
 
-  def match(current, [name | parts]) when is_binary(name) do
-    current |> match(name) |> Matcher.match(parts)
+  def match(current, [name | parts], full_context) when is_binary(name) do
+    current |> match(name, full_context) |> Matcher.match(parts, full_context)
   end
 
-  def match(current, key) when is_binary(key), do: Map.get(current, key)
+  def match(current, key, _full_context) when is_binary(key), do: Map.get(current, key)
 
   @doc """
   Makes `Variable.parts` or literals from the given markup
@@ -74,10 +74,10 @@ defmodule Liquid.Appointer do
     if is_list(value), do: %{parts: value}, else: %{literal: value}
   end
 
-  defp assign_context(filters, assigns) when assigns == %{}, do: filters
-  defp assign_context([], _), do: []
+  defp assign_context(filters, assigns, _full_context) when assigns == %{}, do: filters
+  defp assign_context([], _, _full_context), do: []
 
-  defp assign_context([head | tail], assigns) do
+  defp assign_context([head | tail], assigns, full_context) do
     [name, args] = head
 
     is_not_mapdata_key = fn k -> k != :__mapdata__ end
@@ -91,10 +91,10 @@ defmodule Liquid.Appointer do
             for {k, v} <- parsed,
                 is_not_mapdata_key.(k),
                 into: %{},
-                do: {k, assign_mapdata_context(assigns, v)}
+                do: {k, assign_mapdata_context(assigns, v, full_context)}
 
           Map.has_key?(parsed, :parts) ->
-            assigns |> Matcher.match(parsed.parts) |> to_string()
+            assigns |> Matcher.match(parsed.parts, full_context) |> to_string()
 
           Map.has_key?(assigns, :__struct__) ->
             key = String.to_atom(arg)
@@ -112,13 +112,13 @@ defmodule Liquid.Appointer do
         end
       end)
 
-    [[name, args] | assign_context(tail, assigns)]
+    [[name, args] | assign_context(tail, assigns, full_context)]
   end
 
-  defp assign_mapdata_context(assigns, v) do
+  defp assign_mapdata_context(assigns, v, full_context) do
     cond do
       Map.has_key?(v, :parts) ->
-        assigns |> Matcher.match(v.parts) |> to_string()
+        assigns |> Matcher.match(v.parts, full_context) |> to_string()
 
       Map.has_key?(v, :literal) ->
         v |> Map.get(:literal) |> to_string()
