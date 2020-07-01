@@ -15,33 +15,60 @@ defp deps do
 end
 ```
 
-You can either start the application directly:
+You can start the application as a child to your app:
 
-`Liquid.start`
+```elixir
+children = [
+  worker(Liquid.Process, [
+    :liquid,
+    Application.get_env(:your_app, :liquid)
+  ])
+]
 
-Or start it with your application:
+opts = [strategy: :one_for_one, name: Hokusai.Supervisor]
+Supervisor.start_link(children, opts)
+```
+
+where config is:
+
+```elixir
+config :your_app, :liquid,
+  cache_adapter: Cachex,
+  filter_modules: [
+    ...
+  ],
+  extra_tags: %{
+    tag_1: {TagModule, Liquid.Tag},
+    block_1: {BlockModule, Liquid.Block},
+  },
+  file_system: {Filesystem, "/"}
+```
+
+Or start it manually:
 
 ``` elixir
-# mix.exs
-def application do
-  [mod: {MyApp, []},
-   applications: […, :liquid]]
-end
+{:ok, pid} = Liquid.Process.start_link(:liquid, options)
 ```
+
+where option is a keyword list, same as in config.
+
+Every option can be overridden by a keyword list passed as last argument to `Liquid.parse_template` / `Liquid.render_template`.
 
 Compile a template from a string:
 
-`template = Liquid.Template.parse("{% assign hello='hello' %}{{ hello }}{{world}}")`
+`template = Liquid.parse_template(:liquid, "{% assign hello='hello' %}{{ hello }}{{world}}")`
 
 Render the template with a keyword list representing the local variables:
 
-`{ :ok, rendered, _ } = Liquid.Template.render(template, %{"world" => "world"})`
+`{ :ok, rendered, _ } = Liquid.render_template(:liquid, template, %{"world" => "world"})`
 
 For registers you might want to use in custom tags you can assign them like this:
 
-`{ :ok, rendered, _ } = Liquid.Template.render(template, %{"world" => "world"}, registers: %{test: "hallo")`
+`{ :ok, rendered, _ } = Liquid.render_template(:liquid, template, %{"world" => "world"}, registers: %{test: "hallo")`
 
 The tests should give a pretty good idea of the features implemented so far.
+
+All of the public API can be viewed inside the `Liquid` module.
 
 ## Custom tags and filters
 
@@ -54,11 +81,11 @@ defmodule MyFilters do
 end
 
 defmodule ExampleTag do
-  def parse(%Liquid.Tag{}=tag, %Liquid.Template{}=context) do
+  def parse(%Liquid.Tag{}=tag, %Liquid.Template{}=context, _options) do
     {tag, context}
   end
 
-  def render(output, tag, context) do
+  def render(output, tag, context, _options) do
     number = tag.markup |> Integer.parse |> elem(0)
     {["#{number - 1}"] ++ output, context}
   end
@@ -69,39 +96,21 @@ defmodule ExampleBlock do
 end
 ```
 
-and than include them in your `config.exs` file
-
-``` elixir
-# config.exs
-config :liquid,
-  extra_filter_modules: [MyFilters],
-  extra_tags: %{minus_one: {ExampleTag, Liquid.Tag},
-                my_block: {ExampleBlock, Liquid.Block}}
-```
+and then include them in your configuration, as shown above.
 
 Another option is to set up the tag using:
-`Liquid.Registers.register("minus_one", MinusOneTag, Tag)` for tag
-`Liquid.Registers.register("my_block", ExampleBlock, Liquid.Block)` same for blocks;
+`Liquid.register_tags(:liquid, "minus_one", MinusOneTag, Liquid.Tag)`,
+`Liquid.register_tags(:liquid, "my_block", ExampleBlock, Liquid.Block)` same for blocks;
 and for filters you should use
-`Liquid.Filters.add_filters(MyFilters)`
+`Liquid.add_filters(:liquid, MyFilters)`
 
 #### Global Filters
-It's also possible to apply global filter to all rendered variables setting up the config:
+It's also possible to apply a global filter to all rendered variables setting up in the config:
 ``` elixir
-# config.exs
-config :liquid,
-  global_filter: &MyFilter.counting_sheeps/1
+[global_filter: &MyFilter.counting_sheeps/1]
 ```
-or adding a `"global_filter"` value to context for `Liquid.Template.render` function:
-`Liquid.Template.render(tpl, %{global_filter: &MyFilter.counting_sheeps/1})` (you need to define filter function first)
-
-## File systems
-You can also set up the desired default file system for your project using the `config.exs` file
-``` elixir
-# config.exs
-config :liquid,
-  file_system: {Liquid.LocalFileSystem, "/your/path"}
-```
+or adding a `"global_filter"` value to options for the `Liquid.render_template` function:
+`Liquid.render_template(:liquid, :tpl, %{some: context}, global_filter: &MyFilter.counting_sheeps/1)` (you need to define the filter function first)
 
 
 ## Context assignment
@@ -123,14 +132,11 @@ end
 ```
 And later you can use it in your code:
 ``` elixir
-iex> "{{ info }}" |> Liquid.Template.parse |> Liquid.Template.render(%User{}) |> elem(1)
+iex> parsed_template = Liquid.parse_template(:liquid, "{{ info }}")
+iex> Liquid.Template.render_template(:liquid, parsed_template, %User{}) |> elem(1)
 "His name is: John"
 ```
 
 ## Missing Features
 
 Feel free to add a bug report or pull request if you feel that anything is missing.
-
-### todo
-
-* Fix empty check on arrays
