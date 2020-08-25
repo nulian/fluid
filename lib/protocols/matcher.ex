@@ -49,6 +49,8 @@ defimpl Liquid.Matcher, for: List do
 
   def match(current, ["size" | _], _full_context), do: current |> Enum.count()
 
+  def match(current, ["length" | _], _full_context), do: current |> Enum.count()
+
   def match(current, [<<?[, index::binary>> | parts], full_context) do
     index = index |> String.split("]") |> hd |> String.to_integer()
 
