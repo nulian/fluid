@@ -49,8 +49,8 @@ You can add your own filters and tags/blocks inside your project:
 
 ``` elixir
 defmodule MyFilters do
-  def meaning_of_life(_), do: 42
-  def one(_), do: 1
+  def meaning_of_life(_, _context), do: 42
+  def one(_, _context), do: 1
 end
 
 defmodule ExampleTag do
@@ -90,10 +90,10 @@ It's also possible to apply global filter to all rendered variables setting up t
 ``` elixir
 # config.exs
 config :liquid,
-  global_filter: &MyFilter.counting_sheeps/1
+  global_filter: &MyFilter.counting_sheeps/2
 ```
 or adding a `"global_filter"` value to context for `Liquid.Template.render` function:
-`Liquid.Template.render(tpl, %{global_filter: &MyFilter.counting_sheeps/1})` (you need to define filter function first) 
+`Liquid.Template.render(tpl, %{global_filter: &MyFilter.counting_sheeps/2})` (you need to define filter function first)
 
 ## File systems
 You can also set up the desired default file system for your project using the `config.exs` file 

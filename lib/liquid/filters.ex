@@ -4,7 +4,7 @@ defmodule Liquid.Filters do
   """
   import Kernel, except: [round: 1, abs: 1, floor: 1, ceil: 1]
   import Liquid.Utils, only: [to_number: 1]
-  alias Liquid.HTML
+  alias Liquid.{Context, HTML}
 
   defmodule Functions do
     @moduledoc """
@@ -484,9 +484,9 @@ defmodule Liquid.Filters do
   @doc """
   Recursively pass through all of the input filters applying them
   """
-  def filter([], value), do: value
+  def filter([], value, _context), do: value
 
-  def filter([filter | rest], value) do
+  def filter([filter | rest], value, %Context{} = context) do
     [name, args] = filter
 
     args =
@@ -509,13 +509,13 @@ defmodule Liquid.Filters do
 
         # Fallback to custom if no standard
         {_, nil, _} ->
-          apply_function(custom_filters[name], name, [value | args])
+          apply_function(custom_filters[name], name, [value, context | args])
 
         _ ->
           apply_function(Functions, name, [value | args])
       end
 
-    filter(rest, ret)
+    filter(rest, ret, context)
   end
 
   @doc """

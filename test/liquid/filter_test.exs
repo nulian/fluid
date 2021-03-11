@@ -3,7 +3,7 @@ Code.require_file("../../test_helper.exs", __ENV__.file)
 defmodule Liquid.FilterTest do
   use ExUnit.Case
   use Timex
-  alias Liquid.{Filters, Template, Variable}
+  alias Liquid.{Context, Filters, Template, Variable}
   alias Liquid.Filters.Functions
 
   setup_all do
@@ -22,7 +22,7 @@ defmodule Liquid.FilterTest do
   test :filter_parsed do
     name = "'foofoo'"
     filters = [[:replace, ["'foo'", "'bar'"]]]
-    assert "'barbar'" == Filters.filter(filters, name)
+    assert "'barbar'" == Filters.filter(filters, name, %Context{})
   end
 
   test :size do
