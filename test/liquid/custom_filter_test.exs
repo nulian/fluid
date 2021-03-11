@@ -5,16 +5,22 @@ defmodule Liquid.CustomFilterTest do
   alias Liquid.Template
 
   defmodule MyFilter do
-    def meaning_of_life(_), do: 42
+    def meaning_of_life(_, _), do: 42
   end
 
   defmodule MyFilterTwo do
-    def meaning_of_life(_), do: 40
-    def not_meaning_of_life(_), do: 2
+    def meaning_of_life(_, _), do: 40
+    def not_meaning_of_life(_, _), do: 2
+  end
+
+  defmodule MyFilterThree do
+    def stuff(_, context) do
+      context.assigns.test
+    end
   end
 
   setup_all do
-    Application.put_env(:liquid, :extra_filter_modules, [MyFilter, MyFilterTwo])
+    Application.put_env(:liquid, :extra_filter_modules, [MyFilter, MyFilterTwo, MyFilterThree])
     Liquid.start()
     on_exit(fn -> Liquid.stop() end)
     :ok
@@ -36,6 +42,10 @@ defmodule Liquid.CustomFilterTest do
       "41",
       "{{ 'text' | upcase | nonexistent | meaning_of_life | minus: 1 }}"
     )
+  end
+
+  test "custom filter can use context" do
+    assert_template_result("100", "{{ 'text' | stuff }}", %{test: 100})
   end
 
   defp assert_template_result(expected, markup, assigns \\ %{}) do

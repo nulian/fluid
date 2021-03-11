@@ -31,7 +31,7 @@ defmodule Liquid.Variable do
 
     result =
       try do
-        {:ok, filters |> Filters.filter(ret) |> apply_global_filter(context)}
+        {:ok, filters |> Filters.filter(ret, context) |> apply_global_filter(context)}
       rescue
         e in UndefinedFunctionError -> {e, e.reason}
         e in ArgumentError -> {e, e.message}
@@ -59,8 +59,8 @@ defmodule Liquid.Variable do
 
   defp apply_global_filter(input, %Context{global_filter: nil}), do: input
 
-  defp apply_global_filter(input, %Context{global_filter: global_filter}),
-    do: global_filter.(input)
+  defp apply_global_filter(input, %Context{global_filter: global_filter} = context),
+    do: global_filter.(input, context)
 
   @doc """
   Parses the markup to a list of filters

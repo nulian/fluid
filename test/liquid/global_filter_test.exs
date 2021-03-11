@@ -5,12 +5,13 @@ defmodule Liquid.GlobalFilterTest do
   alias Liquid.Template
 
   defmodule MyFilter do
-    def counting_sheeps(input) when is_binary(input), do: input <> " One, two, thr.. z-zz.."
-    def counting_bees(input) when is_binary(input), do: input <> " One, tw.. Ouch!"
+    def counting_sheeps(input, _) when is_binary(input), do: input <> " One, two, thr.. z-zz.."
+    def counting_bees(input, _) when is_binary(input), do: input <> " One, tw.. Ouch!"
+    def context_bees(input, context) when is_binary(input), do: input <> context.assigns.test
   end
 
   setup_all do
-    Application.put_env(:liquid, :global_filter, &MyFilter.counting_sheeps/1)
+    Application.put_env(:liquid, :global_filter, &MyFilter.counting_sheeps/2)
     Liquid.start()
     on_exit(fn -> Liquid.stop(Application.delete_env(:liquid, :global_filter)) end)
     :ok
@@ -22,7 +23,14 @@ defmodule Liquid.GlobalFilterTest do
 
   test "preset filter overrides default applied" do
     assert_template_result("Initial One, tw.. Ouch!", "{{ 'initial' | capitalize }}", %{
-      global_filter: &MyFilter.counting_bees/1
+      global_filter: &MyFilter.counting_bees/2
+    })
+  end
+
+  test "can use context" do
+    assert_template_result("Initial bee", "{{ 'initial' | capitalize }}", %{
+      global_filter: &MyFilter.context_bees/2,
+      test: " bee"
     })
   end
 
