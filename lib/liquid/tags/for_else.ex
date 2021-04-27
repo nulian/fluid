@@ -69,9 +69,9 @@ defmodule Liquid.ForElse do
     block = %{block | iterator: parse_iterator(block)}
 
     case Block.split(block) do
-      {true_block, [_, false_block]} ->
-        is_blank = Blank.blank?([true_block | false_block])
-        {%{block | nodelist: true_block, elselist: false_block, blank: is_blank}, t}
+      {true_block, [_ | false_blocks]} ->
+        is_blank = Blank.blank?([true_block | false_blocks])
+        {%{block | nodelist: true_block, elselist: false_blocks, blank: is_blank}, t}
 
       {_, []} ->
         is_blank = Blank.blank?(nodelist)

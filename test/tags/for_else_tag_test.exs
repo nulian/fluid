@@ -404,6 +404,20 @@ defmodule ForElseTagTest do
     })
   end
 
+  test :for_block_with_liquid_in_else do
+    assert_result(
+      "\n  empty\n\n",
+      """
+      {% for line in lines %}
+        A
+      {% else %}
+        {{ "empty" }}
+      {% endfor %}
+      """,
+      %{lines: []}
+    )
+  end
+
   defp assert_template_result(expected, markup, assigns) do
     assert_result(expected, markup, assigns)
   end
