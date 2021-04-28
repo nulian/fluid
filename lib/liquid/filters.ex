@@ -502,7 +502,9 @@ defmodule Liquid.Filters do
       for arg <- args do
         case arg do
           %{} ->
-            for {k, v} <- arg, into: %{}, do: {k, Liquid.Parse.quote_matcher() |> Regex.replace(v, "")}
+            for {k, v} <- arg,
+                into: %{},
+                do: {k, Liquid.Parse.quote_matcher() |> Regex.replace(v, "")}
 
           _ ->
             Liquid.Parse.quote_matcher() |> Regex.replace(arg, "")
@@ -557,11 +559,21 @@ defmodule Liquid.Filters do
   defp extract_filename_from_context(_), do: :root
 
   defp apply_filter(func, name, args, filename) do
-    try do
-      apply(func, args)
-    rescue
-      _ in BadArityError ->
-        "Liquid error: wrong number of arguments to #{name}, filename: #{filename}"
+    arity = :erlang.fun_info(func)[:arity]
+
+    arity_without_default = arity - 1
+
+    case length(args) do
+      ^arity ->
+        apply(func, args)
+
+      ^arity_without_default ->
+        apply(func, args ++ [%{}])
+
+      args_length ->
+        "Liquid error: wrong number of arguments (#{args_length}) to #{name} (#{arity}), filename: #{
+          filename
+        }"
     end
   end
 

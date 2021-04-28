@@ -47,7 +47,7 @@ defmodule Liquid.FilterTest do
       }
     }
 
-    assert "Liquid error: wrong number of arguments to foo, filename: root" ==
+    assert "Liquid error: wrong number of arguments (1) to foo (3), filename: root" ==
              Filters.filter(filters, %Context{registers: registers}, name, [])
   end
 
