@@ -27,9 +27,7 @@ defmodule Liquid do
   def register_tags(name, tag_name, module, type) do
     custom_tags = name |> options() |> Keyword.get(:extra_tags, %{})
 
-    custom_tags =
-      %{(tag_name |> String.to_atom()) => {module, type}}
-      |> Map.merge(custom_tags)
+    custom_tags = Map.merge(%{String.to_atom(tag_name) => {module, type}}, custom_tags)
 
     new_options = name |> options() |> Keyword.put(:extra_tags, custom_tags)
 
