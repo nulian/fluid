@@ -19,7 +19,6 @@ defmodule Liquid.Process do
     GenServer.start_link(__MODULE__, augment_options(options), name: name)
   end
 
-
   @impl true
   def init(options), do: {:ok, options}
 
@@ -47,7 +46,8 @@ defmodule Liquid.Process do
     custom_filters = Keyword.get(options, :custom_filters, %{})
     filter_modules = Keyword.get(options, :filter_modules, [])
 
-    custom_filters = Enum.reduce(filter_modules, custom_filters, fn module, acc ->
+    custom_filters =
+      Enum.reduce(filter_modules, custom_filters, fn module, acc ->
         module.__info__(:functions)
         |> Keyword.keys()
         |> Kernel.++(overridden_filter_names(module))

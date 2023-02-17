@@ -1,9 +1,10 @@
 defmodule Liquid do
-  def render_template(name, template, context \\ %{}, extra_options \\ []), do:
-    Liquid.Template.render(template, context,  name |> options() |> Keyword.merge(extra_options))
+  def render_template(name, template, context \\ %{}, extra_options \\ []),
+    do:
+      Liquid.Template.render(template, context, name |> options() |> Keyword.merge(extra_options))
 
-  def parse_template(name, source, presets \\ %{}, extra_options \\ []), do:
-    Liquid.Template.parse(source, presets,  name |> options() |> Keyword.merge(extra_options))
+  def parse_template(name, source, presets \\ %{}, extra_options \\ []),
+    do: Liquid.Template.parse(source, presets, name |> options() |> Keyword.merge(extra_options))
 
   def register_file_system(name, module, path \\ "/") do
     new_options = name |> options() |> Keyword.put(:file_system, {module, path})
@@ -37,14 +38,13 @@ defmodule Liquid do
     :ok
   end
 
-  def registers(name), do:
-    name |> options() |> Keyword.get(:extra_tags)
+  def registers(name), do: name |> options() |> Keyword.get(:extra_tags)
 
-  def registers_lookup(name, tag_name, extra_options \\ []), do:
-        Liquid.Registers.lookup(tag_name, name |> options() |> Keyword.merge(extra_options))
+  def registers_lookup(name, tag_name, extra_options \\ []),
+    do: Liquid.Registers.lookup(tag_name, name |> options() |> Keyword.merge(extra_options))
 
   def add_filters(name, module) do
-    custom_filters = name |> options() |>Keyword.get(:custom_filters, %{})
+    custom_filters = name |> options() |> Keyword.get(:custom_filters, %{})
 
     module_functions =
       module.__info__(:functions)
@@ -60,15 +60,19 @@ defmodule Liquid do
     :ok
   end
 
-  def read_template_file(name, path, extra_options \\ []), do:
-    Liquid.FileSystem.read_template_file(path, name |> options() |> Keyword.merge(extra_options))
+  def read_template_file(name, path, extra_options \\ []),
+    do:
+      Liquid.FileSystem.read_template_file(
+        path,
+        name |> options() |> Keyword.merge(extra_options)
+      )
 
-  def full_path(name, path, extra_options \\ []), do:
-    Liquid.FileSystem.full_path(path, name |> options() |> Keyword.merge(extra_options))
+  def full_path(name, path, extra_options \\ []),
+    do: Liquid.FileSystem.full_path(path, name |> options() |> Keyword.merge(extra_options))
 
   defp options(name) do
-     [{_, options}] = :ets.lookup(name, "options")
-     options
+    [{_, options}] = :ets.lookup(name, "options")
+    options
   end
 
   defp overridden_filter_names(module), do: Map.keys(filter_name_override_map(module))

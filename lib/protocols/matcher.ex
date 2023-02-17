@@ -38,7 +38,9 @@ defimpl Liquid.Matcher, for: Map do
   end
 
   def match(current, [name | parts], full_context) when is_binary(name) do
-    current |> Liquid.Matcher.match(name, full_context) |> Liquid.Matcher.match(parts, full_context)
+    current
+    |> Liquid.Matcher.match(name, full_context)
+    |> Liquid.Matcher.match(parts, full_context)
   end
 
   def match(current, key, _full_context) when is_binary(key), do: current[key]
@@ -73,13 +75,16 @@ defimpl Liquid.Matcher, for: Any do
   @doc """
   Match size for strings:
   """
-  def match(current, ["size" | _], _full_context) when is_binary(current), do: current |> String.length()
+  def match(current, ["size" | _], _full_context) when is_binary(current),
+    do: current |> String.length()
 
   @doc """
   Match functions for structs:
   """
   def match(current, [name | parts], full_context) when is_map(current) and is_binary(name) do
-    current |> Liquid.Matcher.match(name, full_context) |> Liquid.Matcher.match(parts, full_context)
+    current
+    |> Liquid.Matcher.match(name, full_context)
+    |> Liquid.Matcher.match(parts, full_context)
   end
 
   def match(current, key, _full_context) when is_map(current) and is_binary(key) do

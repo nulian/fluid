@@ -120,9 +120,7 @@ defmodule Liquid.Parse do
   # (?::|,)\s*((?:\w+\s*\:\s*)?"[^"]*"|'[^']*'|(?:[^ ,|'":]|"[^":]*"|'[^':]*')+):?\s*((?:\w+\s*\:\s*)?"[^"]*"|'[^']*'|(?:[^ ,|'":]|"[^":]*"|'[^':]*')+)?
   def filter_arguments,
     do:
-      ~r/(?:#{filter_argument_separator()}|#{argument_separator()})\s*((?:\w+\s*\:\s*)?#{
-        filter_quoted_fragment()
-      }):?\s*(#{filter_quoted_fragment()})?/
+      ~r/(?:#{filter_argument_separator()}|#{argument_separator()})\s*((?:\w+\s*\:\s*)?#{filter_quoted_fragment()}):?\s*(#{filter_quoted_fragment()})?/
 
   def single_quote, do: "'"
   def double_quote, do: "\""
@@ -145,9 +143,7 @@ defmodule Liquid.Parse do
 
   def parser,
     do:
-      ~r/#{tag_start()}\s*(?<tag>.*?)\s*#{tag_end()}|#{variable_start()}\s*(?<variable>.*?)\s*#{
-        variable_end()
-      }/ms
+      ~r/#{tag_start()}\s*(?<tag>.*?)\s*#{tag_end()}|#{variable_start()}\s*(?<variable>.*?)\s*#{variable_end()}/ms
 
   def template_parser, do: ~r/#{partial_template_parser()}|#{any_starting_tag()}/ms
 

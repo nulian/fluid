@@ -571,9 +571,7 @@ defmodule Liquid.Filters do
         apply(func, args ++ [%{}])
 
       args_length ->
-        "Liquid error: wrong number of arguments (#{args_length}) to #{name} (#{arity}), filename: #{
-          filename
-        }"
+        "Liquid error: wrong number of arguments (#{args_length}) to #{name} (#{arity}), filename: #{filename}"
     end
   end
 
@@ -586,9 +584,7 @@ defmodule Liquid.Filters do
 
         raise ArgumentError,
           message:
-            "Liquid error: wrong number of arguments (#{e.arity} for #{functions[name]}), filename: #{
-              filename
-            }"
+            "Liquid error: wrong number of arguments (#{e.arity} for #{functions[name]}), filename: #{filename}"
     end
   end
 

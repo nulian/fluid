@@ -7,7 +7,8 @@ defmodule Liquid.Include do
 
   @compile {:inline, syntax: 0}
   def syntax,
-    do: ~r/(#{Liquid.Parse.quoted_fragment()}+)(\s+(?:with|for)\s+(#{Liquid.Parse.quoted_fragment()}+))?/
+    do:
+      ~r/(#{Liquid.Parse.quoted_fragment()}+)(\s+(?:with|for)\s+(#{Liquid.Parse.quoted_fragment()}+))?/
 
   def parse(%Tag{markup: markup} = tag, %Template{} = template, _options) do
     [parts | _] = syntax() |> Regex.scan(markup)

@@ -11,9 +11,7 @@ defmodule Liquid.Dev.ErrorHandler do
         ~s(
           <div style="color: #856404; background-color: #fff3cd; border-color: #ffeeba; padding: .75rem 1.25rem; margin-bottom: 1rem; border: 1px solid transparent;
     border-radius: .25rem;margin-top: 1rem;">
-          Errored while including template '"#{Keyword.get(params, :name)}"', error: "#{
-          error_message
-        }"
+          Errored while including template '"#{Keyword.get(params, :name)}"', error: "#{error_message}"
         </div>
         )
     end

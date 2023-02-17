@@ -15,6 +15,7 @@ defmodule Liquid.Template do
 
   def render(%Template{} = t, %Context{} = c, options) do
     registers = Keyword.get(options, :registers, %{})
+
     new_registers =
       c
       |> Map.get(:registers, %{})

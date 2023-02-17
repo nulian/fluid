@@ -11,8 +11,7 @@ defmodule Liquid.Raw do
     if Regex.match?(full_token_possibly_invalid(), h) do
       block_delimiter = "end" <> to_string(name)
 
-      regex_result =
-        Regex.scan(full_token_possibly_invalid(), h, capture: :all_but_first)
+      regex_result = Regex.scan(full_token_possibly_invalid(), h, capture: :all_but_first)
 
       [extra_data, endblock | _] = regex_result |> List.flatten()
 

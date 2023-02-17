@@ -10,7 +10,8 @@ defmodule Liquid.Case do
 
   @compile {:inline, when_syntax: 0}
   def when_syntax,
-    do: ~r/(#{Liquid.Parse.quoted_fragment()})(?:(?:\s+or\s+|\s*\,\s*)(#{Liquid.Parse.quoted_fragment()}.*))?/
+    do:
+      ~r/(#{Liquid.Parse.quoted_fragment()})(?:(?:\s+or\s+|\s*\,\s*)(#{Liquid.Parse.quoted_fragment()}.*))?/
 
   def parse(%Block{markup: markup} = b, %Template{} = t, _options) do
     [[_, name]] = syntax() |> Regex.scan(markup)
