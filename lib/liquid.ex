@@ -1,42 +1,87 @@
 defmodule Liquid do
-  @timeout 5_000
+  def render_template(name, template, context \\ %{}, extra_options \\ []), do:
+    Liquid.Template.render(template, context,  name |> options() |> Keyword.merge(extra_options))
 
-  def render_template(name, template, context \\ %{}, extra_options \\ []) do
-    case GenServer.call(name, {:render_template, template, context, extra_options}, @timeout) do
-      {:ok, v} -> v
-      {:error, error, stacktrace} -> reraise error, stacktrace
-    end
+  def parse_template(name, source, presets \\ %{}, extra_options \\ []), do:
+    Liquid.Template.parse(source, presets,  name |> options() |> Keyword.merge(extra_options))
+
+  def register_file_system(name, module, path \\ "/") do
+    new_options = name |> options() |> Keyword.put(:file_system, {module, path})
+
+    :ets.insert(name, {"options", new_options})
+
+    :ok
   end
 
-  def parse_template(name, source, presets \\ %{}, extra_options \\ []) do
-    case GenServer.call(name, {:parse_template, source, presets, extra_options}, @timeout) do
-      {:ok, v} -> v
-      {:error, error, stacktrace} -> reraise error, stacktrace
-    end
+  def clear_registers(name) do
+    new_options = name |> options() |> Keyword.put(:extra_tags, %{})
+
+    :ets.insert(name, {"options", new_options})
+
+    :ok
   end
-
-  def register_file_system(name, module, path \\ "/"),
-    do: GenServer.cast(name, {:register_file_system, module, path})
-
-  def clear_registers(name), do: GenServer.cast(name, {:clear_registers})
 
   def clear_extra_tags(name), do: clear_registers(name)
 
-  def register_tags(name, tag_name, module, type),
-    do: GenServer.cast(name, {:register_tags, tag_name, module, type})
+  def register_tags(name, tag_name, module, type) do
+    custom_tags = name |> options() |> Keyword.get(:extra_tags, %{})
 
-  def registers(name), do: GenServer.call(name, {:registers}, @timeout)
+    custom_tags =
+      %{(tag_name |> String.to_atom()) => {module, type}}
+      |> Map.merge(custom_tags)
 
-  def registers_lookup(name, tag_name, extra_options \\ []),
-    do: GenServer.call(name, {:registers_lookup, tag_name, extra_options}, @timeout)
+    new_options = name |> options() |> Keyword.put(:extra_tags, custom_tags)
 
-  def add_filters(name, filter_module), do: GenServer.cast(name, {:add_filters, filter_module})
+    :ets.insert(name, {"options", new_options})
 
-  def read_template_file(name, path, extra_options \\ []),
-    do: GenServer.call(name, {:read_template_file, path, extra_options}, @timeout)
+    :ok
+  end
 
-  def full_path(name, path, extra_options \\ []),
-    do: GenServer.call(name, {:full_path, path, extra_options}, @timeout)
+  def registers(name), do:
+    name |> options() |> Keyword.get(:extra_tags)
+
+  def registers_lookup(name, tag_name, extra_options \\ []), do:
+        Liquid.Registers.lookup(tag_name, name |> options() |> Keyword.merge(extra_options))
+
+  def add_filters(name, module) do
+    custom_filters = name |> options() |>Keyword.get(:custom_filters, %{})
+
+    module_functions =
+      module.__info__(:functions)
+      |> Keyword.keys()
+      |> Kernel.++(overridden_filter_names(module))
+      |> Enum.into(%{}, fn filter_name -> {filter_name, module} end)
+
+    custom_filters = module_functions |> Map.merge(custom_filters)
+    new_options = name |> options() |> Keyword.put(:custom_filters, custom_filters)
+
+    :ets.insert(name, {"options", new_options})
+
+    :ok
+  end
+
+  def read_template_file(name, path, extra_options \\ []), do:
+    Liquid.FileSystem.read_template_file(path, name |> options() |> Keyword.merge(extra_options))
+
+  def full_path(name, path, extra_options \\ []), do:
+    Liquid.FileSystem.full_path(path, name |> options() |> Keyword.merge(extra_options))
+
+  defp options(name) do
+     [{_, options}] = :ets.lookup(name, "options")
+     options
+  end
+
+  defp overridden_filter_names(module), do: Map.keys(filter_name_override_map(module))
+
+  defp filter_name_override_map(module) do
+    if function_exists?(module, :filter_name_override_map) do
+      module.filter_name_override_map
+    else
+      %{}
+    end
+  end
+
+  defp function_exists?(module, func), do: Keyword.has_key?(module.__info__(:functions), func)
 
   defmodule List do
     def even_elements([_, h | t]) do
