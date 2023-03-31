@@ -46,7 +46,10 @@ defmodule Liquid.Variable do
           {e, "variable: #{v.name}, Liquid error: #{e.message}, filename: #{filename}"}
       end
 
+
     case result do
+      {:ok, {:safe, text}} -> {text, context}
+      {:ok, text} when is_binary(text) -> {HtmlSanitizeEx.basic_html(text), context}
       {:ok, text} -> {text, context}
       {error, message} -> process_error(context, error, message, options)
     end

@@ -454,6 +454,8 @@ defmodule Liquid.Filters do
       with {:ok, date_str} <- Timex.format(input, format, :strftime), do: date_str
     end
 
+    def safe(input), do: {:safe, input}
+
     # Helpers
 
     defp to_iterable(input) when is_list(input) do
