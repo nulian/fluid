@@ -48,7 +48,8 @@ defmodule Liquid.Variable do
 
 
     case result do
-      {:ok, {:safe, text}} -> {text, context}
+      {:ok, {:unsafe_raw, text}} -> {text, context}
+      {:ok, text} when is_binary(text) and text == " " -> {text, context}
       {:ok, text} when is_binary(text) -> {HtmlSanitizeEx.basic_html(text), context}
       {:ok, text} -> {text, context}
       {error, message} -> process_error(context, error, message, options)

@@ -213,4 +213,35 @@ defmodule VariableResolutionTest do
     {:ok, rendered, _} = Liquid.render_template(:liquid, template)
     assert "bazbar" == rendered
   end
+
+  test :unsafe_raw_filter_not_cleaning_var do
+    template =
+      Liquid.parse_template(:liquid, "{{ test | unsafe_raw }}", %{
+        "test" => "<script>baz</script>"
+      })
+
+    {:ok, rendered, _} = Liquid.render_template(:liquid, template)
+    assert "<script>baz</script>" == rendered
+  end
+
+  test :var_sanitized do
+    template =
+      Liquid.parse_template(:liquid, "{{ test }}", %{
+        "test" => "<script>baz</script>"
+      })
+
+    {:ok, rendered, _} = Liquid.render_template(:liquid, template)
+    assert "baz" == rendered
+  end
+
+  test :safe_filter_is_not_being_composable do
+    template =
+      Liquid.parse_template(:liquid, "{{ test | unsafe_raw | append: 'd' }}", %{
+        "test" => "baz"
+      })
+
+    assert_raise Protocol.UndefinedError, fn ->
+      Liquid.render_template(:liquid, template)
+    end
+  end
 end

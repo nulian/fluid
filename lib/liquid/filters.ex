@@ -454,7 +454,7 @@ defmodule Liquid.Filters do
       with {:ok, date_str} <- Timex.format(input, format, :strftime), do: date_str
     end
 
-    def safe(input), do: {:safe, input}
+    def unsafe_raw(input), do: {:unsafe_raw, input}
 
     # Helpers
 
