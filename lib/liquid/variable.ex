@@ -46,7 +46,6 @@ defmodule Liquid.Variable do
           {e, "variable: #{v.name}, Liquid error: #{e.message}, filename: #{filename}"}
       end
 
-
     case result do
       {:ok, {:unsafe_raw, text}} -> {text, context}
       {:ok, text} when is_binary(text) and text == " " -> {text, context}
