@@ -51,8 +51,9 @@ defmodule Liquid.Filters do
 
     def sort(array), do: array |> Enum.sort()
 
-    def sort([%_{} | _] = array, key) when is_list(array) and is_map(hd(array)) do
-      array |> Enum.sort_by(fn element -> Map.get(element, convert_to_symbol_if_needed(key)) end)
+    def sort(array, key) when is_list(array) and is_map(hd(array)) do
+      key = convert_to_symbol_if_needed(key)
+      array |> Enum.sort_by(fn element -> Map.get(element, key) end)
     end
 
     def sort(array, key) when is_list(array) and is_map(hd(array)) do
