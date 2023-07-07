@@ -12,17 +12,11 @@ defmodule Liquid.Filters do
     """
     use Timex
 
-    def size(input) when is_binary(input) do
-      String.length(input)
-    end
+    def size(input) when is_binary(input), do: String.length(input)
 
-    def size(input) when is_list(input) do
-      length(input)
-    end
+    def size(input) when is_list(input), do: length(input)
 
-    def size(input) when is_tuple(input) do
-      tuple_size(input)
-    end
+    def size(input) when is_tuple(input), do: tuple_size(input)
 
     def size(_), do: 0
 
@@ -31,21 +25,15 @@ defmodule Liquid.Filters do
     It has no effect on strings which are already all lowercase.
     """
     @spec downcase(any) :: String.t()
-    def downcase(input) do
-      input |> to_string |> String.downcase()
-    end
+    def downcase(input), do: input |> to_string |> String.downcase()
 
-    def upcase(input) do
-      input |> to_string |> String.upcase()
-    end
+    def upcase(input), do: input |> to_string |> String.upcase()
 
-    def capitalize(input) do
-      input |> to_string |> String.capitalize()
-    end
+    def capitalize(input), do: input |> to_string |> String.capitalize()
 
-    def first(array) when is_list(array), do: array |> List.first()
+    def first(array) when is_list(array), do: List.first(array)
 
-    def last(array) when is_list(array), do: array |> List.last()
+    def last(array) when is_list(array), do: List.last(array)
 
     def reverse(array), do: array |> to_iterable |> Enum.reverse()
 
@@ -56,25 +44,19 @@ defmodule Liquid.Filters do
       array |> Enum.sort_by(fn element -> Map.get(element, key) end)
     end
 
-    def sort(array, key) when is_list(array) and is_map(hd(array)) do
-      array |> Enum.sort_by(& &1[key])
-    end
+    def sort(array, key) when is_list(array) and is_map(hd(array)),
+      do: Enum.sort_by(array, & &1[key])
 
-    def sort(array, _) when is_list(array) do
-      array |> Enum.sort()
-    end
+    def sort(array, _) when is_list(array), do: Enum.sort(array)
 
-    def uniq(array) when is_list(array), do: array |> Enum.uniq()
+    def uniq(array) when is_list(array), do: Enum.uniq(array)
 
     def uniq(_), do: raise("Called `uniq` with non-list parameter.")
 
-    def uniq(array, key) when is_list(array) and is_map(hd(array)) do
-      array |> Enum.uniq_by(& &1[key])
-    end
+    def uniq(array, key) when is_list(array) and is_map(hd(array)),
+      do: Enum.uniq_by(array, & &1[key])
 
-    def uniq(array, _) when is_list(array) do
-      array |> Enum.uniq()
-    end
+    def uniq(array, _) when is_list(array), do: Enum.uniq(array)
 
     def uniq(_, _), do: raise("Called `uniq` with non-list parameter.")
 
@@ -93,33 +75,19 @@ defmodule Liquid.Filters do
 
     def map(_, _), do: ""
 
-    def plus(value, operand) when is_number(value) and is_number(operand) do
-      value + operand
-    end
+    def plus(value, operand) when is_number(value) and is_number(operand), do: value + operand
 
-    def plus(value, operand) when is_number(value) do
-      plus(value, to_number(operand))
-    end
+    def plus(value, operand) when is_number(value), do: plus(value, to_number(operand))
 
-    def plus(value, operand) do
-      value |> to_number |> plus(to_number(operand))
-    end
+    def plus(value, operand), do: value |> to_number |> plus(to_number(operand))
 
-    def minus(value, operand) when is_number(value) and is_number(operand) do
-      value - operand
-    end
+    def minus(value, operand) when is_number(value) and is_number(operand), do: value - operand
 
-    def minus(value, operand) when is_number(value) do
-      minus(value, to_number(operand))
-    end
+    def minus(value, operand) when is_number(value), do: minus(value, to_number(operand))
 
-    def minus(value, operand) do
-      value |> to_number |> minus(to_number(operand))
-    end
+    def minus(value, operand), do: value |> to_number |> minus(to_number(operand))
 
-    def times(value, operand) when is_integer(value) and is_integer(operand) do
-      value * operand
-    end
+    def times(value, operand) when is_integer(value) and is_integer(operand), do: value * operand
 
     def times(value, operand) do
       {value_int, value_len} = value |> get_int_and_counter
@@ -147,9 +115,7 @@ defmodule Liquid.Filters do
       end
     end
 
-    def divided_by(input, operand) do
-      input |> to_number |> divided_by(operand)
-    end
+    def divided_by(input, operand), do: input |> to_number |> divided_by(operand)
 
     def floor(input) when is_integer(input), do: input
 
@@ -161,41 +127,29 @@ defmodule Liquid.Filters do
       input |> to_number |> Float.floor(precision)
     end
 
-    def floor(input, precision) do
-      input |> floor(to_number(precision))
-    end
+    def floor(input, precision), do: floor(input, to_number(precision))
 
     def ceil(input) when is_integer(input), do: input
 
-    def ceil(input) when is_number(input) do
-      input |> Float.ceil() |> trunc
-    end
+    def ceil(input) when is_number(input), do: input |> Float.ceil() |> trunc
 
     def ceil(input), do: input |> to_number |> ceil
 
-    def ceil(input, precision) when is_number(precision) do
-      input |> to_number |> Float.ceil(precision)
-    end
+    def ceil(input, precision) when is_number(precision),
+      do: input |> to_number |> Float.ceil(precision)
 
-    def ceil(input, precision) do
-      input |> ceil(to_number(precision))
-    end
+    def ceil(input, precision), do: ceil(input, to_number(precision))
 
     def round(input) when is_integer(input), do: input
 
-    def round(input) when is_number(input) do
-      input |> Float.round() |> trunc
-    end
+    def round(input) when is_number(input), do: input |> Float.round() |> trunc
 
     def round(input), do: input |> to_number |> round
 
-    def round(input, precision) when is_number(precision) do
-      input |> to_number |> Float.round(precision)
-    end
+    def round(input, precision) when is_number(precision),
+      do: input |> to_number |> Float.round(precision)
 
-    def round(input, precision) do
-      input |> round(to_number(precision))
-    end
+    def round(input, precision), do: round(input, to_number(precision))
 
     @doc """
     Allows you to specify a fallback in case a value doesn’t exist.
@@ -234,9 +188,7 @@ defmodule Liquid.Filters do
     def modulo(input, operand) when is_number(input) and is_number(operand) and input < 0,
       do: modulo(input + operand, operand)
 
-    def modulo(input, operand) do
-      input |> to_number |> modulo(to_number(operand))
-    end
+    def modulo(input, operand), do: input |> to_number |> modulo(to_number(operand))
 
     def truncate(input, l \\ 50, truncate_string \\ "...")
 
@@ -280,152 +232,102 @@ defmodule Liquid.Filters do
 
     def replace(string, from, to \\ "")
 
-    def replace(<<string::binary>>, <<from::binary>>, <<to::binary>>) do
-      string |> String.replace(from, to)
-    end
+    def replace(<<string::binary>>, <<from::binary>>, <<to::binary>>),
+      do: String.replace(string, from, to)
 
-    def replace(<<string::binary>>, <<from::binary>>, to) do
-      string |> replace(from, to_string(to))
-    end
+    def replace(<<string::binary>>, <<from::binary>>, to),
+      do: replace(string, from, to_string(to))
 
-    def replace(<<string::binary>>, from, to) do
-      string |> replace(to_string(from), to)
-    end
+    def replace(<<string::binary>>, from, to), do: replace(string, to_string(from), to)
 
-    def replace(string, from, to) do
-      string |> to_string |> replace(from, to)
-    end
+    def replace(string, from, to), do: string |> to_string |> replace(from, to)
 
     def replace_first(string, from, to \\ "")
 
-    def replace_first(<<string::binary>>, <<from::binary>>, to) do
-      string |> String.replace(from, to_string(to), global: false)
-    end
+    def replace_first(<<string::binary>>, <<from::binary>>, to),
+      do: String.replace(string, from, to_string(to), global: false)
 
     def replace_first(string, from, to) do
-      to = to |> to_string
+      to = to_string(to)
       string |> to_string |> String.replace(to_string(from), to, global: false)
     end
 
-    def remove(<<string::binary>>, <<remove::binary>>) do
-      string |> String.replace(remove, "")
-    end
+    def remove(<<string::binary>>, <<remove::binary>>), do: String.replace(string, remove, "")
 
-    def remove_first(<<string::binary>>, <<remove::binary>>) do
-      string |> String.replace(remove, "", global: false)
-    end
+    def remove_first(<<string::binary>>, <<remove::binary>>),
+      do: String.replace(string, remove, "", global: false)
 
-    def remove_first(string, operand) do
-      string |> to_string |> remove_first(to_string(operand))
-    end
+    def remove_first(string, operand), do: string |> to_string |> remove_first(to_string(operand))
 
-    def append(<<string::binary>>, <<operand::binary>>) do
-      string <> operand
-    end
+    def append(<<string::binary>>, <<operand::binary>>), do: string <> operand
 
     def append(input, nil), do: input
 
-    def append(string, operand) do
-      string |> to_string |> append(to_string(operand))
-    end
+    def append(string, operand), do: string |> to_string |> append(to_string(operand))
 
-    def prepend(<<string::binary>>, <<addition::binary>>) do
-      addition <> string
-    end
+    def prepend(<<string::binary>>, <<addition::binary>>), do: addition <> string
 
     def prepend(string, nil), do: string
 
-    def prepend(string, addition) do
-      string |> to_string |> append(to_string(addition))
-    end
+    def prepend(string, addition), do: string |> to_string |> append(to_string(addition))
 
-    def strip(<<string::binary>>) do
-      string |> String.trim()
-    end
+    def strip(<<string::binary>>), do: String.trim(string)
 
-    def lstrip(<<string::binary>>) do
-      string |> String.trim_leading()
-    end
+    def lstrip(<<string::binary>>), do: String.trim_leading(string)
 
-    def rstrip(<<string::binary>>) do
-      string |> String.trim_trailing()
-    end
+    def rstrip(<<string::binary>>), do: String.trim_trailing(string)
 
-    def strip_newlines(<<string::binary>>) do
-      string |> String.replace(~r/\r?\n/, "")
-    end
+    def strip_newlines(<<string::binary>>), do: String.replace(string, ~r/\r?\n/, "")
 
-    def newline_to_br(<<string::binary>>) do
-      string |> String.replace("\n", "<br />\n")
-    end
+    def newline_to_br(<<string::binary>>), do: String.replace(string, "\n", "<br />\n")
 
-    def split(<<string::binary>>, <<separator::binary>>) do
-      String.split(string, separator)
-    end
+    def split(<<string::binary>>, <<separator::binary>>), do: String.split(string, separator)
 
     def split(nil, _), do: []
 
-    def slice(list, from, to) when is_list(list) do
-      list |> Enum.slice(from, to)
-    end
+    def slice(list, from, to) when is_list(list), do: Enum.slice(list, from, to)
 
-    def slice(<<string::binary>>, from, to) do
-      string |> String.slice(from, to)
-    end
+    def slice(<<string::binary>>, from, to), do: String.slice(string, from, to)
 
     def slice(list, 0) when is_list(list), do: list
 
-    def slice(list, range) when is_list(list) and range > 0 do
-      list |> Enum.slice(range, length(list))
-    end
+    def slice(list, range) when is_list(list) and range > 0,
+      do: Enum.slice(list, range, length(list))
 
-    def slice(list, range) when is_list(list) do
-      len = length(list)
-      list |> Enum.slice(len + range, len)
-    end
+    def slice(list, range) when is_list(list), do: len = length(list)
+    Enum.slice(list, len + range, len)
 
     def slice(<<string::binary>>, 0), do: string
 
-    def slice(<<string::binary>>, range) when range > 0 do
-      string |> String.slice(range, String.length(string))
-    end
+    def slice(<<string::binary>>, range) when range > 0,
+      do: String.slice(string, range, String.length(string))
 
-    def slice(<<string::binary>>, range) do
-      len = String.length(string)
-      string |> String.slice(len + range, len)
-    end
+    def slice(<<string::binary>>, range), do: len = String.length(string)
+    String.slice(string, len + range, len)
 
     def slice(nil, _), do: ""
 
-    def escape(input) when is_binary(input) do
-      input |> HTML.html_escape()
-    end
+    def escape(input) when is_binary(input), do: HTML.html_escape(input)
 
     defdelegate h(input), to: __MODULE__, as: :escape
 
-    def escape_once(input) when is_binary(input) do
-      input |> HTML.html_escape_once()
-    end
+    def escape_once(input) when is_binary(input), do: HTML.html_escape_once(input)
 
     def strip_html(nil), do: ""
 
-    def strip_html(input) when is_binary(input) do
-      input
-      |> String.replace(~r/<script.*?<\/script>/m, "")
-      |> String.replace(~r/<!--.*?-->/m, "")
-      |> String.replace(~r/<style.*?<\/style>/m, "")
-      |> String.replace(~r/<.*?>/m, "")
-    end
+    def strip_html(input) when is_binary(input),
+      do:
+        input
+        |> String.replace(~r/<script.*?<\/script>/m, "")
+        |> String.replace(~r/<!--.*?-->/m, "")
+        |> String.replace(~r/<style.*?<\/style>/m, "")
+        |> String.replace(~r/<.*?>/m, "")
 
-    def url_encode(input) when is_binary(input) do
-      input |> URI.encode_www_form()
-    end
+    def url_encode(input) when is_binary(input), do: URI.encode_www_form(input)
 
     def url_encode(nil), do: nil
 
-    def url_decode(input) when is_binary(input) do
-      input |> URI.decode_www_form()
-    end
+    def url_decode(input) when is_binary(input), do: URI.decode_www_form(input)
 
     def url_decode(nil), do: nil
 
@@ -433,13 +335,11 @@ defmodule Liquid.Filters do
 
     def date(nil, _), do: nil
 
-    def date(input, format) when is_nil(format) or format == "" do
-      input |> date
-    end
+    def date(input, format) when is_nil(format) or format == "", do: date(input)
 
-    def date("now", format), do: Timex.now() |> date(format)
+    def date("now", format), do: date(Timex.now(), format)
 
-    def date("today", format), do: Timex.now() |> date(format)
+    def date("today", format), do: date(Timex.now(), format)
 
     def date(input, format) when is_binary(input) do
       with {:ok, input_date} <- NaiveDateTime.from_iso8601(input) do
@@ -467,11 +367,10 @@ defmodule Liquid.Filters do
       end
     end
 
-    defp to_iterable(input) do
+    defp to_iterable(input),
       # input when is_map(input) -> [input]
       # input when is_tuple(input) -> input
-      List.wrap(input)
-    end
+      do: List.wrap(input)
 
     defp get_int_and_counter(input) when is_integer(input), do: {input, 0}
 
@@ -483,9 +382,7 @@ defmodule Liquid.Filters do
       {new_value, len}
     end
 
-    defp get_int_and_counter(input) do
-      input |> to_number |> get_int_and_counter
-    end
+    defp get_int_and_counter(input), do: input |> to_number |> get_int_and_counter
 
     defp convert_to_symbol_if_needed(key) when is_atom(key), do: key
     defp convert_to_symbol_if_needed(key) when is_binary(key), do: String.to_atom(key)
@@ -502,7 +399,8 @@ defmodule Liquid.Filters do
     filename = extract_filename_from_context(context)
 
     args =
-      for arg <- args do
+      args
+      |> Enum.map(fn arg ->
         case arg do
           %{} ->
             for {k, v} <- arg,
@@ -512,23 +410,23 @@ defmodule Liquid.Filters do
           _ ->
             Liquid.Parse.quote_matcher() |> Regex.replace(arg, "")
         end
-      end
-      |> (fn items ->
-            case Enum.at(items, -1) do
-              %{__mapdata__: _} = a when map_size(a) == 1 ->
-                items |> Enum.reverse() |> tl() |> Enum.reverse()
+      end)
+      |> then(fn items ->
+        case Enum.at(items, -1) do
+          %{__mapdata__: _} = a when map_size(a) == 1 ->
+            items |> Enum.reverse() |> tl() |> Enum.reverse()
 
-              %{__mapdata__: _} = a when map_size(a) > 1 ->
-                items
-                |> Enum.reverse()
-                |> tl()
-                |> Enum.reverse()
-                |> Enum.concat([Map.delete(a, :__mapdata__)])
+          %{__mapdata__: _} = a when map_size(a) > 1 ->
+            items
+            |> Enum.reverse()
+            |> tl()
+            |> Enum.reverse()
+            |> Enum.concat([Map.delete(a, :__mapdata__)])
 
-              _ ->
-                items
-            end
-          end).()
+          _ ->
+            items
+        end
+      end)
 
     functions = Functions.__info__(:functions)
     custom_filters = Keyword.get(options, :custom_filters)
